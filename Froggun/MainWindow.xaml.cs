@@ -2,6 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace Froggun
@@ -25,7 +26,8 @@ namespace Froggun
         private bool verrouillageMouvement = false;
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
-
+        private static BitmapImage imgGun;
+        private static BitmapImage imgGunInv;
         private static Vector2 posSouris = new Vector2();
 
         private static int distancePisolet = 50;
@@ -35,6 +37,7 @@ namespace Froggun
 
         public MainWindow()
         {
+            InitImage();
             InitializeComponent();
             InitialiserMinuterie();
         }
@@ -46,11 +49,15 @@ namespace Froggun
             minuterie.Tick += Loop;
             minuterie.Start();
         }
-
+        private void InitImage()
+        {
+            imgGun = new BitmapImage(new Uri("pack://application:,,,/img/gun.png"));
+            imgGunInv = new BitmapImage(new Uri("pack://application:,,,/img/guninversee.png"));
+        }
     private void Loop(object? sender, EventArgs e)
         {
             int maxY = (int) grid.ActualHeight;
-
+            gun.Source = imgGunInv;
             mouseX = int.Clamp((int)Mouse.GetPosition(canvas).X, 0, (int) grid.ActualWidth);
             mouseY = int.Clamp((int)Mouse.GetPosition(canvas).Y, 0, (int) grid.ActualHeight);
             posSouris.X = mouseX; posSouris.Y = mouseY;
