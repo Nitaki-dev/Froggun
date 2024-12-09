@@ -1,14 +1,7 @@
 ﻿using System.Numerics;
-using System.Text;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using System.Windows.Threading;
 
 namespace Froggun
@@ -50,7 +43,7 @@ namespace Froggun
 
         private void Loop(object? sender, EventArgs e)
         {
-            int maxY = (int)grid.ActualHeight;
+            int maxY = (int) grid.ActualHeight;
             Console.WriteLine($"{isGroundSlaming} {isMovementLocked} {isOnGround} {Math.Round(playerVelocity.X, 1)}  {Math.Round(playerVelocity.Y, 1)}    //    {playerPosition.X}  {playerPosition.Y}");
 
             // Check player state to see if we need to lock its movement
@@ -62,7 +55,7 @@ namespace Froggun
                 // lock the player movement
                 if (isGroundSlaming)
                 {
-                    playerVelocity.Y = maxFallSpeed * 2.0f;
+                    playerVelocity.Y = maxFallSpeed * 4.0f;
                     playerPosition.Y += playerVelocity.Y;
 
                     Canvas.SetLeft(player, playerPosition.X);
@@ -123,7 +116,7 @@ namespace Froggun
                 moveRight = true;
                 moveLeft = false;
             }
-            if (e.Key == Key.Q)
+            if (e.Key == Key.Q || e.Key == Key.A)
             {
                 moveLeft = true;
                 moveRight = false;
@@ -136,7 +129,7 @@ namespace Froggun
             {
                 moveRight = false;
             }
-            if (e.Key == Key.Q)
+            if (e.Key == Key.Q || e.Key == Key.A)
             {
                 moveLeft = false;
             }
