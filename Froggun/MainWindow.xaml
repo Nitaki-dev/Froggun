@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="Froggun - A Frog With A Gun"
     Width="800"
-    Height="450"
+    Height="950"
     KeyDown="keydown"
     KeyUp="keyup"
     mc:Ignorable="d">
@@ -16,6 +16,15 @@
             <Canvas.Background>
                 <ImageBrush ImageSource="/img/fond.PNG" />
             </Canvas.Background>
+            <Rectangle
+                x:Name="playerTongue"
+                Canvas.Left="390"
+                Canvas.Top="187"
+                Width="10"
+                Height="10"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                Fill="HotPink" />
             <Image
                 x:Name="player"
                 Canvas.Left="364"
@@ -26,7 +35,6 @@
                 VerticalAlignment="Top"
                 Source="/img/frog.png"
                 Stretch="Fill" />
-            <Rectangle Width="100" Height="100" />
             <Image
                 x:Name="gun"
                 Canvas.Left="319"
@@ -55,8 +63,18 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Content="0" />
-            <Label x:Name="labelTemps" Content="Temps restant : " Canvas.Left="25" Foreground="White"/>
-            <Label x:Name="labelNombreTemps" Content="60 " Canvas.Left="111" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+            <Label
+                x:Name="labelTemps"
+                Canvas.Left="25"
+                Content="Temps restant : "
+                Foreground="White" />
+            <Label
+                x:Name="labelNombreTemps"
+                Canvas.Left="111"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Content="60 "
+                Foreground="White" />
         </Canvas>
     </Grid>
 </Window>
