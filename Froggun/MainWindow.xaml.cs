@@ -3,6 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 
 namespace Froggun
@@ -60,7 +61,8 @@ namespace Froggun
             imgGun = new BitmapImage(new Uri("pack://application:,,,/img/gun.png"));
             imgGunInv = new BitmapImage(new Uri("pack://application:,,,/img/guninversee.png"));
         }
-    private void Loop(object? sender, EventArgs e)
+
+        private void Loop(object? sender, EventArgs e) 
         {
             int maxY = (int) grid.ActualHeight/2;
 
