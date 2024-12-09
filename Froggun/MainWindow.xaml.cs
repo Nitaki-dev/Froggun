@@ -26,6 +26,10 @@ namespace Froggun
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
 
+        private static Vector2 posSouris = new Vector2();
+
+        private static int distancePisolet = 50;
+
         private int mouseX;
         private int mouseY;
 
@@ -49,8 +53,17 @@ namespace Froggun
 
             mouseX = int.Clamp((int)Mouse.GetPosition(canvas).X, 0, (int) grid.ActualWidth);
             mouseY = int.Clamp((int)Mouse.GetPosition(canvas).Y, 0, (int) grid.ActualHeight);
+            posSouris.X = mouseX; posSouris.Y = mouseY;
 
-            Console.WriteLine($"{mouseX}  {mouseY}");
+            Vector2 posJoueurTemp = new Vector2((float)(positionJoueur.X + player.Width / 2.0f), (float)(positionJoueur.Y + player.Height / 2.0f));
+            float distanceJoueurSouris = Vector2.Distance(posJoueurTemp, posSouris);
+            Vector2 directionSouris = Vector2.Normalize(posSouris - posJoueurTemp);
+            if (distanceJoueurSouris > distancePisolet)
+            {
+                posSouris = posJoueurTemp + (directionSouris * distancePisolet);
+            }
+            Canvas.SetTop(gun, posSouris.Y);
+            Canvas.SetLeft(gun, posSouris.X);
 
             // Vérifier l'état du joueur pour savoir si nous devons verrouiller son mouvement
             if (plongeVersSol) verrouillageMouvement = true;

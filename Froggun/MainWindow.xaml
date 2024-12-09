@@ -24,6 +24,16 @@
                 Source="/img/frog.png"
                 Stretch="Fill" />
             <Rectangle Width="100" Height="100" />
+            <Image
+                x:Name="gun"
+                Canvas.Left="319"
+                Canvas.Top="184"
+                Width="40"
+                Height="26"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Source="/img/gun.png"
+                Stretch="Fill" />
         </Canvas>
     </Grid>
 </Window>
