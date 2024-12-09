@@ -40,6 +40,7 @@ namespace Froggun
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
         private static Vector2 posSouris = new Vector2();
+        private double moveSpeed = 20.0;
 
         private static Vector2 posGun = new Vector2();
 
@@ -110,7 +111,6 @@ namespace Froggun
                 Canvas.SetTop(ant, alea.Next(600,1080));
                 canvas.Children.Add(ant);
                 ants.Add(ant);
-                Console.WriteLine((int)(Canvas.GetLeft(ant)));
             }
         }
         private void InitScore(int ajout)
@@ -121,7 +121,20 @@ namespace Froggun
             private void Loop(object? sender, EventArgs e) 
         {
             int maxY = (int) grid.ActualHeight/2;
+            foreach (var fly in fireflys)
+            {
+                double currentX = Canvas.GetLeft(fly);
+                double currentY = Canvas.GetTop(fly);
+                double moveX = alea.NextDouble() * moveSpeed * 2 - moveSpeed;
+                double moveY = alea.NextDouble() * (moveSpeed/5) * 2 - (moveSpeed / 5);
+                Canvas.SetLeft(fly, currentX + moveX);
+                Canvas.SetTop(fly, currentY + moveY);
+                if (currentX + moveX < 0) Canvas.SetLeft(fly, 0);
+                else if (currentX + moveX > canvas.ActualWidth) Canvas.SetLeft(fly, canvas.ActualWidth - fly.Width);
 
+                if (currentY + moveY < 0) Canvas.SetTop(fly, 0);
+                else if (currentY + moveY > canvas.ActualHeight) Canvas.SetTop(fly, canvas.ActualHeight - fly.Height);
+            }
             if (directionJoueur) joueurFlip.ScaleX = -1; // droite
             else joueurFlip.ScaleX = 1; // gauche
 
