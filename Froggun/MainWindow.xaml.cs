@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Froggun
 {
@@ -24,13 +25,18 @@ namespace Froggun
         private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
         private const float friction = 0.8f;
+        private static Random alea = new Random();
         private bool estAuSol = false;
         private bool plongeVersSol = false;
         private bool verrouillageMouvement = false;
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
-        private static BitmapImage imgGun;
-        private static BitmapImage imgGunInv;
+        private const int nbAnts = 3;
+        private const int nbFireflys = 3;
+        private static List<Image> ants;
+        private static List<Image> fireflys;
+        private static BitmapImage imgAnt;
+        private static BitmapImage imgFly;
         private static Vector2 posSouris = new Vector2();
 
         private static Vector2 posGun = new Vector2();
@@ -58,10 +64,32 @@ namespace Froggun
         }
         private void InitImage()
         {
-            imgGun = new BitmapImage(new Uri("pack://application:,,/img/gun.png"));
-            imgGunInv = new BitmapImage(new Uri("pack://application:,,,/img/guninversee.png"));
+            imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
+            imgFly = new BitmapImage(new Uri("pack://application:,,/img/fly.png"));
         }
-
+        private void InitObjects()
+        {
+            ants = new List<Image>();
+            fireflys = new List<Image>();
+            for (int i = 0; i < nbFireflys; i++)
+            {
+                Image fly = new Image();
+                fly.Source = imgFly;
+                Canvas.SetLeft(fly, alea.Next(0, (int)(this.ActualWidth)));
+                Canvas.SetTop(fly, alea.Next(100, 200));
+                canvas.Children.Add(fly);
+                fireflys.Add(fly);
+            }
+            for (int i = 0; i < nbAnts; i++)
+            {
+                Image ant = new Image();
+                ant.Source = imgAnt;
+                Canvas.SetLeft(ant, alea.Next(0, (int)(this.ActualWidth)));
+                Canvas.SetTop(ant, alea.Next(100,200));
+                canvas.Children.Add(ant);
+                ants.Add(ant);
+            }
+        }
         private void Loop(object? sender, EventArgs e) 
         {
             int maxY = (int) grid.ActualHeight/2;

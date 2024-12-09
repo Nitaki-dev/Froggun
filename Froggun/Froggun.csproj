@@ -9,6 +9,8 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Remove="img\ant.jpg" />
+		<None Remove="img\firefly.png" />
 		<None Remove="img\fond.PNG" />
 		<None Remove="img\frog.png" />
 		<None Remove="img\gun.png" />
@@ -27,6 +29,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Resource Include="img\ant.jpg" />
+		<Resource Include="img\firefly.png" />
 		<Resource Include="img\fond.PNG" />
 		<Resource Include="img\frog.png" />
 		<Resource Include="img\gun.png" />
