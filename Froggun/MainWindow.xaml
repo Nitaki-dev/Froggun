@@ -55,6 +55,8 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Content="0" />
+            <Label x:Name="labelTemps" Content="Temps restant : " Canvas.Left="25" Foreground="White"/>
+            <Label x:Name="labelNombreTemps" Content="60 " Canvas.Left="111" Foreground="White" HorizontalAlignment="Left" VerticalAlignment="Center"/>
         </Canvas>
     </Grid>
 </Window>

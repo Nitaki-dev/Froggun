@@ -15,7 +15,8 @@ namespace Froggun
     {
         private int score = 0;
         private static DispatcherTimer minuterie = new DispatcherTimer();
-
+        private static DispatcherTimer tempsRestant = new DispatcherTimer();
+        private int temps = 60;
         private static ScaleTransform joueurFlip = new ScaleTransform();
         private static Vector2 positionJoueur = new Vector2();
         private static Vector2 vitesseJoueur = new Vector2();
@@ -48,6 +49,7 @@ namespace Froggun
             InitImage();
             InitializeComponent();
             InitialiserMinuterie();
+            Minuterie();
         }
 
         void InitialiserMinuterie()
@@ -56,6 +58,20 @@ namespace Froggun
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
             minuterie.Tick += Loop;
             minuterie.Start();
+        }
+        private void Minuterie()
+        {
+            tempsRestant = new DispatcherTimer();
+            tempsRestant.Interval = TimeSpan.FromSeconds(1);
+            tempsRestant.Tick += tempsEnMoins;
+            tempsRestant.Start();
+                
+             
+        }
+        private void tempsEnMoins(object? sender, EventArgs e)
+        {
+            temps--;
+            labelNombreTemps.Content=temps;
         }
         private void InitImage()
         {
