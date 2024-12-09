@@ -56,6 +56,7 @@ namespace Froggun
             InitializeComponent();
             InitialiserMinuterie();
             Minuterie();
+            InitObjects();
         }
 
         void InitialiserMinuterie()
@@ -77,12 +78,12 @@ namespace Froggun
         private void tempsEnMoins(object? sender, EventArgs e)
         {
             temps--;
-            labelNombreTemps.Content=temps;
+            //labelNombreTemps.Content=temps;
         }
         private void InitImage()
         {
             imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
-            imgFly = new BitmapImage(new Uri("pack://application:,,/img/fly.png"));
+            imgFly = new BitmapImage(new Uri("pack://application:,,,/img/fly.png"));
         }
         private void InitObjects()
         {
@@ -105,12 +106,13 @@ namespace Froggun
                 Canvas.SetTop(ant, alea.Next(100,200));
                 canvas.Children.Add(ant);
                 ants.Add(ant);
+                Console.WriteLine((int)(Canvas.GetLeft(ant)));
             }
         }
         private void InitScore(int ajout)
         {
             score += ajout;
-            labelNumScore.Content = score;
+            //labelNumScore.Content = score;
         }
             private void Loop(object? sender, EventArgs e) 
         {
