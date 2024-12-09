@@ -10,9 +10,31 @@
 
 	<ItemGroup>
 		<None Remove="img\frog.png" />
+		<None Remove="img\health0.png" />
+		<None Remove="img\health1.png" />
+		<None Remove="img\health2.png" />
+		<None Remove="img\health3.png" />
+		<None Remove="img\health5.png" />
+		<None Remove="img\img_explosion0.png" />
+		<None Remove="img\img_explosion1.png" />
+		<None Remove="img\img_explosion2.png" />
+		<None Remove="img\img_explosion3.png" />
+		<None Remove="img\img_explosion4.png" />
+		<None Remove="img\img_explosion5.png" />
 	</ItemGroup>
 
 	<ItemGroup>
 		<Resource Include="img\frog.png" />
+		<Resource Include="img\health0.png" />
+		<Resource Include="img\health1.png" />
+		<Resource Include="img\health2.png" />
+		<Resource Include="img\health3.png" />
+		<Resource Include="img\health5.png" />
+		<Resource Include="img\img_explosion0.png" />
+		<Resource Include="img\img_explosion1.png" />
+		<Resource Include="img\img_explosion2.png" />
+		<Resource Include="img\img_explosion3.png" />
+		<Resource Include="img\img_explosion4.png" />
+		<Resource Include="img\img_explosion5.png" />
 	</ItemGroup>
 </Project>
