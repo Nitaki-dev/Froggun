@@ -27,6 +27,8 @@ namespace Froggun
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
 
+        private int mouseX;
+        private int mouseY;
 
         public MainWindow()
         {
@@ -42,10 +44,14 @@ namespace Froggun
             timer.Start();
         }
 
-        private void Loop(object? sender, EventArgs e)
+    private void Loop(object? sender, EventArgs e)
         {
             int maxY = (int) grid.ActualHeight;
-            Console.WriteLine($"{plongeVersSol} {estMouvementVerrouille} {estAuSol} {Math.Round(vitesseJoueur.X, 1)}  {Math.Round(vitesseJoueur.Y, 1)}    //    {positionJoueur.X}  {positionJoueur.Y}");
+
+            mouseX = int.Clamp((int)Mouse.GetPosition(canvas).X, 0, (int) grid.ActualWidth);
+            mouseY = int.Clamp((int)Mouse.GetPosition(canvas).Y, 0, (int) grid.ActualHeight);
+
+            Console.WriteLine($"{mouseX}  {mouseY}");
 
             // Verif si il faut verrouille les mouvement du joueur
             if (plongeVersSol) estMouvementVerrouille = true;

@@ -12,7 +12,7 @@
     KeyUp="keyup"
     mc:Ignorable="d">
     <Grid x:Name="grid">
-        <Canvas>
+        <Canvas x:Name="canvas">
             <Image
                 x:Name="player"
                 Canvas.Left="364"
