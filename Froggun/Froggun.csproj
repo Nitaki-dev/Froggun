@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
-		<OutputType>Exe</OutputType>
+		<OutputType>WinExe</OutputType>
 		<TargetFramework>net8.0-windows</TargetFramework>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
@@ -9,8 +9,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Remove="img\fond.PNG" />
 		<None Remove="img\frog.png" />
 		<None Remove="img\gun.png" />
+		<None Remove="img\guninversee.png" />
 		<None Remove="img\health0.png" />
 		<None Remove="img\health1.png" />
 		<None Remove="img\health2.png" />
@@ -25,8 +27,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Resource Include="img\fond.PNG" />
 		<Resource Include="img\frog.png" />
 		<Resource Include="img\gun.png" />
+		<Resource Include="img\guninversee.png" />
 		<Resource Include="img\health0.png" />
 		<Resource Include="img\health1.png" />
 		<Resource Include="img\health2.png" />

@@ -28,6 +28,9 @@ namespace Froggun
         private bool verrouillageMouvement = false;
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
+        private static BitmapImage imgGun;
+        private static BitmapImage imgGunInv;
+        private static Vector2 posSouris = new Vector2();
 
         private static Vector2 posGun = new Vector2();
 
@@ -40,6 +43,7 @@ namespace Froggun
 
         public MainWindow()
         {
+            InitImage();
             InitializeComponent();
             InitialiserMinuterie();
         }
@@ -51,7 +55,11 @@ namespace Froggun
             minuterie.Tick += Loop;
             minuterie.Start();
         }
-
+        private void InitImage()
+        {
+            imgGun = new BitmapImage(new Uri("pack://application:,,,/img/gun.png"));
+            imgGunInv = new BitmapImage(new Uri("pack://application:,,,/img/guninversee.png"));
+        }
     private void Loop(object? sender, EventArgs e)
         {
             int maxY = (int) grid.ActualHeight/2;
