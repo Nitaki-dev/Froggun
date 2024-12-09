@@ -5,6 +5,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Froggun
 {
@@ -13,8 +14,10 @@ namespace Froggun
     /// </summary>
     public partial class MainWindow : Window
     {
+        private int score = 0;
         private static DispatcherTimer minuterie = new DispatcherTimer();
-
+        private static DispatcherTimer tempsRestant = new DispatcherTimer();
+        private int temps = 60;
         private static ScaleTransform joueurFlip = new ScaleTransform();
         private static Vector2 positionJoueur = new Vector2();
         private static Vector2 vitesseJoueur = new Vector2();
@@ -24,13 +27,18 @@ namespace Froggun
         private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
         private const float friction = 0.8f;
+        private static Random alea = new Random();
         private bool estAuSol = false;
         private bool plongeVersSol = false;
         private bool verrouillageMouvement = false;
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
-        private static BitmapImage imgGun;
-        private static BitmapImage imgGunInv;
+        private const int nbAnts = 3;
+        private const int nbFireflys = 3;
+        private static List<Image> ants;
+        private static List<Image> fireflys;
+        private static BitmapImage imgAnt;
+        private static BitmapImage imgFly;
         private static Vector2 posSouris = new Vector2();
 
         private static Vector2 posGun = new Vector2();
@@ -47,6 +55,7 @@ namespace Froggun
             InitImage();
             InitializeComponent();
             InitialiserMinuterie();
+            Minuterie();
         }
 
         void InitialiserMinuterie()
@@ -56,13 +65,54 @@ namespace Froggun
             minuterie.Tick += Loop;
             minuterie.Start();
         }
+        private void Minuterie()
+        {
+            tempsRestant = new DispatcherTimer();
+            tempsRestant.Interval = TimeSpan.FromSeconds(1);
+            tempsRestant.Tick += tempsEnMoins;
+            tempsRestant.Start();
+                
+             
+        }
+        private void tempsEnMoins(object? sender, EventArgs e)
+        {
+            temps--;
+            labelNombreTemps.Content=temps;
+        }
         private void InitImage()
         {
-            imgGun = new BitmapImage(new Uri("pack://application:,,/img/gun.png"));
-            imgGunInv = new BitmapImage(new Uri("pack://application:,,,/img/guninversee.png"));
+            imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
+            imgFly = new BitmapImage(new Uri("pack://application:,,/img/fly.png"));
         }
-
-        private void Loop(object? sender, EventArgs e) 
+        private void InitObjects()
+        {
+            ants = new List<Image>();
+            fireflys = new List<Image>();
+            for (int i = 0; i < nbFireflys; i++)
+            {
+                Image fly = new Image();
+                fly.Source = imgFly;
+                Canvas.SetLeft(fly, alea.Next(0, (int)(this.ActualWidth)));
+                Canvas.SetTop(fly, alea.Next(100, 200));
+                canvas.Children.Add(fly);
+                fireflys.Add(fly);
+            }
+            for (int i = 0; i < nbAnts; i++)
+            {
+                Image ant = new Image();
+                ant.Source = imgAnt;
+                Canvas.SetLeft(ant, alea.Next(0, (int)(this.ActualWidth)));
+                Canvas.SetTop(ant, alea.Next(100,200));
+                canvas.Children.Add(ant);
+                ants.Add(ant);
+            }
+        }
+        private void InitScore(int ajout)
+        {
+            score += ajout;
+            labelNumScore.Content = score;
+        }
+            private void Loop(object? sender, EventArgs e) 
         {
             int maxY = (int) grid.ActualHeight/2;
 
