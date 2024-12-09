@@ -51,11 +51,12 @@ namespace Froggun
         }
         private void InitImage()
         {
-            imgGun = new BitmapImage(new Uri("pack://application:,,,/img/gun.png"));
+            imgGun = new BitmapImage(new Uri("pack://application:,,/img/gun.png"));
             imgGunInv = new BitmapImage(new Uri("pack://application:,,,/img/guninversee.png"));
         }
     private void Loop(object? sender, EventArgs e)
         {
+            gun.Source = imgGunInv;
             int maxY = (int) grid.ActualHeight;
             mouseX = int.Clamp((int)Mouse.GetPosition(canvas).X, 0, (int) grid.ActualWidth);
             mouseY = int.Clamp((int)Mouse.GetPosition(canvas).Y, 0, (int) grid.ActualHeight);
