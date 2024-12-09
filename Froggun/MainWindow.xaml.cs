@@ -13,19 +13,20 @@ namespace Froggun
     {
         private static DispatcherTimer timer = new DispatcherTimer();
 
-        private static Vector2 playerPosition = new Vector2();
-        private static Vector2 playerVelocity = new Vector2();
-        private const float gravity = 0.5f;
-        private const float jumpForce = 15.0f;
-        private const float maxFallSpeed = 9.8f;
-        private const float moveSpeed = 8.0f;
+        private static Vector2 positionJoueur = new Vector2();
+        private static Vector2 vitesseJoueur = new Vector2();
+        private const float gravite = 0.5f;
+        private const float forceSaut = 15.0f;
+        private const float vitesseMaxChute = 9.8f;
+        private const float vitesseDeplacement = 8.0f;
         private const float friction = 0.8f;
 
-        private bool isOnGround = false;
-        private bool isGroundSlaming = false;
-        private bool isMovementLocked = false;
-        private bool moveLeft = false;
-        private bool moveRight = false;
+        private bool estAuSol = false;
+        private bool plongeVersSol = false;
+        private bool estMouvementVerrouille = false;
+        private bool deplacerGauche = false;
+        private bool deplacerDroite = false;
+
 
         public MainWindow()
         {
@@ -44,59 +45,58 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             int maxY = (int) grid.ActualHeight;
-            Console.WriteLine($"{isGroundSlaming} {isMovementLocked} {isOnGround} {Math.Round(playerVelocity.X, 1)}  {Math.Round(playerVelocity.Y, 1)}    //    {playerPosition.X}  {playerPosition.Y}");
+            Console.WriteLine($"{plongeVersSol} {estMouvementVerrouille} {estAuSol} {Math.Round(vitesseJoueur.X, 1)}  {Math.Round(vitesseJoueur.Y, 1)}    //    {positionJoueur.X}  {positionJoueur.Y}");
 
-            // Check player state to see if we need to lock its movement
-            if (isGroundSlaming) isMovementLocked = true;
-            else isMovementLocked = false;
+            // Verif si il faut verrouille les mouvement du joueur
+            if (plongeVersSol) estMouvementVerrouille = true;
+            else estMouvementVerrouille = false;
 
-            if (isMovementLocked)
+            if (estMouvementVerrouille)
             {
-                // lock the player movement
-                if (isGroundSlaming)
+                // verrouille les mouvement du joueur
+                if (plongeVersSol)
                 {
-                    playerVelocity.Y = maxFallSpeed * 4.0f;
-                    playerPosition.Y += playerVelocity.Y;
+                    vitesseJoueur.Y = vitesseMaxChute * 4.0f;
+                    positionJoueur.Y += vitesseJoueur.Y;
 
-                    Canvas.SetLeft(player, playerPosition.X);
-                    Canvas.SetTop(player, playerPosition.Y);
+                    Canvas.SetLeft(player, positionJoueur.X);
+                    Canvas.SetTop(player, positionJoueur.Y);
 
-                    if (playerPosition.Y >= maxY - player.Height) isGroundSlaming = false;
+                    if (positionJoueur.Y >= maxY - player.Height) plongeVersSol = false;
                 }
             }
             else
             {
-                //move player down
-                if (playerVelocity.Y < maxFallSpeed) playerVelocity.Y += gravity;
-                else playerVelocity.Y = maxFallSpeed;
+                // deplacer le joueur vers le bas
+                if (vitesseJoueur.Y < vitesseMaxChute) vitesseJoueur.Y += gravite;
+                else vitesseJoueur.Y = vitesseMaxChute;
 
-                // Apply vertical velocity
-                playerPosition.Y += playerVelocity.Y;
+                positionJoueur.Y += vitesseJoueur.Y;
 
-                //plyr is on the ground
-                if (playerPosition.Y >= maxY - player.Height)
+                // le joueur est sur le sol
+                if (positionJoueur.Y >= maxY - player.Height)
                 {
-                    playerPosition.Y = maxY - (float)player.Height;
-                    isOnGround = true;
-                    playerVelocity.Y = 0;
+                    // ne pas bouger 
+                    positionJoueur.Y = maxY - (float)player.Height;
+                    estAuSol = true;
+                    vitesseJoueur.Y = 0;
                 }
-                else isOnGround = false;
-                if (moveRight) playerVelocity.X = moveSpeed;  // Move right
-                else if (moveLeft) playerVelocity.X = -moveSpeed; // Move left
+                else estAuSol = false;
+                if (deplacerDroite) vitesseJoueur.X = vitesseDeplacement;  // bouger droite
+                else if (deplacerGauche) vitesseJoueur.X = -vitesseDeplacement; // bouger gauche
 
                 else
                 {
-                    // lower player verlocity based on friction
-                    playerVelocity.X *= friction;
-                    // if the velocity (forced to be positive) is < than 0.1f stop moving
-                    if (Math.Abs(playerVelocity.X) < 0.1f) playerVelocity.X = 0;
+                    // friction pour ralantire le joueur
+                    vitesseJoueur.X *= friction;
+                    if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0;
                 }
 
-                playerPosition.Y += playerVelocity.Y;
-                playerPosition.X += playerVelocity.X;
+                positionJoueur.Y += vitesseJoueur.Y;
+                positionJoueur.X += vitesseJoueur.X;
 
-                Canvas.SetLeft(player, playerPosition.X);
-                Canvas.SetTop(player, playerPosition.Y);
+                Canvas.SetLeft(player, positionJoueur.X);
+                Canvas.SetTop(player, positionJoueur.Y);
             }
         }
 
@@ -104,22 +104,22 @@ namespace Froggun
         {
             if (e.Key == Key.Space)
             {
-                playerVelocity.Y = -jumpForce;
+                vitesseJoueur.Y = -forceSaut;
             }
             if (e.Key == Key.LeftCtrl)
             {
-                if (!isOnGround) isGroundSlaming = true;
+                if (!estAuSol) plongeVersSol = true;
             }
 
             if (e.Key == Key.D)
             {
-                moveRight = true;
-                moveLeft = false;
+                deplacerDroite = true;
+                deplacerGauche = false;
             }
             if (e.Key == Key.Q || e.Key == Key.A)
             {
-                moveLeft = true;
-                moveRight = false;
+                deplacerGauche = true;
+                deplacerDroite = false;
             }
         }
 
@@ -127,11 +127,11 @@ namespace Froggun
         {
             if (e.Key == Key.D)
             {
-                moveRight = false;
+                deplacerDroite = false;
             }
             if (e.Key == Key.Q || e.Key == Key.A)
             {
-                moveLeft = false;
+                deplacerGauche = false;
             }
         }
     }
