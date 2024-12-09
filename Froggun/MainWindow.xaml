@@ -13,6 +13,9 @@
     mc:Ignorable="d">
     <Grid x:Name="grid">
         <Canvas x:Name="canvas">
+            <Canvas.Background>
+                <ImageBrush ImageSource="/img/fond.PNG"/>
+            </Canvas.Background>
             <Image
                 x:Name="player"
                 Canvas.Left="364"
