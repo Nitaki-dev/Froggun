@@ -11,7 +11,7 @@ namespace Froggun
     /// </summary>
     public partial class MainWindow : Window
     {
-        private static DispatcherTimer timer = new DispatcherTimer();
+        private static DispatcherTimer minuterie = new DispatcherTimer();
 
         private static Vector2 positionJoueur = new Vector2();
         private static Vector2 vitesseJoueur = new Vector2();
@@ -20,10 +20,9 @@ namespace Froggun
         private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
         private const float friction = 0.8f;
-
         private bool estAuSol = false;
         private bool plongeVersSol = false;
-        private bool estMouvementVerrouille = false;
+        private bool verrouillageMouvement = false;
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
 
@@ -33,15 +32,15 @@ namespace Froggun
         public MainWindow()
         {
             InitializeComponent();
-            InitializeTimer();
+            InitialiserMinuterie();
         }
 
-        void InitializeTimer()
+        void InitialiserMinuterie()
         {
-            timer = new DispatcherTimer();
-            timer.Interval = TimeSpan.FromMilliseconds(16.6666667);
-            timer.Tick += Loop;
-            timer.Start();
+            minuterie = new DispatcherTimer();
+            minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
+            minuterie.Tick += Loop;
+            minuterie.Start();
         }
 
     private void Loop(object? sender, EventArgs e)
@@ -53,13 +52,13 @@ namespace Froggun
 
             Console.WriteLine($"{mouseX}  {mouseY}");
 
-            // Verif si il faut verrouille les mouvement du joueur
-            if (plongeVersSol) estMouvementVerrouille = true;
-            else estMouvementVerrouille = false;
+            // Vérifier l'état du joueur pour savoir si nous devons verrouiller son mouvement
+            if (plongeVersSol) verrouillageMouvement = true;
+            else verrouillageMouvement = false;
 
-            if (estMouvementVerrouille)
+            if (verrouillageMouvement)
             {
-                // verrouille les mouvement du joueur
+                // verrouiller le mouvement du joueur
                 if (plongeVersSol)
                 {
                     vitesseJoueur.Y = vitesseMaxChute * 4.0f;
@@ -73,10 +72,10 @@ namespace Froggun
             }
             else
             {
-                // deplacer le joueur vers le bas
+                // déplacer le joueur vers le bas
                 if (vitesseJoueur.Y < vitesseMaxChute) vitesseJoueur.Y += gravite;
                 else vitesseJoueur.Y = vitesseMaxChute;
-
+                // Appliquer la vitesse verticale  
                 positionJoueur.Y += vitesseJoueur.Y;
 
                 // le joueur est sur le sol
@@ -93,8 +92,9 @@ namespace Froggun
 
                 else
                 {
-                    // friction pour ralantire le joueur
+                    // réduire la vitesse du joueur en fonction de la friction
                     vitesseJoueur.X *= friction;
+                    // si la vitesse (obligée d'être positive) est inférieure à 0.1f, arrêter le mouvement
                     if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0;
                 }
 
