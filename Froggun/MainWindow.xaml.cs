@@ -131,7 +131,6 @@ namespace Froggun
                 Canvas.SetTop(fly, currentY + moveY);
                 if (currentX + moveX < 0) Canvas.SetLeft(fly, 0);
                 else if (currentX + moveX > canvas.ActualWidth) Canvas.SetLeft(fly, canvas.ActualWidth - fly.Width);
-
                 if (currentY + moveY < 0) Canvas.SetTop(fly, 0);
                 else if (currentY + moveY > canvas.ActualHeight) Canvas.SetTop(fly, canvas.ActualHeight - fly.Height);
             }
