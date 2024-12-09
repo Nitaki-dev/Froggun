@@ -9,7 +9,9 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+		<None Remove="img\fond.PNG" />
 		<None Remove="img\frog.png" />
+		<None Remove="img\gun.png" />
 		<None Remove="img\guninversee.png" />
 		<None Remove="img\health0.png" />
 		<None Remove="img\health1.png" />
@@ -25,7 +27,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<Resource Include="img\fond.PNG" />
 		<Resource Include="img\frog.png" />
+		<Resource Include="img\gun.png" />
 		<Resource Include="img\guninversee.png" />
 		<Resource Include="img\health0.png" />
 		<Resource Include="img\health1.png" />

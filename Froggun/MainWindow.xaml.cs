@@ -57,7 +57,6 @@ namespace Froggun
     private void Loop(object? sender, EventArgs e)
         {
             int maxY = (int) grid.ActualHeight;
-            gun.Source = imgGunInv;
             mouseX = int.Clamp((int)Mouse.GetPosition(canvas).X, 0, (int) grid.ActualWidth);
             mouseY = int.Clamp((int)Mouse.GetPosition(canvas).Y, 0, (int) grid.ActualHeight);
             posSouris.X = mouseX; posSouris.Y = mouseY;
