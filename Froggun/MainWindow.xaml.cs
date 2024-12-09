@@ -62,7 +62,7 @@ namespace Froggun
                 // lock the player movement
                 if (isGroundSlaming)
                 {
-                    playerVelocity.Y = maxFallSpeed * 2.0f;
+                    playerVelocity.Y = maxFallSpeed * 4.0f;
                     playerPosition.Y += playerVelocity.Y;
 
                     Canvas.SetLeft(player, playerPosition.X);
