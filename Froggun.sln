@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35013.160
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Froggun", "Froggun\Froggun.csproj", "{57340C35-C2DE-4CCD-AFA5-0AF4B086C783}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{57340C35-C2DE-4CCD-AFA5-0AF4B086C783}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{57340C35-C2DE-4CCD-AFA5-0AF4B086C783}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{57340C35-C2DE-4CCD-AFA5-0AF4B086C783}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{57340C35-C2DE-4CCD-AFA5-0AF4B086C783}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {45021CA8-09C8-4A20-873B-CFAC9D1A71E7}
+	EndGlobalSection
+EndGlobal
