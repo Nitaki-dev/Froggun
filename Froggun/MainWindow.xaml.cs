@@ -14,41 +14,39 @@ namespace Froggun
     /// </summary>
     public partial class MainWindow : Window
     {
+        private static Random alea = new Random();
+        
         private int score = 0;
+        private int temps = 60;
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer tempsRestant = new DispatcherTimer();
-        private int temps = 60;
+
         private static ScaleTransform joueurFlip = new ScaleTransform();
-        private static Vector2 positionJoueur = new Vector2();
+        private static Vector2 posJoueur = new Vector2();
         private static Vector2 vitesseJoueur = new Vector2();
+        
         private static bool directionJoueur = false; // false = gauche, true = droite. à changer si possible
-        private const float gravite = 0.5f;
         private const float forceSaut = 15.0f;
         private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
         private const float friction = 0.8f;
-        private static Random alea = new Random();
+        private const float gravite = 0.5f;
+        
+        private bool verrouillageMouvement = false;
         private bool estAuSol = false;
         private bool plongeVersSol = false;
-        private bool verrouillageMouvement = false;
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
+        
         private const int nbAnts = 3;
         private const int nbFireflys = 3;
         private static List<Image> ants;
         private static List<Image> fireflys;
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
-        private static Vector2 posSouris = new Vector2();
-
-        private static Vector2 posGun = new Vector2();
-
+        
+        private static Vector2 posArme = new Vector2();
         private static int distancePisolet = 100;
-        private static ScaleTransform gunFlip = new ScaleTransform();
-       
-
-        private int mouseX;
-        private int mouseY;
 
         public MainWindow()
         {
@@ -66,25 +64,26 @@ namespace Froggun
             minuterie.Tick += Loop;
             minuterie.Start();
         }
+
         private void Minuterie()
         {
             tempsRestant = new DispatcherTimer();
             tempsRestant.Interval = TimeSpan.FromSeconds(1);
             tempsRestant.Tick += tempsEnMoins;
             tempsRestant.Start();
-                
-             
         }
+        
         private void tempsEnMoins(object? sender, EventArgs e)
         {
             temps--;
-            //labelNombreTemps.Content=temps;
         }
+        
         private void InitImage()
         {
             imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
             imgFly = new BitmapImage(new Uri("pack://application:,,,/img/fly.png"));
         }
+
         private void InitObjects()
         {
             ants = new List<Image>();
@@ -93,6 +92,8 @@ namespace Froggun
             {
                 Image fly = new Image();
                 fly.Source = imgFly;
+                fly.Width = 80;
+                fly.Height = 50;
                 Canvas.SetLeft(fly, alea.Next(0, (int)(this.ActualWidth)));
                 Canvas.SetTop(fly, alea.Next(100, 200));
                 canvas.Children.Add(fly);
@@ -102,6 +103,8 @@ namespace Froggun
             {
                 Image ant = new Image();
                 ant.Source = imgAnt;
+                ant.Width = 80;
+                ant.Height = 50;
                 Canvas.SetLeft(ant, alea.Next(0, (int)(this.ActualWidth)));
                 Canvas.SetTop(ant, alea.Next(100,200));
                 canvas.Children.Add(ant);
@@ -109,53 +112,62 @@ namespace Froggun
                 Console.WriteLine((int)(Canvas.GetLeft(ant)));
             }
         }
+
         private void InitScore(int ajout)
         {
             score += ajout;
-            //labelNumScore.Content = score;
         }
-            private void Loop(object? sender, EventArgs e) 
-        {
-            int maxY = (int) grid.ActualHeight/2;
 
-            if (directionJoueur) joueurFlip.ScaleX = -1; // droite
-            else joueurFlip.ScaleX = 1; // gauche
+        private void PivoterArme() {
+            posArme.X = (float)Mouse.GetPosition(canvas).X;
+            posArme.Y = (float)Mouse.GetPosition(canvas).Y;
 
-
-            player.RenderTransform = joueurFlip;
-
-            mouseX = (int)Mouse.GetPosition(canvas).X;
-            mouseY = (int)Mouse.GetPosition(canvas).Y;
-            posGun.X = mouseX;
-            posGun.Y = mouseY;
-
-            Vector2 posJoueurTemp = new Vector2(
-                (float)(positionJoueur.X + (directionJoueur ? -player.ActualWidth / 2.0f : player.ActualWidth/2.0f)),
-                (float)(positionJoueur.Y + (player.ActualHeight/2.0f))
+            // Centre du joueur
+            Vector2 posCentreJoueur = new Vector2(
+                (float)(posJoueur.X + (directionJoueur ? -player.ActualWidth / 2.0f : player.ActualWidth/2.0f)),
+                (float)(posJoueur.Y + (player.ActualHeight/2.0f))
             );
 
-            Vector2 directionSouris = Vector2.Normalize(posGun - posJoueurTemp);
-            float distanceJoueurSouris = Vector2.Distance(posJoueurTemp, posGun);
-            posGun = posJoueurTemp + (directionSouris * distancePisolet);
+            // Trouve la position de l'arme autour du joueur
+            Vector2 directionSouris = Vector2.Normalize(posArme - posCentreJoueur);
+            float distanceJoueurSouris = Vector2.Distance(posCentreJoueur, posArme);
+            posArme = posCentreJoueur + (directionSouris * distancePisolet);
             
+            // Trouve l'angle de l'arme du joueur
             float angle = (float) (Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
-            RotateTransform rotateTransform = new RotateTransform(angle);
-            gun.RenderTransform = rotateTransform;
-            gunFlip.ScaleX = -1;
 
-            if (directionSouris.X > 0) gunFlip.ScaleY = 1;
-            else gunFlip.ScaleY = -1;
-
-            gun.RenderTransform = gunFlip;
-
+            // Initialisation des transformes de l'image de l'arme du joueur
             TransformGroup myTransformGroup = new TransformGroup();
-            myTransformGroup.Children.Add(gunFlip);
-            myTransformGroup.Children.Add(rotateTransform);
+            ScaleTransform inverseArme = new ScaleTransform();
+            RotateTransform rotationArme = new RotateTransform(angle);
+
+            // Inverser l'image de l'arme si à gauche
+            if (directionSouris.X > 0) inverseArme.ScaleY = 1;
+            else inverseArme.ScaleY = -1;
+
+            inverseArme.ScaleX = -1;
+            gun.RenderTransform = rotationArme;
+            gun.RenderTransform = inverseArme;
+
+            myTransformGroup.Children.Add(inverseArme);
+            myTransformGroup.Children.Add(rotationArme);
 
             gun.RenderTransform = myTransformGroup;
 
-            Canvas.SetTop(gun, posGun.Y);
-            Canvas.SetLeft(gun, posGun.X);
+            Canvas.SetTop(gun, posArme.Y);
+            Canvas.SetLeft(gun, posArme.X);
+        }
+
+        private void Loop(object? sender, EventArgs e) 
+        {
+            int maxY = (int) grid.ActualHeight/2;
+
+            // Inverse l'image du joueur si nécessaire
+            if (directionJoueur) joueurFlip.ScaleX = -1; // droite
+            else joueurFlip.ScaleX = 1; // gauche
+            player.RenderTransform = joueurFlip;
+
+            PivoterArme();
 
             // Vérifier l'état du joueur pour savoir si nous devons verrouiller son mouvement
             if (plongeVersSol) verrouillageMouvement = true;
@@ -167,12 +179,12 @@ namespace Froggun
                 if (plongeVersSol)
                 {
                     vitesseJoueur.Y = vitesseMaxChute * 4.0f;
-                    positionJoueur.Y += vitesseJoueur.Y;
+                    posJoueur.Y += vitesseJoueur.Y;
 
-                    Canvas.SetLeft(player, positionJoueur.X);
-                    Canvas.SetTop(player, positionJoueur.Y);
+                    Canvas.SetLeft(player, posJoueur.X);
+                    Canvas.SetTop(player, posJoueur.Y);
 
-                    if (positionJoueur.Y >= maxY - player.Height) plongeVersSol = false;
+                    if (posJoueur.Y >= maxY - player.Height) plongeVersSol = false;
                 }
             }
             else
@@ -180,16 +192,15 @@ namespace Froggun
                 // déplacer le joueur vers le bas
                 if (vitesseJoueur.Y < vitesseMaxChute) vitesseJoueur.Y += gravite;
                 else vitesseJoueur.Y = vitesseMaxChute;
-                // Appliquer la vitesse verticale  
-                positionJoueur.Y += vitesseJoueur.Y;
+                posJoueur.Y += vitesseJoueur.Y;
 
                 // le joueur est sur le sol
-                if (positionJoueur.Y >= maxY - player.Height)
+                if (posJoueur.Y >= maxY - player.Height)
                 {
-                    // ne pas bouger 
-                    positionJoueur.Y = maxY - (float)player.Height;
-                    estAuSol = true;
+                    // ne pas le bouger 
+                    posJoueur.Y = maxY - (float)player.Height;
                     vitesseJoueur.Y = 0;
+                    estAuSol = true;
                 }
 
                 else estAuSol = false;
@@ -200,14 +211,14 @@ namespace Froggun
                 {
                     // réduire la vitesse du joueur en fonction de la friction
                     vitesseJoueur.X *= friction;
-                    // si la vitesse (obligée d'être positive) est inférieure à 0.1f, arrêter le mouvement
+                    // si la vitesse (positive) est inférieure à 0.1f, arrêter le mouvement
                     if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0;
                 }
-                if (Canvas.GetTop(player) < 0) positionJoueur.Y += vitesseJoueur.Y;
-                positionJoueur.X += vitesseJoueur.X;
+                if (Canvas.GetTop(player) < 0) posJoueur.Y += vitesseJoueur.Y;
+                posJoueur.X += vitesseJoueur.X;
 
-                Canvas.SetLeft(player, positionJoueur.X);
-                Canvas.SetTop(player, positionJoueur.Y);
+                Canvas.SetLeft(player, posJoueur.X);
+                Canvas.SetTop(player, posJoueur.Y);
             }
         }
 
