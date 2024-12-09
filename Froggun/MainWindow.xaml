@@ -14,7 +14,7 @@
     <Grid x:Name="grid">
         <Canvas x:Name="canvas">
             <Canvas.Background>
-                <ImageBrush ImageSource="/img/fond.PNG"/>
+                <ImageBrush ImageSource="/img/fond.PNG" />
             </Canvas.Background>
             <Image
                 x:Name="player"
@@ -37,6 +37,24 @@
                 VerticalAlignment="Center"
                 Source="/img/gun.png"
                 Stretch="Fill" />
+            <Label
+                x:Name="labelScore"
+                Canvas.Left="674"
+                Canvas.Top="5"
+                Height="45"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Content="Score : "
+                FontFamily="Amiri Quran"
+                FontSize="16"
+                Foreground="Black" />
+            <Label
+                x:Name="labelNumScore"
+                Canvas.Left="730"
+                Canvas.Top="21"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Content="0" />
         </Canvas>
     </Grid>
 </Window>

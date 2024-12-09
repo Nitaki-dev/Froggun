@@ -14,6 +14,7 @@ namespace Froggun
     /// </summary>
     public partial class MainWindow : Window
     {
+        private int score = 0;
         private static DispatcherTimer minuterie = new DispatcherTimer();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
@@ -90,7 +91,12 @@ namespace Froggun
                 ants.Add(ant);
             }
         }
-        private void Loop(object? sender, EventArgs e) 
+        private void InitScore(int ajout)
+        {
+            score += ajout;
+            labelNumScore.Content = score;
+        }
+            private void Loop(object? sender, EventArgs e) 
         {
             int maxY = (int) grid.ActualHeight/2;
 
