@@ -3,7 +3,9 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Shapes;
 using System.Windows.Threading;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
@@ -45,6 +47,7 @@ namespace Froggun
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
         
+        private static Vector2 posLangue = new Vector2();
         private static Vector2 posArme = new Vector2();
         private static int distancePisolet = 100;
 
@@ -99,6 +102,7 @@ namespace Froggun
                 canvas.Children.Add(fly);
                 fireflys.Add(fly);
             }
+
             for (int i = 0; i < nbAnts; i++)
             {
                 Image ant = new Image();
@@ -158,6 +162,26 @@ namespace Froggun
             Canvas.SetLeft(gun, posArme.X);
         }
 
+        private void PivoterLangue()
+        {
+            posLangue.X = (float)Mouse.GetPosition(canvas).X;
+            posLangue.Y = (float)Mouse.GetPosition(canvas).Y;
+
+            Vector2 posCentreJoueur = new Vector2(
+                (float)(posJoueur.X + (directionJoueur ? -player.ActualWidth / 2.0f : player.ActualWidth / 2.0f)),
+                (float)(posJoueur.Y)
+            );
+
+            Vector2 directionSouris = Vector2.Normalize(posLangue - posCentreJoueur);
+
+            float angle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
+            RotateTransform rotationArme = new RotateTransform(angle);
+            playerTongue.RenderTransform = rotationArme;
+
+            Canvas.SetTop(playerTongue, posCentreJoueur.Y);
+            Canvas.SetLeft(playerTongue, posCentreJoueur.X);
+        }
+
         private void Loop(object? sender, EventArgs e) 
         {
             int maxY = (int) grid.ActualHeight/2;
@@ -168,6 +192,7 @@ namespace Froggun
             player.RenderTransform = joueurFlip;
 
             PivoterArme();
+            PivoterLangue();
 
             // Vérifier l'état du joueur pour savoir si nous devons verrouiller son mouvement
             if (plongeVersSol) verrouillageMouvement = true;
@@ -222,6 +247,29 @@ namespace Froggun
             }
         }
 
+        private void ShootTung()
+        {
+            playerTongue.Width = 10;
+
+            DoubleAnimation grow = new DoubleAnimation
+            {
+                From = playerTongue.Width,
+                To = 300,
+                Duration = TimeSpan.FromMilliseconds(100)
+            };
+            
+            DoubleAnimation shrink = new DoubleAnimation
+            {
+                From = playerTongue.Width,
+                To = 10,
+                Duration = TimeSpan.FromMilliseconds(100)
+            };
+
+            playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
+            //Task.Delay(100);
+            //playerTongue.BeginAnimation(Rectangle.WidthProperty, shrink);
+        }
+
         private void keydown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
@@ -244,6 +292,10 @@ namespace Froggun
                 deplacerGauche = true;
                 deplacerDroite = false; 
                 directionJoueur = false;
+            }
+            if (e.Key == Key.E)
+            {
+                ShootTung();
             }
         }
 
