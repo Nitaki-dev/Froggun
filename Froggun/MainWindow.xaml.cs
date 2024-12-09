@@ -92,10 +92,10 @@ namespace Froggun
             {
                 Image fly = new Image();
                 fly.Source = imgFly;
-                fly.Width = 80;
+                fly.Width = 50;
                 fly.Height = 50;
-                Canvas.SetLeft(fly, alea.Next(0, (int)(this.ActualWidth)));
-                Canvas.SetTop(fly, alea.Next(100, 200));
+                Canvas.SetLeft(fly, alea.Next(0, 1920));
+                Canvas.SetTop(fly, alea.Next(0, 300));
                 canvas.Children.Add(fly);
                 fireflys.Add(fly);
             }
@@ -103,10 +103,10 @@ namespace Froggun
             {
                 Image ant = new Image();
                 ant.Source = imgAnt;
-                ant.Width = 80;
+                ant.Width = 50;
                 ant.Height = 50;
-                Canvas.SetLeft(ant, alea.Next(0, (int)(this.ActualWidth)));
-                Canvas.SetTop(ant, alea.Next(100,200));
+                Canvas.SetLeft(ant, alea.Next(0, 1920));
+                Canvas.SetTop(ant, alea.Next(600,1080));
                 canvas.Children.Add(ant);
                 ants.Add(ant);
                 Console.WriteLine((int)(Canvas.GetLeft(ant)));
