@@ -82,6 +82,7 @@
                 VerticalAlignment="Center"
                 Content="60 "
                 Foreground="White" />
+            <Image Height="41" Canvas.Left="746" Source="/img/health5.png" Stretch="Fill" Canvas.Top="128" Width="234"/>
         </Canvas>
     </Grid>
 </Window>

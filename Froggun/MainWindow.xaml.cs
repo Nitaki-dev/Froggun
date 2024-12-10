@@ -20,8 +20,12 @@ namespace Froggun
         
         private int score = 0;
         private int temps = 60;
+        private int health = 5;
+        private double speedFactorFirefly = 0.5;
+        private double speedFactorAraignee = 0.8;
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer tempsRestant = new DispatcherTimer();
+        private Rect playerR = new Rect();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
         private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
@@ -148,6 +152,7 @@ namespace Froggun
         {
             minuterie = new DispatcherTimer();
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
+            //minuterie.Tick += EnnemiesAttack;
             minuterie.Tick += Loop;
             minuterie.Start();
         }
@@ -158,8 +163,36 @@ namespace Froggun
             tempsRestant.Interval = TimeSpan.FromSeconds(1);
             tempsRestant.Tick += tempsEnMoins;
             tempsRestant.Start();
+            playerR = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
+
+            for (int i = 0; i < nbFireflys; i++)
+            {
+
+                if (playerR.IntersectsWith(rectanglesfireflys[i]))
+                {
+                    health--;
+                    SlowDownFireflys(0.5, 3);
+                }
+            }
         }
-        
+        private Dictionary<int, int> slowDownTimers = new Dictionary<int, int>();
+        private void SlowDownFireflys(double newSpeedFactor, int durationInSeconds)
+        {
+            double originalSpeedFactor = speedFactorFirefly;
+            speedFactorFirefly = newSpeedFactor;
+            DispatcherTimer timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(durationInSeconds)
+            };
+
+            timer.Tick += (s, e) =>
+            {
+                speedFactorFirefly = originalSpeedFactor; 
+                timer.Stop();
+            };
+
+            timer.Start();
+        }
         private void tempsEnMoins(object? sender, EventArgs e)
         {
             temps--;
@@ -313,7 +346,7 @@ namespace Froggun
             }
             posJoueur.Y += vitesseJoueur.Y;
 
-            if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth) vitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
+            if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth-player.ActualWidth) vitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
             else if (deplacerGauche && Canvas.GetLeft(player) > 0) vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
             else
             {
@@ -326,6 +359,7 @@ namespace Froggun
             posJoueur.X += vitesseJoueur.X;
             Canvas.SetLeft(player, posJoueur.X);
             Canvas.SetTop(player, posJoueur.Y);
+            
         }
 
         private void ShootTung()
