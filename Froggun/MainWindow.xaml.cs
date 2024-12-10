@@ -165,34 +165,10 @@ namespace Froggun
             tempsRestant.Start();
             playerR = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
 
-            for (int i = 0; i < nbFireflys; i++)
-            {
-
-                if (playerR.IntersectsWith(rectanglesfireflys[i]))
-                {
-                    health--;
-                    SlowDownFireflys(0.5, 3);
-                }
-            }
         }
-        private Dictionary<int, int> slowDownTimers = new Dictionary<int, int>();
-        private void SlowDownFireflys(double newSpeedFactor, int durationInSeconds)
-        {
-            double originalSpeedFactor = speedFactorFirefly;
-            speedFactorFirefly = newSpeedFactor;
-            DispatcherTimer timer = new DispatcherTimer
-            {
-                Interval = TimeSpan.FromSeconds(durationInSeconds)
-            };
 
-            timer.Tick += (s, e) =>
-            {
-                speedFactorFirefly = originalSpeedFactor; 
-                timer.Stop();
-            };
+        //private Dictionary<int, int> slowDownTimers = new Dictionary<int, int>();
 
-            timer.Start();
-        }
         private void tempsEnMoins(object? sender, EventArgs e)
         {
             temps--;
@@ -214,13 +190,13 @@ namespace Froggun
         {
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
-            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 200, 200, 100, 100, 8, canvas, imageDirectory, animationFrames);
-            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 200, 400, 100, 100, 8, canvas, imageDirectory, animationFrames);
-            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 600, 300, 100, 100, 8, canvas, imageDirectory, animationFrames);
+            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 200, 200, 100, 100, 8, canvas, imageDirectory, animationFrames, 1.0);
+            //Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 200, 400, 100, 100, 8, canvas, imageDirectory, animationFrames);
+            //Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 600, 300, 100, 100, 8, canvas, imageDirectory, animationFrames);
 
             ennemis.Add(spider1);
-            ennemis.Add(spider2);
-            ennemis.Add(spider3);
+            //ennemis.Add(spider2);
+            //ennemis.Add(spider3);
 
             //string imageDirectory1 = "img/ennemis/Food1";
             //int[] animationFrames1 = new int[] { 1, 2 };
@@ -308,7 +284,7 @@ namespace Froggun
                     Balles.RemoveAt(i);
             }
 
-            Ennemis.UpdateEnnemis(ennemis, posJoueur);
+            Ennemis.UpdateEnnemis(ennemis, playerRect);
 
             //fix direction:
             if      (deplacerBas)                    directionJoueur = Directions.down;

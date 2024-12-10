@@ -24,6 +24,8 @@ namespace Froggun
         public double Width { get; set; }
         public double Height { get; set; }
         public double Speed { get; set; }
+        public double SpeedMultiplier { get; set; }
+        public bool isSlowed { get; set; }
         private string imagePath { get; set; }
         public int[] AnimationIndex { get; set; }
 
@@ -31,7 +33,9 @@ namespace Froggun
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }
         private DispatcherTimer animationTimer { get; set; }
-        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, string path, int[] animationIndex, Rect BoundingBox = new Rect())
+
+
+        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, string path, int[] animationIndex, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
         {
             X = x;
             Y = y;
@@ -40,6 +44,7 @@ namespace Froggun
             Speed = speed;
             imagePath = path;
             AnimationIndex = animationIndex;
+            isSlowed = false;
 
             currentFrameIndex = 0;
 
@@ -77,10 +82,13 @@ namespace Froggun
             return bitmapImage;
         }
 
-        public static void UpdateEnnemis(List<Ennemis> ennemis, Vector2 posJoueur)
+        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur)
         {
             foreach (var ennemi in ennemis)
             {
+                if (ennemi.isSlowed) ennemi.SpeedMultiplier = 0.5;
+                else                 ennemi.SpeedMultiplier = 1.0;
+
                 ennemi.BoundingBox = new Rect(
                     (int)ennemi.X,
                     (int)ennemi.Y,
@@ -89,8 +97,8 @@ namespace Froggun
                 );
 
                 Vector2 direction = new Vector2(
-                    (float)(posJoueur.X - ennemi.X),
-                    (float)(posJoueur.Y - ennemi.Y)
+                    (float)(joueur.X - ennemi.X),
+                    (float)(joueur.Y - ennemi.Y)
                 );
 
                 direction = Vector2.Normalize(direction);
@@ -98,12 +106,33 @@ namespace Froggun
                 //check if the thing can move here
                 // todo...
 
-                ennemi.X = (ennemi.X + direction.X * ennemi.Speed);
-                ennemi.Y = (ennemi.Y + direction.Y * ennemi.Speed);
+                ennemi.X += (direction.X * ennemi.Speed * ennemi.SpeedMultiplier);
+                ennemi.Y += (direction.Y * ennemi.Speed * ennemi.SpeedMultiplier);
+
+                if (joueur.IntersectsWith(ennemi.BoundingBox))
+                {
+                    //health--;
+                    if (!ennemi.isSlowed) ennemi.SlowDown(3);
+                }
+
+                Console.WriteLine(ennemi.isSlowed);
 
                 Canvas.SetLeft(ennemi.Image, ennemi.X);
                 Canvas.SetTop(ennemi.Image, ennemi.Y);
             }
+        }
+        public void SlowDown(int durationInSeconds)
+        {
+            isSlowed = true;
+            DispatcherTimer timer = new DispatcherTimer();
+            timer.Interval = TimeSpan.FromSeconds(durationInSeconds);
+            timer.Tick += (s,e) =>
+            {
+                isSlowed = false;
+                timer.Stop();
+            };
+
+            timer.Start();
         }
     }
 }
