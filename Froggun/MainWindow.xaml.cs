@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using System.IO;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,6 +8,7 @@ using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using static Froggun.MainWindow;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Froggun
@@ -26,8 +28,23 @@ namespace Froggun
         private static ScaleTransform joueurFlip = new ScaleTransform();
         private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
         private static Vector2 vitesseJoueur = new Vector2();
-        
-        private static bool directionJoueur = false; // false = gauche, true = droite. à changer si possible
+
+        private static BitmapImage imgFrogFront;
+        private static BitmapImage imgFrogBack;
+        private static BitmapImage imgFrogSide;
+        public enum Directions
+        {
+            left, //0
+            right, //1
+            up, //2
+            down, //3
+            diagUpLeft, //4
+            diagUpRight, //5
+            diagDownLeft, //6
+            diagDownRight //7
+        }
+        Directions directionJoueur = Directions.right;
+
         private const float forceSaut = 15.0f;
         private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
@@ -53,10 +70,10 @@ namespace Froggun
 
         private static Vector2 posGun = new Vector2();
 
-        
         private static Vector2 posLangue = new Vector2();
         private static Vector2 posArme = new Vector2();
-        private static int distancePisolet = 100;
+        private static int distancePisolet = 30;
+        private static bool tirLangue;
 
         public MainWindow()
         {
@@ -91,11 +108,13 @@ namespace Froggun
                     
                 }
             }
-            
 
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
+
+            RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
         }
 
         void InitialiserMinuterie()
@@ -123,6 +142,10 @@ namespace Froggun
         {
             imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
             imgFly = new BitmapImage(new Uri("pack://application:,,,/img/fly.png"));
+
+            imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
+            imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
+            imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
         }
 
         private void InitObjects()
@@ -165,8 +188,8 @@ namespace Froggun
 
             // Centre du joueur
             Vector2 posCentreJoueur = new Vector2(
-                (float)(posJoueur.X + (directionJoueur ? -player.ActualWidth / 2.0f : player.ActualWidth/2.0f)),
-                (float)(posJoueur.Y + (player.ActualHeight/2.0f))
+                (float)(posJoueur.X + player.Width / 2.0f),
+                (float)(posJoueur.Y + player.Height / 6.0f)
             );
 
             // Trouve la position de l'arme autour du joueur
@@ -186,7 +209,7 @@ namespace Froggun
             if (directionSouris.X > 0) inverseArme.ScaleY = 1;
             else inverseArme.ScaleY = -1;
 
-            inverseArme.ScaleX = -1;
+            //inverseArme.ScaleX = -1;
             gun.RenderTransform = rotationArme;
             gun.RenderTransform = inverseArme;
 
@@ -205,15 +228,16 @@ namespace Froggun
             posLangue.Y = (float)Mouse.GetPosition(canvas).Y;
 
             Vector2 posCentreJoueur = new Vector2(
-                (float)(posJoueur.X),
-                (float)(posJoueur.Y)
+                (float)(posJoueur.X + player.Width / 2.0f),
+                (float)(posJoueur.Y + player.Height / 2.0f)
             );
 
             Vector2 directionSouris = Vector2.Normalize(posLangue - posCentreJoueur);
 
             float angle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
             RotateTransform rotationArme = new RotateTransform(angle);
-            playerTongue.RenderTransform = rotationArme;
+            
+            if (!tirLangue) playerTongue.RenderTransform = rotationArme;
             
             Canvas.SetTop(playerTongue, directionSouris.X > 0 ? posCentreJoueur.Y : posCentreJoueur.Y + playerTongue.Height/2.0f);
             Canvas.SetLeft(playerTongue, posCentreJoueur.X);
@@ -223,10 +247,27 @@ namespace Froggun
         {
             int maxY = (int) grid.ActualHeight/2;
 
+            //fix direction:
+            if      (deplacerBas) directionJoueur = Directions.down;
+            else if (deplacerHaut) directionJoueur = Directions.up;
+            else if (deplacerDroite) directionJoueur = Directions.right;
+            else if (deplacerGauche) directionJoueur = Directions.left;
+            else if (deplacerBas && deplacerGauche) directionJoueur = Directions.diagDownLeft;
+            else if (deplacerBas && deplacerDroite) directionJoueur = Directions.diagDownRight;
+            else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
+            else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
+
             // Inverse l'image du joueur si nécessaire
-            if (directionJoueur) joueurFlip.ScaleX = -1; // droite
-            else joueurFlip.ScaleX = 1; // gauche
+            bool doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
+            if (doitFlip) joueurFlip.ScaleX = 1;
+            else joueurFlip.ScaleX = -1;
+
+            player.RenderTransformOrigin = new Point(0.5, 0.5);
             player.RenderTransform = joueurFlip;
+
+            if (directionJoueur == Directions.left || directionJoueur == Directions.right) player.Source = imgFrogSide;
+            if (directionJoueur == Directions.up || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight) player.Source = imgFrogBack;
+            if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
 
             PivoterArme();
             PivoterLangue();
@@ -259,6 +300,9 @@ namespace Froggun
 
         private void ShootTung()
         {
+            if (tirLangue) return;
+            else tirLangue = true;
+
             DoubleAnimation grow = new DoubleAnimation
             {
                 From = playerTongue.Width,
@@ -272,8 +316,13 @@ namespace Froggun
                 To = 0,
                 Duration = TimeSpan.FromMilliseconds(50)
             };
-
-            // lorsque l'animation grow est compléter, start l'animation shrink.
+            
+            // lorsque l'animation est compléter
+            shrink.Completed += (s, e) =>
+            {
+                tirLangue = false;
+            };
+            
             grow.Completed += (s, e) => { // s = object? sender  e = EventArgs event
                 playerTongue.BeginAnimation(Rectangle.WidthProperty, shrink);
             };
@@ -292,23 +341,25 @@ namespace Froggun
             {
                 deplacerDroite = true;
                 deplacerGauche = false;
-                directionJoueur = true;
+                directionJoueur = Directions.right;
             }
             if (e.Key == Key.Q || e.Key == Key.A)
             {
                 deplacerGauche = true;
                 deplacerDroite = false;
-                directionJoueur = false;
+                directionJoueur = Directions.left;
             }
             if (e.Key == Key.S)
             {
                 deplacerBas = true;
                 deplacerHaut = false;
+                directionJoueur = Directions.down;
             }
             if (e.Key == Key.Z || e.Key == Key.W)
             {
                 deplacerHaut = true;
                 deplacerBas = false;
+                directionJoueur = Directions.up;
             }
 
             if (e.Key == Key.E)

@@ -16,7 +16,10 @@
     <Grid x:Name="grid">
         <Canvas x:Name="canvas">
             <Canvas.Background>
-                <ImageBrush ImageSource="/img/fond.PNG" />
+                <ImageBrush
+                    ImageSource="/img/bg.PNG"
+                    Stretch="UniformToFill"
+                    TileMode="FlipXY" />
             </Canvas.Background>
             <Rectangle
                 x:Name="playerTongue"
@@ -29,20 +32,20 @@
                 Fill="HotPink" />
             <Image
                 x:Name="player"
-                Canvas.Left="364"
-                Canvas.Top="169"
-                Width="72"
-                Height="56"
+                Canvas.Left="375"
+                Canvas.Top="187"
+                Width="51"
+                Height="40"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Source="/img/frog.png"
+                Source="/img/frog_side.png"
                 Stretch="Fill" />
             <Image
                 x:Name="gun"
                 Canvas.Left="319"
                 Canvas.Top="184"
-                Width="40"
-                Height="26"
+                Width="51"
+                Height="40"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
                 Source="/img/gun.png"

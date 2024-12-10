@@ -16,6 +16,9 @@
 		<None Remove="img\fly.png" />
 		<None Remove="img\fond.PNG" />
 		<None Remove="img\frog.png" />
+		<None Remove="img\frog_back.png" />
+		<None Remove="img\frog_front.png" />
+		<None Remove="img\frog_side.png" />
 		<None Remove="img\gun.png" />
 		<None Remove="img\guninversee.png" />
 		<None Remove="img\health0.png" />
@@ -38,6 +41,9 @@
 		<Resource Include="img\fly.png" />
 		<Resource Include="img\fond.PNG" />
 		<Resource Include="img\frog.png" />
+		<Resource Include="img\frog_back.png" />
+		<Resource Include="img\frog_front.png" />
+		<Resource Include="img\frog_side.png" />
 		<Resource Include="img\gun.png" />
 		<Resource Include="img\guninversee.png" />
 		<Resource Include="img\health0.png" />
