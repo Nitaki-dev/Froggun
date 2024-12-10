@@ -24,7 +24,7 @@ namespace Froggun
         private static DispatcherTimer tempsRestant = new DispatcherTimer();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
-        private static Vector2 posJoueur = new Vector2();
+        private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
         private static Vector2 vitesseJoueur = new Vector2();
         
         private static bool directionJoueur = false; // false = gauche, true = droite. à changer si possible
@@ -39,6 +39,8 @@ namespace Froggun
         private bool plongeVersSol = false;
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
+        private bool deplacerHaut = false;
+        private bool deplacerBas = false;
         
         private const int nbAnts = 3;
         private const int nbFireflys = 3;
@@ -194,78 +196,51 @@ namespace Froggun
             PivoterArme();
             PivoterLangue();
 
-            // Vérifier l'état du joueur pour savoir si nous devons verrouiller son mouvement
-            if (plongeVersSol) verrouillageMouvement = true;
-            else verrouillageMouvement = false;
-
-            if (verrouillageMouvement)
-            {
-                // verrouiller le mouvement du joueur
-                if (plongeVersSol)
-                {
-                    vitesseJoueur.Y = vitesseMaxChute * 4.0f;
-                    posJoueur.Y += vitesseJoueur.Y;
-
-                    Canvas.SetLeft(player, posJoueur.X);
-                    Canvas.SetTop(player, posJoueur.Y);
-
-                    if (posJoueur.Y >= maxY - player.Height) plongeVersSol = false;
-                }
-            }
+            if (deplacerHaut && Canvas.GetTop(player) > 0) vitesseJoueur.Y = -vitesseDeplacement;  // bouger vers le haut
+            else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight-player.ActualHeight) vitesseJoueur.Y = vitesseDeplacement; // bouger vers le bas 
             else
             {
-                // déplacer le joueur vers le bas
-                if (vitesseJoueur.Y < vitesseMaxChute) vitesseJoueur.Y += gravite;
-                else vitesseJoueur.Y = vitesseMaxChute;
-                posJoueur.Y += vitesseJoueur.Y;
-
-                // le joueur est sur le sol
-                if (posJoueur.Y >= maxY - player.Height)
-                {
-                    // ne pas le bouger 
-                    posJoueur.Y = maxY - (float)player.Height;
-                    vitesseJoueur.Y = 0;
-                    estAuSol = true;
-                }
-
-                else estAuSol = false;
-                if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth) vitesseJoueur.X = vitesseDeplacement;  // bouger droite
-                else if (deplacerGauche && Canvas.GetLeft(player) > 0) vitesseJoueur.X = -vitesseDeplacement; // bouger gauche
-
-                else
-                {
-                    // réduire la vitesse du joueur en fonction de la friction
-                    vitesseJoueur.X *= friction;
-                    // si la vitesse (positive) est inférieure à 0.1f, arrêter le mouvement
-                    if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0;
-                }
-                if (Canvas.GetTop(player) < 0) posJoueur.Y += vitesseJoueur.Y;
-                posJoueur.X += vitesseJoueur.X;
-
-                Canvas.SetLeft(player, posJoueur.X);
-                Canvas.SetTop(player, posJoueur.Y);
+                // réduire la vitesse du joueur en fonction de la friction
+                vitesseJoueur.Y *= friction;
+                // si la vitesse (positive) est inférieure à 0.1f, arrêter le mouvement
+                if (Math.Abs(vitesseJoueur.Y) < 0.1f) vitesseJoueur.Y = 0;
             }
+            posJoueur.Y += vitesseJoueur.Y;
+
+            if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth) vitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
+            else if (deplacerGauche && Canvas.GetLeft(player) > 0) vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
+            else
+            {
+                // réduire la vitesse du joueur en fonction de la friction
+                vitesseJoueur.X *= friction;
+                // si la vitesse (positive) est inférieure à 0.1f, arrêter le mouvement
+                if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0;
+            }
+                
+            posJoueur.X += vitesseJoueur.X;
+            Canvas.SetLeft(player, posJoueur.X);
+            Canvas.SetTop(player, posJoueur.Y);
         }
 
         private void ShootTung()
         {
-            playerTongue.Width = 10;
-
-            DoubleAnimation grow = new DoubleAnimation
-            {
-                From = playerTongue.Width,
-                To = 300,
-                Duration = TimeSpan.FromMilliseconds(100)
-            };
+            playerTongue.Width = 50;
+            playerTongue.Width = 80;
+            //DoubleAnimation grow = new DoubleAnimation
+            //{
+            //    From = playerTongue.Width,
+            //    To = 300,
+            //    Duration = TimeSpan.FromMilliseconds(100)
+            //};
             
-            DoubleAnimation shrink = new DoubleAnimation
-            {
-                From = playerTongue.Width,
-                To = 10,
-                Duration = TimeSpan.FromMilliseconds(100)
-            };
+            //DoubleAnimation shrink = new DoubleAnimation
+            //{
+            //    From = playerTongue.Width,
+            //    To = 10,
+            //    Duration = TimeSpan.FromMilliseconds(50)
+            //};
 
-            playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
+            //playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
             //Task.Delay(100);
             //playerTongue.BeginAnimation(Rectangle.WidthProperty, shrink);
         }
@@ -275,10 +250,6 @@ namespace Froggun
             if (e.Key == Key.Space)
             {
                 vitesseJoueur.Y = -forceSaut;
-            }
-            if (e.Key == Key.LeftCtrl)
-            {
-                if (!estAuSol) plongeVersSol = true;
             }
 
             if (e.Key == Key.D)
@@ -290,9 +261,20 @@ namespace Froggun
             if (e.Key == Key.Q || e.Key == Key.A)
             {
                 deplacerGauche = true;
-                deplacerDroite = false; 
+                deplacerDroite = false;
                 directionJoueur = false;
             }
+            if (e.Key == Key.S)
+            {
+                deplacerBas = true;
+                deplacerHaut = false;
+            }
+            if (e.Key == Key.Z || e.Key == Key.W)
+            {
+                deplacerHaut = true;
+                deplacerBas = false;
+            }
+
             if (e.Key == Key.E)
             {
                 ShootTung();
@@ -309,6 +291,15 @@ namespace Froggun
             {
                 deplacerGauche = false;
             }
+            if (e.Key == Key.S)
+            {
+                deplacerBas = false;
+            }
+            if (e.Key == Key.Z || e.Key == Key.W)
+            {
+                deplacerHaut = false;
+            }
+
         }
     }
 }
