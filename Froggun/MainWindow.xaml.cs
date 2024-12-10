@@ -31,7 +31,7 @@ namespace Froggun
         private const float forceSaut = 15.0f;
         private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
-        private const float friction = 0.8f;
+        private const float friction = 0.4f;
         private const float gravite = 0.5f;
         
         private bool verrouillageMouvement = false;
@@ -174,7 +174,7 @@ namespace Froggun
             posLangue.Y = (float)Mouse.GetPosition(canvas).Y;
 
             Vector2 posCentreJoueur = new Vector2(
-                (float)(posJoueur.X + (directionJoueur ? -player.ActualWidth / 2.0f : player.ActualWidth / 2.0f)),
+                (float)(posJoueur.X),
                 (float)(posJoueur.Y)
             );
 
@@ -183,8 +183,8 @@ namespace Froggun
             float angle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
             RotateTransform rotationArme = new RotateTransform(angle);
             playerTongue.RenderTransform = rotationArme;
-
-            Canvas.SetTop(playerTongue, posCentreJoueur.Y);
+            
+            Canvas.SetTop(playerTongue, directionSouris.X > 0 ? posCentreJoueur.Y : posCentreJoueur.Y + playerTongue.Height/2.0f);
             Canvas.SetLeft(playerTongue, posCentreJoueur.X);
         }
 
@@ -228,25 +228,26 @@ namespace Froggun
 
         private void ShootTung()
         {
-            playerTongue.Width = 50;
-            playerTongue.Width = 80;
-            //DoubleAnimation grow = new DoubleAnimation
-            //{
-            //    From = playerTongue.Width,
-            //    To = 300,
-            //    Duration = TimeSpan.FromMilliseconds(100)
-            //};
-            
-            //DoubleAnimation shrink = new DoubleAnimation
-            //{
-            //    From = playerTongue.Width,
-            //    To = 10,
-            //    Duration = TimeSpan.FromMilliseconds(50)
-            //};
+            DoubleAnimation grow = new DoubleAnimation
+            {
+                From = playerTongue.Width,
+                To = 300,
+                Duration = TimeSpan.FromMilliseconds(100)
+            };
 
-            //playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
-            //Task.Delay(100);
-            //playerTongue.BeginAnimation(Rectangle.WidthProperty, shrink);
+            DoubleAnimation shrink = new DoubleAnimation
+            {
+                From = 300,
+                To = 0,
+                Duration = TimeSpan.FromMilliseconds(50)
+            };
+
+            // lorsque l'animation grow est compléter, start l'animation shrink.
+            grow.Completed += (s, e) => { // s = object? sender  e = EventArgs event
+                playerTongue.BeginAnimation(Rectangle.WidthProperty, shrink);
+            };
+
+            playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
         }
 
         private void keydown(object sender, KeyEventArgs e)
