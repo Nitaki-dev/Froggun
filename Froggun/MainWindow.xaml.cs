@@ -48,6 +48,11 @@ namespace Froggun
         private static List<Image> fireflys;
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
+        private static Vector2 posSouris = new Vector2();
+        private double moveSpeed = 20.0;
+
+        private static Vector2 posGun = new Vector2();
+
         
         private static Vector2 posLangue = new Vector2();
         private static Vector2 posArme = new Vector2();
@@ -115,7 +120,6 @@ namespace Froggun
                 Canvas.SetTop(ant, alea.Next(600,1080));
                 canvas.Children.Add(ant);
                 ants.Add(ant);
-                Console.WriteLine((int)(Canvas.GetLeft(ant)));
             }
         }
 
