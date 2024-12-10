@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
@@ -85,35 +86,33 @@ namespace Froggun
         {
             InitImage();
             InitializeComponent();
-            parametre fentreNiveau = new parametre();
-            fentreNiveau.ShowDialog();
-            if (fentreNiveau.DialogResult==false)
-                Application.Current.Shutdown();
-            if (fentreNiveau.DialogResult == true)  // Si la fenêtre a été fermée correctement (avec DialogResult = true)
-            {
-                    // Récupérer le résultat de la fenêtre du jeu
-                    string resultat = fentreNiveau.Resultat;
-                if (resultat == "parametre")
-                {
-                    controle fentreControle = new controle();
-                    fentreControle.ShowDialog();
-                    if (fentreControle.DialogResult == true)
-                    {
-                        if (fentreControle.Resultat == "choixTouche")
-                        {
-                            controle fentreChoixTouche = new controle();
-                            fentreChoixTouche.ShowDialog();
-                        }
-                        else if (fentreControle.Resultat == "aide")
-                        {
-                            controle fentreAide = new controle();
-                            fentreAide.ShowDialog();
-                        }
-                    }
-
-                    
-                }
-            }
+            //parametre fentreNiveau = new parametre();
+            //fentreNiveau.ShowDialog();
+            //if (fentreNiveau.DialogResult==false)
+            //    Application.Current.Shutdown();
+            //if (fentreNiveau.DialogResult == true)  // Si la fenêtre a été fermée correctement (avec DialogResult = true)
+            //{
+            //    // Récupérer le résultat de la fenêtre du jeu
+            //    string resultat = fentreNiveau.Resultat;
+            //    if (resultat == "parametre")
+            //    {
+            //        controle fentreControle = new controle();
+            //        fentreControle.ShowDialog();
+            //        if (fentreControle.DialogResult == true)
+            //        {
+            //            if (fentreControle.Resultat == "choixTouche")
+            //            {
+            //                controle fentreChoixTouche = new controle();
+            //                fentreChoixTouche.ShowDialog();
+            //            }
+            //            else if (fentreControle.Resultat == "aide")
+            //            {
+            //                controle fentreAide = new controle();
+            //                fentreAide.ShowDialog();
+            //            }
+            //        }
+            //    }
+            //}
 
             InitialiserMinuterie();
             Minuterie();
@@ -222,8 +221,8 @@ namespace Froggun
                             trier = false;
                             Canvas.SetLeft(ants[i], alea.Next(200, 1500));
                             Canvas.SetTop(ants[i], alea.Next(0, 300));
-                            Console.WriteLine(rectanglesants[i]);
-                            Console.WriteLine(rectanglesants[j]);
+                            //Console.WriteLine(rectanglesants[i]);
+                            //Console.WriteLine(rectanglesants[j]);
                         }
 
                     }
@@ -303,8 +302,6 @@ namespace Froggun
 
         private void Loop(object? sender, EventArgs e) 
         {
-            int maxY = (int) grid.ActualHeight/2;
-
             for (int i = 0; i < Balles.Count; i++) {
                 Balle balle = Balles[i];
 
@@ -316,12 +313,12 @@ namespace Froggun
             }
 
             //fix direction:
-            if      (deplacerBas) directionJoueur = Directions.down;
-            else if (deplacerHaut) directionJoueur = Directions.up;
-            else if (deplacerDroite) directionJoueur = Directions.right;
-            else if (deplacerGauche) directionJoueur = Directions.left;
-            else if (deplacerBas && deplacerGauche) directionJoueur = Directions.diagDownLeft;
-            else if (deplacerBas && deplacerDroite) directionJoueur = Directions.diagDownRight;
+            if      (deplacerBas)                    directionJoueur = Directions.down;
+            else if (deplacerHaut)                   directionJoueur = Directions.up;
+            else if (deplacerDroite)                 directionJoueur = Directions.right;
+            else if (deplacerGauche)                 directionJoueur = Directions.left;
+            else if (deplacerBas && deplacerGauche)  directionJoueur = Directions.diagDownLeft;
+            else if (deplacerBas && deplacerDroite)  directionJoueur = Directions.diagDownRight;
             else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
             else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
 

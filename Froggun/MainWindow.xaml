@@ -25,7 +25,7 @@
                 x:Name="playerTongue"
                 Canvas.Left="390"
                 Canvas.Top="187"
-                Width="10"
+                Width="0"
                 Height="10"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
@@ -52,22 +52,23 @@
                 Stretch="Fill" />
             <Label
                 x:Name="labelScore"
-                Canvas.Left="674"
-                Canvas.Top="5"
+                Canvas.Left="1103"
+                Canvas.Top="27"
                 Height="45"
-                HorizontalAlignment="Center"
+                HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 Content="Score : "
                 FontFamily="Amiri Quran"
                 FontSize="16"
-                Foreground="Black" />
+                Foreground="White" />
             <Label
                 x:Name="labelNumScore"
-                Canvas.Left="730"
-                Canvas.Top="21"
+                Canvas.Left="1161"
+                Canvas.Top="43"
                 HorizontalAlignment="Left"
-                VerticalAlignment="Center"
-                Content="0" />
+                VerticalAlignment="Top"
+                Content="0"
+                Foreground="White" />
             <Label
                 x:Name="labelTemps"
                 Canvas.Left="25"
