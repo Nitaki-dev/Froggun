@@ -11,6 +11,7 @@
 	<ItemGroup>
 		<None Remove="img\ant.jpg" />
 		<None Remove="img\ant.png" />
+		<None Remove="img\balle.png" />
 		<None Remove="img\bg.png" />
 		<None Remove="img\firefly.png" />
 		<None Remove="img\fly.png" />
@@ -36,16 +37,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Resource Include="img\balle.png" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Resource Include="img\ant.png" />
 		<Resource Include="img\bg.png" />
 		<Resource Include="img\fly.png" />
-		<Resource Include="img\fond.PNG" />
-		<Resource Include="img\frog.png" />
 		<Resource Include="img\frog_back.png" />
 		<Resource Include="img\frog_front.png" />
 		<Resource Include="img\frog_side.png" />
 		<Resource Include="img\gun.png" />
-		<Resource Include="img\guninversee.png" />
 		<Resource Include="img\health0.png" />
 		<Resource Include="img\health1.png" />
 		<Resource Include="img\health2.png" />
