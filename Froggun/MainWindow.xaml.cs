@@ -33,6 +33,8 @@ namespace Froggun
         private static BitmapImage imgFrogFront;
         private static BitmapImage imgFrogBack;
         private static BitmapImage imgFrogSide;
+
+        
         public enum Directions
         {
             left, //0
@@ -66,6 +68,8 @@ namespace Froggun
         private static List<Image> fireflys;
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
+        List<Rect> rectanglesfireflys = new List<Rect>();
+        List<Rect> rectanglesants = new List<Rect>();
         private static Vector2 posSouris = new Vector2();
         private double moveSpeed = 20.0;
 
@@ -124,6 +128,7 @@ namespace Froggun
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
             minuterie.Tick += Loop;
             minuterie.Start();
+            minuterie.Tick += EnnemiesAttack;
         }
 
         private void Minuterie()
@@ -151,8 +156,7 @@ namespace Froggun
 
         private void InitObjects()
         {
-            List<Rect> rectanglesfireflys = new List<Rect>();
-            List<Rect> rectanglesants = new List<Rect>();
+            
             ants = new List<Image>();
             fireflys = new List<Image>();
             for (int i = 0; i < nbFireflys; i++)
@@ -222,10 +226,6 @@ namespace Froggun
                     }
                 }
             } while (trier == false);
-        }
-        private void GenerationObjetsPasCollision(int width, int heigth)
-        {
-            
         }
 
         private void InitScore(int ajout)
@@ -297,7 +297,6 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e) 
         {
             int maxY = (int) grid.ActualHeight/2;
-
             //fix direction:
             if      (deplacerBas) directionJoueur = Directions.down;
             else if (deplacerHaut) directionJoueur = Directions.up;
@@ -418,7 +417,52 @@ namespace Froggun
                 ShootTung();
             }
         }
+        private void EnnemiesAttack(object? sender, EventArgs e)
+        {
+            
+            Rect playerR = new Rect((int)Canvas.GetLeft(player), (int)Canvas.GetTop(player), (int)player.Width, (int)player.Height);
+            for (int i = 0; i < nbFireflys; i++)
+            {
+                double speedFactor = 0.5;
+                double xFirefly = Canvas.GetLeft(fireflys[i]);
+                double yFirefly = Canvas.GetTop(fireflys[i]);
+                Vector2 directionFirefly = new Vector2(
+                    (float)(Canvas.GetLeft(player) - xFirefly),
+                    (float)(Canvas.GetTop(player) - yFirefly)
+                );
+                directionFirefly = Vector2.Normalize(directionFirefly);
+                Canvas.SetLeft(fireflys[i], xFirefly + directionFirefly.X * vitesseDeplacement * speedFactor);
+                Canvas.SetTop(fireflys[i], yFirefly + directionFirefly.Y * vitesseDeplacement * speedFactor);
 
+                rectanglesfireflys[i] = new Rect(
+                    (int)Canvas.GetLeft(fireflys[i]),
+                    (int)Canvas.GetTop(fireflys[i]),
+                    (int)fireflys[i].Width,
+                    (int)fireflys[i].Height
+                );
+            }
+            for (int i = 0; i < nbAnts; i++)
+            {
+                double speedFactor = 0.8;
+                double xAnt = Canvas.GetLeft(ants[i]);
+                double yAnt = Canvas.GetTop(ants[i]);
+                Vector2 directionAnt = new Vector2(
+                    (float)(Canvas.GetLeft(player) - xAnt),
+                    (float)(Canvas.GetTop(player) - yAnt)
+                );
+
+                directionAnt = Vector2.Normalize(directionAnt);
+                Canvas.SetLeft(ants[i], xAnt + directionAnt.X * vitesseDeplacement * speedFactor);
+                Canvas.SetTop(ants[i], yAnt + directionAnt.Y * vitesseDeplacement * speedFactor);
+
+                rectanglesants[i] = new Rect(
+                    (int)Canvas.GetLeft(ants[i]),
+                    (int)Canvas.GetTop(ants[i]),
+                    (int)ants[i].Width,
+                    (int)ants[i].Height
+                );
+            }
+        }
         private void keyup(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.D)
