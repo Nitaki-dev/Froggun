@@ -77,7 +77,7 @@ namespace Froggun
 
         private static Vector2 posLangue = new Vector2();
         private static Vector2 posArme = new Vector2();
-        private static int distancePisolet = 30;
+        private static int distancePisolet = 20;
         private static bool tirLangue;
 
         private static Vector2 dirBalle = new Vector2();
@@ -191,12 +191,12 @@ namespace Froggun
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
             Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 200, 200, 100, 100, 8, canvas, imageDirectory, animationFrames, 1.0);
-            //Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 200, 400, 100, 100, 8, canvas, imageDirectory, animationFrames);
-            //Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 600, 300, 100, 100, 8, canvas, imageDirectory, animationFrames);
+            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 200, 400, 100, 100, 8, canvas, imageDirectory, animationFrames);
+            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 600, 300, 100, 100, 8, canvas, imageDirectory, animationFrames);
 
             ennemis.Add(spider1);
-            //ennemis.Add(spider2);
-            //ennemis.Add(spider3);
+            ennemis.Add(spider2);
+            ennemis.Add(spider3);
 
             //string imageDirectory1 = "img/ennemis/Food1";
             //int[] animationFrames1 = new int[] { 1, 2 };
