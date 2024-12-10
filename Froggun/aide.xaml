@@ -1,0 +1,28 @@
+﻿<Window
+    x:Class="Froggun.aide"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Froggun"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="aide"
+    Width="350"
+    Height="350"
+    mc:Ignorable="d">
+    <Grid>
+        <Label
+            x:Name="labelTexte"
+            Margin="64,91,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Label" />
+        <Button
+            x:Name="boutonQuitter"
+            Margin="276,282,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="boutonQuitter_Click"
+            Content="Quitter" />
+
+    </Grid>
+</Window>

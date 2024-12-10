@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,28 +15,24 @@ using System.Windows.Shapes;
 namespace Froggun
 {
     /// <summary>
-    /// Logique d'interaction pour parametre.xaml
+    /// Logique d'interaction pour parametre2.xaml
     /// </summary>
-    public partial class parametre : Window
-
+    public partial class parametre2 : Window
     {
         public string Resultat { get; private set; }
-
-        public parametre()
+        public parametre2()
         {
             InitializeComponent();
-
         }
 
         private void boutonAnnuler_Click(object sender, RoutedEventArgs e)
         {
             this.DialogResult = false;
-            
+
         }
 
         private void boutonJouer_Click(object sender, RoutedEventArgs e)
         {
-            Resultat = "jouer";  // Assigner la chaîne que vous souhaitez retourner
             this.DialogResult = true;
 
         }

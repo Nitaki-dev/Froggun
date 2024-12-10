@@ -43,5 +43,11 @@ namespace Froggun
             Resultat = "choixTouche";  // Assigner la chaîne que vous souhaitez retourner
             this.DialogResult = true;
         }
+
+        private void boutonQuitter_Click(object sender, RoutedEventArgs e)
+        {
+            this.DialogResult = false;
+            this.Close();
+        }
     }
 }

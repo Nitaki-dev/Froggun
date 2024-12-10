@@ -1,16 +1,12 @@
-﻿using System.IO;
-using System.Numerics;
+﻿using System.Numerics;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
+using System.Windows.Shapes;
+using System.Windows.Controls;
+using System.Windows.Threading;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using System.Windows.Threading;
-using static Froggun.MainWindow;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Froggun
 {
@@ -89,33 +85,52 @@ namespace Froggun
         {
             InitImage();
             InitializeComponent();
+            // Création de la fenêtre parametre avec un Canvas
             parametre fentreNiveau = new parametre();
-            fentreNiveau.ShowDialog();
-            if (fentreNiveau.DialogResult==false)
-                Application.Current.Shutdown();
-            if (fentreNiveau.DialogResult == true)  // Si la fenêtre a été fermée correctement (avec DialogResult = true)
+            fentreNiveau.ShowDialog();  // Affichage de la fenêtre parametre
+
+            // Si la fenêtre parametre est fermée avec DialogResult == false, fermer l'application
+            if (fentreNiveau.DialogResult == false)
             {
-                    // Récupérer le résultat de la fenêtre du jeu
-                    string resultat = fentreNiveau.Resultat;
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                string resultat = fentreNiveau.Resultat; // Récupérer le résultat de la fenêtre parametre
+                                                         // Vérification si le résultat est "parametre", ce qui signifie que le processus doit continuer
                 if (resultat == "parametre")
                 {
-                    controle fentreControle = new controle();
-                    fentreControle.ShowDialog();
-                    if (fentreControle.DialogResult == true)
+                    do
                     {
-                        if (fentreControle.Resultat == "choixTouche")
+                        // Affichage du Canvas pour la fenêtre controle
+                        controle fentreControle = new controle();
+                        fentreControle.ShowDialog();  // Affiche la fenêtre controle de manière modale
+
+                        // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
+                        if (fentreControle.DialogResult == false)
                         {
-                            controle fentreChoixTouche = new controle();
-                            fentreChoixTouche.ShowDialog();
-                        }
-                        else if (fentreControle.Resultat == "aide")
-                        {
-                            controle fentreAide = new controle();
-                            fentreAide.ShowDialog();
+                            // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
+                            fentreNiveau = new parametre();  // Nouvelle instance de parametre
+                            fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
+
+                            // Si l'utilisateur choisit "jouer", sortir de la boucle
+                            resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
+                            if (resultat == "jouer")
+                            {
+                                // Logique pour lancer le jeu ici
+                                MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
+                                break;  // Quitter la boucle et lancer le jeu
+                            }
+
+                            // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
+                            if (fentreNiveau.DialogResult == false)
+                            {
+                                Application.Current.Shutdown();
+                                return;
+                            }
                         }
                     }
-
-                    
+                    while (resultat == "parametre");  // Continue la boucle si le résultat est encore "parametre"
                 }
             }
 
@@ -133,7 +148,7 @@ namespace Froggun
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
             minuterie.Tick += Loop;
             minuterie.Start();
-            minuterie.Tick += EnnemiesAttack;
+            //minuterie.Tick += EnnemiesAttack;
         }
 
         private void Minuterie()
@@ -152,7 +167,7 @@ namespace Froggun
         private void InitImage()
         {
             imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
-            imgFly = new BitmapImage(new Uri("pack://application:,,,/img/fly.png"));
+            imgFly = new BitmapImage(new Uri("pack://application:,,,/img/ennemis/LL/1.png"));
 
             imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
             imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
@@ -163,77 +178,88 @@ namespace Froggun
 
         private void InitObjects()
         {
-            
-            ants = new List<Image>();
-            fireflys = new List<Image>();
-            for (int i = 0; i < nbFireflys; i++)
-            {
 
-                Image fly = new Image();
-                fly.Source = imgFly;
-                fly.Width = 50;
-                fly.Height = 50;
-                Canvas.SetLeft(fly, alea.Next(200, 1300));
-                Canvas.SetTop(fly, alea.Next(0, 300));
-                canvas.Children.Add(fly);
-                fireflys.Add(fly);
-                Rect newRect = new Rect((int)Canvas.GetLeft(fly), (int)Canvas.GetTop(fly), (int)fly.Width, (int)fly.Height);
-                rectanglesfireflys.Add(newRect);
-                RenderOptions.SetBitmapScalingMode(fly, BitmapScalingMode.NearestNeighbor);
-            }
-            bool trier;
-            do
-            {
-                trier = true;
-                for (int i = 0; i < nbFireflys - 1; i++)
-                {
-                    for (int j = nbFireflys - 1; j > i; j--)
-                    {
-                        if (rectanglesfireflys[i].IntersectsWith(rectanglesfireflys[j]))
-                        {
-                            trier = false;
-                            Canvas.SetLeft(fireflys[i], alea.Next(200, 1300));
-                            Canvas.SetTop(fireflys[i], alea.Next(0, 300));
-                        }
+            string imageDirectory = "img/ennemis/LL";
+            int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
+            Ennemis spider = new Ennemis(200, 200, 100, 100, 2.5, canvas, imageDirectory, animationFrames);
 
-                    }
-                }
-            } while (trier == false);
+            string imageDirectory1 = "img/ennemis/Food1";
+            int[] animationFrames1 = new int[] { 1, 2 };
+            Ennemis Food = new Ennemis(300, 200, 64, 64, 2.5, canvas, imageDirectory1, animationFrames1);
+
+            // TODO: FIX MOVEMENT
 
 
-            for (int i = 0; i < nbAnts; i++)
-            {
-                Image ant = new Image();
-                ant.Source = imgAnt;
-                ant.Width = 50;
-                ant.Height = 50;
-                Canvas.SetLeft(ant, alea.Next(200, 1300));
-                Canvas.SetTop(ant, alea.Next(0, 300));
-                canvas.Children.Add(ant);
-                ants.Add(ant);
-                Rect newRect = new Rect((int)Canvas.GetLeft(ant), (int)Canvas.GetTop(ant), (int)ant.Width, (int)ant.Height);
-                rectanglesants.Add(newRect);
-                RenderOptions.SetBitmapScalingMode(ant, BitmapScalingMode.NearestNeighbor);
-            }
-            do
-            {
-                trier = true;
-                for (int i = 0; i < nbAnts - 1; i++)
-                {
-                    for (int j = nbAnts - 1; j > i; j--)
-                    {
-                        if (rectanglesants[i].IntersectsWith(rectanglesants[j]))
-                        {
-                            trier = false;
-                            Canvas.SetLeft(ants[i], alea.Next(200, 1500));
-                            Canvas.SetTop(ants[i], alea.Next(0, 300));
-                            Console.WriteLine(rectanglesants[i]);
-                            Console.WriteLine(rectanglesants[j]);
-                        }
+            // ants = new List<Image>();
+            // fireflys = new List<Image>();
+            // for (int i = 0; i < nbFireflys; i++)
+            // {
 
-                    }
-                }
-            } while (trier == false);
+            //     Image fly = new Image();
+            //     fly.Source = imgFly;
+            //     fly.Width = 50;
+            //     fly.Height = 50;
+            //     Canvas.SetLeft(fly, alea.Next(200, 1300));
+            //     Canvas.SetTop(fly, alea.Next(0, 300));
+            //     canvas.Children.Add(fly);
+            //     fireflys.Add(fly);
+            //     Rect newRect = new Rect((int)Canvas.GetLeft(fly), (int)Canvas.GetTop(fly), (int)fly.Width, (int)fly.Height);
+            //     rectanglesfireflys.Add(newRect);
+            //     RenderOptions.SetBitmapScalingMode(fly, BitmapScalingMode.NearestNeighbor);
+            // }
+            // bool trier;
+            // do
+            // {
+            //     trier = true;
+            //     for (int i = 0; i < nbFireflys - 1; i++)
+            //     {
+            //         for (int j = nbFireflys - 1; j > i; j--)
+            //         {
+            //             if (rectanglesfireflys[i].IntersectsWith(rectanglesfireflys[j]))
+            //             {
+            //                 trier = false;
+            //                 Canvas.SetLeft(fireflys[i], alea.Next(200, 1300));
+            //                 Canvas.SetTop(fireflys[i], alea.Next(0, 300));
+            //             }
+
+            //         }
+            //     }
+            // } while (trier == false);
+
+
+            // for (int i = 0; i < nbAnts; i++)
+            // {
+            //     Image ant = new Image();
+            //     ant.Source = imgAnt;
+            //     ant.Width = 50;
+            //     ant.Height = 50;
+            //     Canvas.SetLeft(ant, alea.Next(200, 1300));
+            //     Canvas.SetTop(ant, alea.Next(0, 300));
+            //     canvas.Children.Add(ant);
+            //     ants.Add(ant);
+            //     Rect newRect = new Rect((int)Canvas.GetLeft(ant), (int)Canvas.GetTop(ant), (int)ant.Width, (int)ant.Height);
+            //     rectanglesants.Add(newRect);
+            //     RenderOptions.SetBitmapScalingMode(ant, BitmapScalingMode.NearestNeighbor);
+            // }
+            // do
+            // {
+            //     trier = true;
+            //     for (int i = 0; i < nbAnts - 1; i++)
+            //     {
+            //         for (int j = nbAnts - 1; j > i; j--)
+            //         {
+            //             if (rectanglesants[i].IntersectsWith(rectanglesants[j]))
+            //             {
+            //                 trier = false;
+            //                 Canvas.SetLeft(ants[i], alea.Next(200, 1500));
+            //                 Canvas.SetTop(ants[i], alea.Next(0, 300));
+            //                 //Console.WriteLine(rectanglesants[i]);
+            //                 //Console.WriteLine(rectanglesants[j]);
+            //             }
+
+            //         }
+            //     }
+            // } while (trier == false);
         }
 
         private void InitScore(int ajout)
@@ -304,8 +330,6 @@ namespace Froggun
 
         private void Loop(object? sender, EventArgs e) 
         {
-            int maxY = (int) grid.ActualHeight/2;
-
             for (int i = 0; i < Balles.Count; i++) {
                 Balle balle = Balles[i];
 
@@ -317,12 +341,12 @@ namespace Froggun
             }
 
             //fix direction:
-            if      (deplacerBas) directionJoueur = Directions.down;
-            else if (deplacerHaut) directionJoueur = Directions.up;
-            else if (deplacerDroite) directionJoueur = Directions.right;
-            else if (deplacerGauche) directionJoueur = Directions.left;
-            else if (deplacerBas && deplacerGauche) directionJoueur = Directions.diagDownLeft;
-            else if (deplacerBas && deplacerDroite) directionJoueur = Directions.diagDownRight;
+            if      (deplacerBas)                    directionJoueur = Directions.down;
+            else if (deplacerHaut)                   directionJoueur = Directions.up;
+            else if (deplacerDroite)                 directionJoueur = Directions.right;
+            else if (deplacerGauche)                 directionJoueur = Directions.left;
+            else if (deplacerBas && deplacerGauche)  directionJoueur = Directions.diagDownLeft;
+            else if (deplacerBas && deplacerDroite)  directionJoueur = Directions.diagDownRight;
             else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
             else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
 
@@ -403,11 +427,12 @@ namespace Froggun
         {
             Vector2 dirBalle = new Vector2((float)Mouse.GetPosition(canvas).X, (float)Mouse.GetPosition(canvas).Y);
 
+            // Centre du joueur
             Vector2 posCentreJoueur = new Vector2(
-                (float)(posArme.X + gun.Width / 2.0f),
-                (float)(posArme.Y + player.Height / 2.0f)
+                (float)(posJoueur.X + player.Width / 2.0f),
+                (float)(posJoueur.Y + player.Height / 6.0f)
             );
-            
+
             Vector2 directionSouris = Vector2.Normalize(dirBalle - posCentreJoueur);
             double angle = Math.Atan2(directionSouris.Y, directionSouris.X);
 
@@ -452,52 +477,54 @@ namespace Froggun
                 ShootTung();
             }
         }
-        private void EnnemiesAttack(object? sender, EventArgs e)
-        {
+
+        //private void EnnemiesAttack(object? sender, EventArgs e)
+        //{
             
-            Rect playerR = new Rect((int)Canvas.GetLeft(player), (int)Canvas.GetTop(player), (int)player.Width, (int)player.Height);
-            for (int i = 0; i < nbFireflys; i++)
-            {
-                double speedFactor = 0.5;
-                double xFirefly = Canvas.GetLeft(fireflys[i]);
-                double yFirefly = Canvas.GetTop(fireflys[i]);
-                Vector2 directionFirefly = new Vector2(
-                    (float)(Canvas.GetLeft(player) - xFirefly),
-                    (float)(Canvas.GetTop(player) - yFirefly)
-                );
-                directionFirefly = Vector2.Normalize(directionFirefly);
-                Canvas.SetLeft(fireflys[i], xFirefly + directionFirefly.X * vitesseDeplacement * speedFactor);
-                Canvas.SetTop(fireflys[i], yFirefly + directionFirefly.Y * vitesseDeplacement * speedFactor);
+        //    Rect playerR = new Rect((int)Canvas.GetLeft(player), (int)Canvas.GetTop(player), (int)player.Width, (int)player.Height);
+        //    for (int i = 0; i < nbFireflys; i++)
+        //    {
+        //        double speedFactor = 0.5;
+        //        double xFirefly = Canvas.GetLeft(fireflys[i]);
+        //        double yFirefly = Canvas.GetTop(fireflys[i]);
+        //        Vector2 directionFirefly = new Vector2(
+        //            (float)(Canvas.GetLeft(player) - xFirefly),
+        //            (float)(Canvas.GetTop(player) - yFirefly)
+        //        );
+        //        directionFirefly = Vector2.Normalize(directionFirefly);
+        //        Canvas.SetLeft(fireflys[i], xFirefly + directionFirefly.X * vitesseDeplacement * speedFactor);
+        //        Canvas.SetTop(fireflys[i], yFirefly + directionFirefly.Y * vitesseDeplacement * speedFactor);
 
-                rectanglesfireflys[i] = new Rect(
-                    (int)Canvas.GetLeft(fireflys[i]),
-                    (int)Canvas.GetTop(fireflys[i]),
-                    (int)fireflys[i].Width,
-                    (int)fireflys[i].Height
-                );
-            }
-            for (int i = 0; i < nbAnts; i++)
-            {
-                double speedFactor = 0.8;
-                double xAnt = Canvas.GetLeft(ants[i]);
-                double yAnt = Canvas.GetTop(ants[i]);
-                Vector2 directionAnt = new Vector2(
-                    (float)(Canvas.GetLeft(player) - xAnt),
-                    (float)(Canvas.GetTop(player) - yAnt)
-                );
+        //        rectanglesfireflys[i] = new Rect(
+        //            (int)Canvas.GetLeft(fireflys[i]),
+        //            (int)Canvas.GetTop(fireflys[i]),
+        //            (int)fireflys[i].Width,
+        //            (int)fireflys[i].Height
+        //        );
+        //    }
+        //    for (int i = 0; i < nbAnts; i++)
+        //    {
+        //        double speedFactor = 0.8;
+        //        double xAnt = Canvas.GetLeft(ants[i]);
+        //        double yAnt = Canvas.GetTop(ants[i]);
+        //        Vector2 directionAnt = new Vector2(
+        //            (float)(Canvas.GetLeft(player) - xAnt),
+        //            (float)(Canvas.GetTop(player) - yAnt)
+        //        );
 
-                directionAnt = Vector2.Normalize(directionAnt);
-                Canvas.SetLeft(ants[i], xAnt + directionAnt.X * vitesseDeplacement * speedFactor);
-                Canvas.SetTop(ants[i], yAnt + directionAnt.Y * vitesseDeplacement * speedFactor);
+        //        directionAnt = Vector2.Normalize(directionAnt);
+        //        Canvas.SetLeft(ants[i], xAnt + directionAnt.X * vitesseDeplacement * speedFactor);
+        //        Canvas.SetTop(ants[i], yAnt + directionAnt.Y * vitesseDeplacement * speedFactor);
 
-                rectanglesants[i] = new Rect(
-                    (int)Canvas.GetLeft(ants[i]),
-                    (int)Canvas.GetTop(ants[i]),
-                    (int)ants[i].Width,
-                    (int)ants[i].Height
-                );
-            }
-        }
+        //        rectanglesants[i] = new Rect(
+        //            (int)Canvas.GetLeft(ants[i]),
+        //            (int)Canvas.GetTop(ants[i]),
+        //            (int)ants[i].Width,
+        //            (int)ants[i].Height
+        //        );
+        //    }
+        //}
+
         private void keyup(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.D)

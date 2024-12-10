@@ -13,6 +13,13 @@
 		<None Remove="img\ant.png" />
 		<None Remove="img\balle.png" />
 		<None Remove="img\bg.png" />
+		<None Remove="img\ennemis\Food1\1.png" />
+		<None Remove="img\ennemis\Food1\2.png" />
+		<None Remove="img\ennemis\LL\1.png" />
+		<None Remove="img\ennemis\LL\2.png" />
+		<None Remove="img\ennemis\LL\3.png" />
+		<None Remove="img\ennemis\LL\4.png" />
+		<None Remove="img\ennemis\LL\5.png" />
 		<None Remove="img\firefly.png" />
 		<None Remove="img\fly.png" />
 		<None Remove="img\fond.PNG" />
@@ -43,22 +50,29 @@
 	<ItemGroup>
 		<Resource Include="img\ant.png" />
 		<Resource Include="img\bg.png" />
+		<Resource Include="img\ennemis\Food1\1.png" />
+		<Resource Include="img\ennemis\Food1\2.png" />
+		<Resource Include="img\ennemis\LL\1.png" />
+		<Resource Include="img\ennemis\LL\2.png" />
+		<Resource Include="img\ennemis\LL\3.png" />
+		<Resource Include="img\ennemis\LL\4.png" />
+		<Resource Include="img\ennemis\LL\5.png" />
 		<Resource Include="img\fly.png" />
 		<Resource Include="img\frog_back.png" />
 		<Resource Include="img\frog_front.png" />
 		<Resource Include="img\frog_side.png" />
 		<Resource Include="img\gun.png" />
-		<Resource Include="img\health0.png" />
-		<Resource Include="img\health1.png" />
-		<Resource Include="img\health2.png" />
-		<Resource Include="img\health3.png" />
-		<Resource Include="img\health5.png" />
-		<Resource Include="img\img_explosion0.png" />
-		<Resource Include="img\img_explosion1.png" />
-		<Resource Include="img\img_explosion2.png" />
-		<Resource Include="img\img_explosion3.png" />
-		<Resource Include="img\img_explosion4.png" />
-		<Resource Include="img\img_explosion5.png" />
+		<Resource Include="img\vie\health0.png" />
+		<Resource Include="img\vie\health1.png" />
+		<Resource Include="img\vie\health2.png" />
+		<Resource Include="img\vie\health3.png" />
+		<Resource Include="img\vie\health5.png" />
+		<Resource Include="img\explosion\img_explosion0.png" />
+		<Resource Include="img\explosion\img_explosion1.png" />
+		<Resource Include="img\explosion\img_explosion2.png" />
+		<Resource Include="img\explosion\img_explosion3.png" />
+		<Resource Include="img\explosion\img_explosion4.png" />
+		<Resource Include="img\explosion\img_explosion5.png" />
 		<Resource Include="img\parametre.png" />
 	</ItemGroup>
 </Project>

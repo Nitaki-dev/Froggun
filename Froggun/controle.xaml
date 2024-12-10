@@ -13,14 +13,14 @@
         <Slider
             x:Name="sliderSon"
             Width="201"
-            Margin="10,211,0,0"
+            Margin="45,163,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top" />
         <Button
             x:Name="boutonAide"
             Width="168"
             Height="68"
-            Margin="0,356,0,0"
+            Margin="0,300,0,0"
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Background="#FFDDDDDD"
@@ -28,74 +28,36 @@
             Content="Aide"
             FontSize="30"
             Opacity="0.7" />
-        <Image
-            x:Name="ChoixFond1"
-            Margin="279,92,456,259"
-            Source="/img/fond.PNG"
-            Stretch="Fill" />
-        <Image
-            x:Name="ChoixFond2"
-            Margin="358,92,377,259"
-            Source="/img/fond.PNG"
-            Stretch="Fill" />
-        <Image
-            x:Name="ChoixFond4"
-            Margin="279,187,456,164"
-            Source="/img/fond.PNG"
-            Stretch="Fill" />
-        <Image
-            x:Name="ChoixFond3"
-            Margin="441,92,294,259"
-            Source="/img/fond.PNG"
-            Stretch="Fill" />
-        <Image
-            x:Name="ChoixFond5"
-            Margin="358,187,377,164"
-            Source="/img/fond.PNG"
-            Stretch="Fill" />
-        <Image
-            x:Name="ChoixFond6"
-            Margin="441,187,294,164"
-            Source="/img/fond.PNG"
-            Stretch="Fill" />
         <Slider
             x:Name="sliderSon_Copy"
             Width="201"
-            Margin="10,303,0,0"
+            Margin="45,291,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top" />
         <Label
             x:Name="labelSonJeu"
-            Margin="10,180,0,0"
+            Margin="45,132,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Content="Son jeu :" />
         <Label
             x:Name="labelSonBruit"
-            Margin="10,272,0,0"
+            Margin="45,242,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Content="Son Bruits :"
             RenderTransformOrigin="0.418,2.282" />
         <Label
             x:Name="labelParametreSon"
-            Margin="38,149,0,0"
+            Margin="89,64,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Content="Parametre du son :" />
-        <Label
-            x:Name="labelChoixFondImage"
-            Margin="0,10,0,0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Top"
-            Content="Choix du fond du jeu"
-            FontSize="20"
-            FontWeight="Bold" />
         <Button
             x:Name="boutonChoixTouche"
             Width="118"
             Height="40"
-            Margin="636,189,0,0"
+            Margin="504,152,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonChoixTouche_Click"
@@ -104,12 +66,21 @@
             x:Name="labelChoisirSesTouches"
             Width="147"
             Height="35"
-            Margin="621,127,0,0"
+            Margin="504,77,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Content="Choisir ses touches"
             FontSize="15"
             FontWeight="Bold" />
+        <Button
+            x:Name="boutonQuitter"
+            Width="66"
+            Height="34"
+            Margin="694,359,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="boutonQuitter_Click"
+            Content="Quitter" />
 
     </Grid>
 </Window>
