@@ -7,6 +7,7 @@ using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
+using System.Windows.Controls.Primitives;
 
 namespace Froggun
 {
@@ -79,8 +80,9 @@ namespace Froggun
         private static BitmapImage imageBalle;
         private static double vitesseBalle = 30.0f;
 
-        private List<Balle> Balles = new List<Balle>();
-        
+        private List<Balle> Balles = new List<Balle>(); 
+        private List<Ennemis> ennemis = new List<Ennemis>();
+
         public MainWindow()
         {
             InitImage();
@@ -148,7 +150,6 @@ namespace Froggun
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
             minuterie.Tick += Loop;
             minuterie.Start();
-            //minuterie.Tick += EnnemiesAttack;
         }
 
         private void Minuterie()
@@ -178,88 +179,21 @@ namespace Froggun
 
         private void InitObjects()
         {
-
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
-            Ennemis spider = new Ennemis(200, 200, 100, 100, 2.5, canvas, imageDirectory, animationFrames);
+            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 200, 200, 100, 100, 8, canvas, imageDirectory, animationFrames);
+            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 200, 400, 100, 100, 8, canvas, imageDirectory, animationFrames);
+            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 600, 300, 100, 100, 8, canvas, imageDirectory, animationFrames);
 
-            string imageDirectory1 = "img/ennemis/Food1";
-            int[] animationFrames1 = new int[] { 1, 2 };
-            Ennemis Food = new Ennemis(300, 200, 64, 64, 2.5, canvas, imageDirectory1, animationFrames1);
+            ennemis.Add(spider1);
+            ennemis.Add(spider2);
+            ennemis.Add(spider3);
 
-            // TODO: FIX MOVEMENT
+            //string imageDirectory1 = "img/ennemis/Food1";
+            //int[] animationFrames1 = new int[] { 1, 2 };
+            //Ennemis Food = new Ennemis(300, 200, 64, 64, 8, canvas, imageDirectory1, animationFrames1);
 
-
-            // ants = new List<Image>();
-            // fireflys = new List<Image>();
-            // for (int i = 0; i < nbFireflys; i++)
-            // {
-
-            //     Image fly = new Image();
-            //     fly.Source = imgFly;
-            //     fly.Width = 50;
-            //     fly.Height = 50;
-            //     Canvas.SetLeft(fly, alea.Next(200, 1300));
-            //     Canvas.SetTop(fly, alea.Next(0, 300));
-            //     canvas.Children.Add(fly);
-            //     fireflys.Add(fly);
-            //     Rect newRect = new Rect((int)Canvas.GetLeft(fly), (int)Canvas.GetTop(fly), (int)fly.Width, (int)fly.Height);
-            //     rectanglesfireflys.Add(newRect);
-            //     RenderOptions.SetBitmapScalingMode(fly, BitmapScalingMode.NearestNeighbor);
-            // }
-            // bool trier;
-            // do
-            // {
-            //     trier = true;
-            //     for (int i = 0; i < nbFireflys - 1; i++)
-            //     {
-            //         for (int j = nbFireflys - 1; j > i; j--)
-            //         {
-            //             if (rectanglesfireflys[i].IntersectsWith(rectanglesfireflys[j]))
-            //             {
-            //                 trier = false;
-            //                 Canvas.SetLeft(fireflys[i], alea.Next(200, 1300));
-            //                 Canvas.SetTop(fireflys[i], alea.Next(0, 300));
-            //             }
-
-            //         }
-            //     }
-            // } while (trier == false);
-
-
-            // for (int i = 0; i < nbAnts; i++)
-            // {
-            //     Image ant = new Image();
-            //     ant.Source = imgAnt;
-            //     ant.Width = 50;
-            //     ant.Height = 50;
-            //     Canvas.SetLeft(ant, alea.Next(200, 1300));
-            //     Canvas.SetTop(ant, alea.Next(0, 300));
-            //     canvas.Children.Add(ant);
-            //     ants.Add(ant);
-            //     Rect newRect = new Rect((int)Canvas.GetLeft(ant), (int)Canvas.GetTop(ant), (int)ant.Width, (int)ant.Height);
-            //     rectanglesants.Add(newRect);
-            //     RenderOptions.SetBitmapScalingMode(ant, BitmapScalingMode.NearestNeighbor);
-            // }
-            // do
-            // {
-            //     trier = true;
-            //     for (int i = 0; i < nbAnts - 1; i++)
-            //     {
-            //         for (int j = nbAnts - 1; j > i; j--)
-            //         {
-            //             if (rectanglesants[i].IntersectsWith(rectanglesants[j]))
-            //             {
-            //                 trier = false;
-            //                 Canvas.SetLeft(ants[i], alea.Next(200, 1500));
-            //                 Canvas.SetTop(ants[i], alea.Next(0, 300));
-            //                 //Console.WriteLine(rectanglesants[i]);
-            //                 //Console.WriteLine(rectanglesants[j]);
-            //             }
-
-            //         }
-            //     }
-            // } while (trier == false);
+            //ennemis.Add(Food);
         }
 
         private void InitScore(int ajout)
@@ -330,15 +264,18 @@ namespace Froggun
 
         private void Loop(object? sender, EventArgs e) 
         {
+            Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
+
             for (int i = 0; i < Balles.Count; i++) {
                 Balle balle = Balles[i];
-
                 balle.UpdatePositionBalles();
 
                 if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
                  || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
                     Balles.RemoveAt(i);
             }
+
+            Ennemis.UpdateEnnemis(ennemis, posJoueur);
 
             //fix direction:
             if      (deplacerBas)                    directionJoueur = Directions.down;
@@ -442,11 +379,6 @@ namespace Froggun
 
         private void keydown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.Space)
-            {
-                vitesseJoueur.Y = -forceSaut;
-            }
-
             if (e.Key == Key.D)
             {
                 deplacerDroite = true;
@@ -477,53 +409,6 @@ namespace Froggun
                 ShootTung();
             }
         }
-
-        //private void EnnemiesAttack(object? sender, EventArgs e)
-        //{
-            
-        //    Rect playerR = new Rect((int)Canvas.GetLeft(player), (int)Canvas.GetTop(player), (int)player.Width, (int)player.Height);
-        //    for (int i = 0; i < nbFireflys; i++)
-        //    {
-        //        double speedFactor = 0.5;
-        //        double xFirefly = Canvas.GetLeft(fireflys[i]);
-        //        double yFirefly = Canvas.GetTop(fireflys[i]);
-        //        Vector2 directionFirefly = new Vector2(
-        //            (float)(Canvas.GetLeft(player) - xFirefly),
-        //            (float)(Canvas.GetTop(player) - yFirefly)
-        //        );
-        //        directionFirefly = Vector2.Normalize(directionFirefly);
-        //        Canvas.SetLeft(fireflys[i], xFirefly + directionFirefly.X * vitesseDeplacement * speedFactor);
-        //        Canvas.SetTop(fireflys[i], yFirefly + directionFirefly.Y * vitesseDeplacement * speedFactor);
-
-        //        rectanglesfireflys[i] = new Rect(
-        //            (int)Canvas.GetLeft(fireflys[i]),
-        //            (int)Canvas.GetTop(fireflys[i]),
-        //            (int)fireflys[i].Width,
-        //            (int)fireflys[i].Height
-        //        );
-        //    }
-        //    for (int i = 0; i < nbAnts; i++)
-        //    {
-        //        double speedFactor = 0.8;
-        //        double xAnt = Canvas.GetLeft(ants[i]);
-        //        double yAnt = Canvas.GetTop(ants[i]);
-        //        Vector2 directionAnt = new Vector2(
-        //            (float)(Canvas.GetLeft(player) - xAnt),
-        //            (float)(Canvas.GetTop(player) - yAnt)
-        //        );
-
-        //        directionAnt = Vector2.Normalize(directionAnt);
-        //        Canvas.SetLeft(ants[i], xAnt + directionAnt.X * vitesseDeplacement * speedFactor);
-        //        Canvas.SetTop(ants[i], yAnt + directionAnt.Y * vitesseDeplacement * speedFactor);
-
-        //        rectanglesants[i] = new Rect(
-        //            (int)Canvas.GetLeft(ants[i]),
-        //            (int)Canvas.GetTop(ants[i]),
-        //            (int)ants[i].Width,
-        //            (int)ants[i].Height
-        //        );
-        //    }
-        //}
 
         private void keyup(object sender, KeyEventArgs e)
         {
