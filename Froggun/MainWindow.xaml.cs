@@ -62,6 +62,37 @@ namespace Froggun
         {
             InitImage();
             InitializeComponent();
+            parametre fentreNiveau = new parametre();
+            fentreNiveau.ShowDialog();
+            if (fentreNiveau.DialogResult==false)
+                Application.Current.Shutdown();
+            if (fentreNiveau.DialogResult == true)  // Si la fenêtre a été fermée correctement (avec DialogResult = true)
+            {
+                    // Récupérer le résultat de la fenêtre du jeu
+                    string resultat = fentreNiveau.Resultat;
+                if (resultat == "parametre")
+                {
+                    controle fentreControle = new controle();
+                    fentreControle.ShowDialog();
+                    if (fentreControle.DialogResult == true)
+                    {
+                        if (fentreControle.Resultat == "choixTouche")
+                        {
+                            controle fentreChoixTouche = new controle();
+                            fentreChoixTouche.ShowDialog();
+                        }
+                        else if (fentreControle.Resultat == "aide")
+                        {
+                            controle fentreAide = new controle();
+                            fentreAide.ShowDialog();
+                        }
+                    }
+
+                    
+                }
+            }
+            
+
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
