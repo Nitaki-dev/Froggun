@@ -19,8 +19,12 @@ namespace Froggun
         
         private int score = 0;
         private int temps = 60;
+        private int health = 5;
+        private double speedFactorFirefly = 0.5;
+        private double speedFactorAraignee = 0.8;
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer tempsRestant = new DispatcherTimer();
+        private Rect playerR = new Rect();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
         private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
@@ -146,9 +150,10 @@ namespace Froggun
         {
             minuterie = new DispatcherTimer();
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
+            //minuterie.Tick += EnnemiesAttack;
             minuterie.Tick += Loop;
             minuterie.Start();
-            //minuterie.Tick += EnnemiesAttack;
+            
         }
 
         private void Minuterie()
@@ -157,8 +162,18 @@ namespace Froggun
             tempsRestant.Interval = TimeSpan.FromSeconds(1);
             tempsRestant.Tick += tempsEnMoins;
             tempsRestant.Start();
+            playerR = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
+
+            for (int i = 0; i < nbFireflys; i++)
+            {
+
+                if (playerR.IntersectsWith(rectanglesfireflys[i]))
+                {
+                    health--;
+                }
+            }
         }
-        
+
         private void tempsEnMoins(object? sender, EventArgs e)
         {
             temps--;
@@ -389,6 +404,7 @@ namespace Froggun
             posJoueur.X += vitesseJoueur.X;
             Canvas.SetLeft(player, posJoueur.X);
             Canvas.SetTop(player, posJoueur.Y);
+            
         }
 
         private void ShootTung()
@@ -481,10 +497,9 @@ namespace Froggun
         //private void EnnemiesAttack(object? sender, EventArgs e)
         //{
             
-        //    Rect playerR = new Rect((int)Canvas.GetLeft(player), (int)Canvas.GetTop(player), (int)player.Width, (int)player.Height);
+        //    Rectangle playerR = new Rect((int)Canvas.GetLeft(player), (int)Canvas.GetTop(player), (int)player.Width, (int)player.Height);
         //    for (int i = 0; i < nbFireflys; i++)
         //    {
-        //        double speedFactor = 0.5;
         //        double xFirefly = Canvas.GetLeft(fireflys[i]);
         //        double yFirefly = Canvas.GetTop(fireflys[i]);
         //        Vector2 directionFirefly = new Vector2(
@@ -492,8 +507,8 @@ namespace Froggun
         //            (float)(Canvas.GetTop(player) - yFirefly)
         //        );
         //        directionFirefly = Vector2.Normalize(directionFirefly);
-        //        Canvas.SetLeft(fireflys[i], xFirefly + directionFirefly.X * vitesseDeplacement * speedFactor);
-        //        Canvas.SetTop(fireflys[i], yFirefly + directionFirefly.Y * vitesseDeplacement * speedFactor);
+        //        Canvas.SetLeft(fireflys[i], xFirefly + directionFirefly.X * vitesseDeplacement * speedFactorFirefly);
+        //        Canvas.SetTop(fireflys[i], yFirefly + directionFirefly.Y * vitesseDeplacement * speedFactorFirefly);
 
         //        rectanglesfireflys[i] = new Rect(
         //            (int)Canvas.GetLeft(fireflys[i]),
@@ -504,7 +519,6 @@ namespace Froggun
         //    }
         //    for (int i = 0; i < nbAnts; i++)
         //    {
-        //        double speedFactor = 0.8;
         //        double xAnt = Canvas.GetLeft(ants[i]);
         //        double yAnt = Canvas.GetTop(ants[i]);
         //        Vector2 directionAnt = new Vector2(
@@ -513,8 +527,8 @@ namespace Froggun
         //        );
 
         //        directionAnt = Vector2.Normalize(directionAnt);
-        //        Canvas.SetLeft(ants[i], xAnt + directionAnt.X * vitesseDeplacement * speedFactor);
-        //        Canvas.SetTop(ants[i], yAnt + directionAnt.Y * vitesseDeplacement * speedFactor);
+        //        Canvas.SetLeft(ants[i], xAnt + directionAnt.X * vitesseDeplacement * speedFactorAraignee);
+        //        Canvas.SetTop(ants[i], yAnt + directionAnt.Y * vitesseDeplacement * speedFactorAraignee);
 
         //        rectanglesants[i] = new Rect(
         //            (int)Canvas.GetLeft(ants[i]),
