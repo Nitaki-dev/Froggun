@@ -62,36 +62,60 @@ namespace Froggun
         {
             InitImage();
             InitializeComponent();
+            // Création de la fenêtre parametre avec un Canvas
             parametre fentreNiveau = new parametre();
-            fentreNiveau.ShowDialog();
-            if (fentreNiveau.DialogResult==false)
-                Application.Current.Shutdown();
-            if (fentreNiveau.DialogResult == true)  // Si la fenêtre a été fermée correctement (avec DialogResult = true)
+            fentreNiveau.ShowDialog();  // Affichage de la fenêtre parametre
+
+            // Si la fenêtre parametre est fermée avec DialogResult == false, fermer l'application
+            if (fentreNiveau.DialogResult == false)
             {
-                    // Récupérer le résultat de la fenêtre du jeu
-                    string resultat = fentreNiveau.Resultat;
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                string resultat = fentreNiveau.Resultat; // Récupérer le résultat de la fenêtre parametre
+                                                         // Vérification si le résultat est "parametre", ce qui signifie que le processus doit continuer
                 if (resultat == "parametre")
                 {
-                    controle fentreControle = new controle();
-                    fentreControle.ShowDialog();
-                    if (fentreControle.DialogResult == true)
+                    do
                     {
-                        if (fentreControle.Resultat == "choixTouche")
+                        // Affichage du Canvas pour la fenêtre controle
+                        controle fentreControle = new controle();
+                        fentreControle.ShowDialog();  // Affiche la fenêtre controle de manière modale
+
+                        // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
+                        if (fentreControle.DialogResult == false)
                         {
-                            controle fentreChoixTouche = new controle();
-                            fentreChoixTouche.ShowDialog();
-                        }
-                        else if (fentreControle.Resultat == "aide")
-                        {
-                            controle fentreAide = new controle();
-                            fentreAide.ShowDialog();
+                            // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
+                            fentreNiveau = new parametre();  // Nouvelle instance de parametre
+                            fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
+
+                            // Si l'utilisateur choisit "jouer", sortir de la boucle
+                            resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
+                            if (resultat == "jouer")
+                            {
+                                // Logique pour lancer le jeu ici
+                                MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
+                                break;  // Quitter la boucle et lancer le jeu
+                            }
+
+                            // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
+                            if (fentreNiveau.DialogResult == false)
+                            {
+                                Application.Current.Shutdown();
+                                return;
+                            }
                         }
                     }
-
-                    
+                    while (resultat == "parametre");  // Continue la boucle si le résultat est encore "parametre"
                 }
             }
-            
+
+
+
+
+
+
 
             InitialiserMinuterie();
             Minuterie();
