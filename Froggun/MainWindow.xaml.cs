@@ -33,6 +33,7 @@ namespace Froggun
         private static BitmapImage imgFrogFront;
         private static BitmapImage imgFrogBack;
         private static BitmapImage imgFrogSide;
+
         public enum Directions
         {
             left, //0
@@ -69,13 +70,17 @@ namespace Froggun
         private static Vector2 posSouris = new Vector2();
         private double moveSpeed = 20.0;
 
-        private static Vector2 posGun = new Vector2();
-
         private static Vector2 posLangue = new Vector2();
         private static Vector2 posArme = new Vector2();
         private static int distancePisolet = 30;
         private static bool tirLangue;
 
+        private static Vector2 dirBalle = new Vector2();
+        private static BitmapImage imageBalle;
+        private static double vitesseBalle = 30.0f;
+
+        private List<Balle> Balles = new List<Balle>();
+        
         public MainWindow()
         {
             InitImage();
@@ -147,6 +152,8 @@ namespace Froggun
             imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
             imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
             imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
+
+            imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
         }
 
         private void InitObjects()
@@ -168,7 +175,7 @@ namespace Froggun
                 fireflys.Add(fly);
                 Rect newRect = new Rect((int)Canvas.GetLeft(fly), (int)Canvas.GetTop(fly), (int)fly.Width, (int)fly.Height);
                 rectanglesfireflys.Add(newRect);
-
+                RenderOptions.SetBitmapScalingMode(fly, BitmapScalingMode.NearestNeighbor);
             }
             bool trier;
             do
@@ -189,7 +196,6 @@ namespace Froggun
                 }
             } while (trier == false);
 
-
             for (int i = 0; i < nbAnts; i++)
             {
                 Image ant = new Image();
@@ -202,6 +208,7 @@ namespace Froggun
                 ants.Add(ant);
                 Rect newRect = new Rect((int)Canvas.GetLeft(ant), (int)Canvas.GetTop(ant), (int)ant.Width, (int)ant.Height);
                 rectanglesants.Add(newRect);
+                RenderOptions.SetBitmapScalingMode(ant, BitmapScalingMode.NearestNeighbor);
             }
             do
             {
@@ -298,6 +305,16 @@ namespace Froggun
         {
             int maxY = (int) grid.ActualHeight/2;
 
+            for (int i = 0; i < Balles.Count; i++) {
+                Balle balle = Balles[i];
+
+                balle.UpdatePositionBalles();
+
+                if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
+                 || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
+                    Balles.RemoveAt(i);
+            }
+
             //fix direction:
             if      (deplacerBas) directionJoueur = Directions.down;
             else if (deplacerHaut) directionJoueur = Directions.up;
@@ -381,6 +398,22 @@ namespace Froggun
             playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
         }
 
+        private void ShootGun()
+        {
+            Vector2 dirBalle = new Vector2((float)Mouse.GetPosition(canvas).X, (float)Mouse.GetPosition(canvas).Y);
+
+            Vector2 posCentreJoueur = new Vector2(
+                (float)(posArme.X + gun.Width / 2.0f),
+                (float)(posArme.Y + player.Height / 2.0f)
+            );
+            
+            Vector2 directionSouris = Vector2.Normalize(dirBalle - posCentreJoueur);
+            double angle = Math.Atan2(directionSouris.Y, directionSouris.X);
+
+            Balle balle = new Balle(posArme.X, posArme.Y, angle, vitesseBalle, canvas, imageBalle);
+            Balles.Add(balle);
+        }
+
         private void keydown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Space)
@@ -442,7 +475,7 @@ namespace Froggun
 
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {
-
+            ShootGun();
         }
 
         private void rightButtonDown(object sender, MouseButtonEventArgs e)
