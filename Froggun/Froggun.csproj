@@ -11,6 +11,7 @@
 	<ItemGroup>
 		<None Remove="img\ant.jpg" />
 		<None Remove="img\ant.png" />
+		<None Remove="img\bg.png" />
 		<None Remove="img\firefly.png" />
 		<None Remove="img\fly.png" />
 		<None Remove="img\fond.PNG" />
@@ -32,6 +33,7 @@
 
 	<ItemGroup>
 		<Resource Include="img\ant.png" />
+		<Resource Include="img\bg.png" />
 		<Resource Include="img\fly.png" />
 		<Resource Include="img\fond.PNG" />
 		<Resource Include="img\frog.png" />

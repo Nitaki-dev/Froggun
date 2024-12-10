@@ -10,6 +10,8 @@
     Height="720"
     KeyDown="keydown"
     KeyUp="keyup"
+    MouseLeftButtonDown="leftButtonDown"
+    MouseRightButtonDown="rightButtonDown"
     mc:Ignorable="d">
     <Grid x:Name="grid">
         <Canvas x:Name="canvas">

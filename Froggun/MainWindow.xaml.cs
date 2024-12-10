@@ -306,5 +306,15 @@ namespace Froggun
             }
 
         }
+
+        private void leftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+
+        }
+
+        private void rightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ShootTung();
+        }
     }
 }
