@@ -19,34 +19,29 @@ namespace Froggun
     /// </summary>
     public partial class controle : Window
     {
+        public string Resultat { get; private set; }
         public controle()
         {
             InitializeComponent();
         }
 
-        private void BoutonDifficulter(object sender, RoutedEventArgs e)
-        {
-            
-        }
-
-        private void BoutonSon_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
 
         private void BoutonFond_Click(object sender, RoutedEventArgs e)
         {
 
         }
 
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
-        }
 
         private void ButtonAide_Click(object sender, RoutedEventArgs e)
         {
+            Resultat = "aide";  // Assigner la chaîne que vous souhaitez retourner
+            this.DialogResult = true;
+        }
 
+        private void boutonChoixTouche_Click(object sender, RoutedEventArgs e)
+        {
+            Resultat = "choixTouche";  // Assigner la chaîne que vous souhaitez retourner
+            this.DialogResult = true;
         }
     }
 }

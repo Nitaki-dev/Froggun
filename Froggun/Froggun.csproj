@@ -28,6 +28,7 @@
 		<None Remove="img\img_explosion3.png" />
 		<None Remove="img\img_explosion4.png" />
 		<None Remove="img\img_explosion5.png" />
+		<None Remove="img\parametre.png" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -48,5 +49,6 @@
 		<Resource Include="img\img_explosion3.png" />
 		<Resource Include="img\img_explosion4.png" />
 		<Resource Include="img\img_explosion5.png" />
+		<Resource Include="img\parametre.png" />
 	</ItemGroup>
 </Project>

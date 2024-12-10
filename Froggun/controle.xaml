@@ -91,6 +91,25 @@
             Content="Choix du fond du jeu"
             FontSize="20"
             FontWeight="Bold" />
+        <Button
+            x:Name="boutonChoixTouche"
+            Width="118"
+            Height="40"
+            Margin="636,189,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="boutonChoixTouche_Click"
+            Content="Choix touche" />
+        <Label
+            x:Name="labelChoisirSesTouches"
+            Width="147"
+            Height="35"
+            Margin="621,127,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Choisir ses touches"
+            FontSize="15"
+            FontWeight="Bold" />
 
     </Grid>
 </Window>
