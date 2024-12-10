@@ -153,7 +153,7 @@ namespace Froggun
             //minuterie.Tick += EnnemiesAttack;
             minuterie.Tick += Loop;
             minuterie.Start();
-            
+
         }
 
         private void Minuterie()
@@ -170,10 +170,28 @@ namespace Froggun
                 if (playerR.IntersectsWith(rectanglesfireflys[i]))
                 {
                     health--;
+                    SlowDownFireflys(0.5, 3);
                 }
             }
         }
+        private Dictionary<int, int> slowDownTimers = new Dictionary<int, int>();
+        private void SlowDownFireflys(double newSpeedFactor, int durationInSeconds)
+        {
+            double originalSpeedFactor = speedFactorFirefly;
+            speedFactorFirefly = newSpeedFactor;
+            DispatcherTimer timer = new DispatcherTimer
+            {
+                Interval = TimeSpan.FromSeconds(durationInSeconds)
+            };
 
+            timer.Tick += (s, e) =>
+            {
+                speedFactorFirefly = originalSpeedFactor; 
+                timer.Stop();
+            };
+
+            timer.Start();
+        }
         private void tempsEnMoins(object? sender, EventArgs e)
         {
             temps--;
