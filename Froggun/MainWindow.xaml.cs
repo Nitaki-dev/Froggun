@@ -1,12 +1,16 @@
-﻿using System.Numerics;
+﻿using System;
+using System.IO;
+using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Windows.Threading;
+using static Froggun.MainWindow;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Froggun
@@ -26,8 +30,24 @@ namespace Froggun
         private static ScaleTransform joueurFlip = new ScaleTransform();
         private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
         private static Vector2 vitesseJoueur = new Vector2();
-        
-        private static bool directionJoueur = false; // false = gauche, true = droite. à changer si possible
+
+        private static BitmapImage imgFrogFront;
+        private static BitmapImage imgFrogBack;
+        private static BitmapImage imgFrogSide;
+
+        public enum Directions
+        {
+            left, //0
+            right, //1
+            up, //2
+            down, //3
+            diagUpLeft, //4
+            diagUpRight, //5
+            diagDownLeft, //6
+            diagDownRight //7
+        }
+        Directions directionJoueur = Directions.right;
+
         private const float forceSaut = 15.0f;
         private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
@@ -43,21 +63,29 @@ namespace Froggun
         private bool deplacerBas = false;
         
         private const int nbAnts = 3;
-        private const int nbFireflys = 3;
+        private const int nbFireflys = 5;
         private static List<Image> ants;
         private static List<Image> fireflys;
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
+        List<Rect> rectanglesfireflys = new List<Rect>();
+        List<Rect> rectanglesants = new List<Rect>();
         private static Vector2 posSouris = new Vector2();
         private double moveSpeed = 20.0;
 
         private static Vector2 posGun = new Vector2();
 
-        
         private static Vector2 posLangue = new Vector2();
         private static Vector2 posArme = new Vector2();
-        private static int distancePisolet = 100;
+        private static int distancePisolet = 30;
+        private static bool tirLangue;
 
+        private static Vector2 dirBalle = new Vector2();
+        private static BitmapImage imageBalle;
+        private static double vitesseBalle = 30.0f;
+
+        private List<Balle> Balles = new List<Balle>();
+        
         public MainWindow()
         {
             InitImage();
@@ -120,6 +148,9 @@ namespace Froggun
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
+
+            RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
         }
 
         void InitialiserMinuterie()
@@ -128,6 +159,7 @@ namespace Froggun
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
             minuterie.Tick += Loop;
             minuterie.Start();
+            minuterie.Tick += EnnemiesAttack;
         }
 
         private void Minuterie()
@@ -147,23 +179,53 @@ namespace Froggun
         {
             imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
             imgFly = new BitmapImage(new Uri("pack://application:,,,/img/fly.png"));
+
+            imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
+            imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
+            imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
+
+            imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
         }
 
         private void InitObjects()
         {
+            
             ants = new List<Image>();
             fireflys = new List<Image>();
             for (int i = 0; i < nbFireflys; i++)
             {
+
                 Image fly = new Image();
                 fly.Source = imgFly;
                 fly.Width = 50;
                 fly.Height = 50;
-                Canvas.SetLeft(fly, alea.Next(0, 1920));
+                Canvas.SetLeft(fly, alea.Next(200, 1300));
                 Canvas.SetTop(fly, alea.Next(0, 300));
                 canvas.Children.Add(fly);
                 fireflys.Add(fly);
+                Rect newRect = new Rect((int)Canvas.GetLeft(fly), (int)Canvas.GetTop(fly), (int)fly.Width, (int)fly.Height);
+                rectanglesfireflys.Add(newRect);
+                RenderOptions.SetBitmapScalingMode(fly, BitmapScalingMode.NearestNeighbor);
             }
+            bool trier;
+            do
+            {
+                trier = true;
+                for (int i = 0; i < nbFireflys - 1; i++)
+                {
+                    for (int j = nbFireflys - 1; j > i; j--)
+                    {
+                        if (rectanglesfireflys[i].IntersectsWith(rectanglesfireflys[j]))
+                        {
+                            trier = false;
+                            Canvas.SetLeft(fireflys[i], alea.Next(200, 1300));
+                            Canvas.SetTop(fireflys[i], alea.Next(0, 300));
+                        }
+
+                    }
+                }
+            } while (trier == false);
+
 
             for (int i = 0; i < nbAnts; i++)
             {
@@ -171,11 +233,33 @@ namespace Froggun
                 ant.Source = imgAnt;
                 ant.Width = 50;
                 ant.Height = 50;
-                Canvas.SetLeft(ant, alea.Next(0, 1920));
-                Canvas.SetTop(ant, alea.Next(600,1080));
+                Canvas.SetLeft(ant, alea.Next(200, 1300));
+                Canvas.SetTop(ant, alea.Next(0, 300));
                 canvas.Children.Add(ant);
                 ants.Add(ant);
+                Rect newRect = new Rect((int)Canvas.GetLeft(ant), (int)Canvas.GetTop(ant), (int)ant.Width, (int)ant.Height);
+                rectanglesants.Add(newRect);
+                RenderOptions.SetBitmapScalingMode(ant, BitmapScalingMode.NearestNeighbor);
             }
+            do
+            {
+                trier = true;
+                for (int i = 0; i < nbAnts - 1; i++)
+                {
+                    for (int j = nbAnts - 1; j > i; j--)
+                    {
+                        if (rectanglesants[i].IntersectsWith(rectanglesants[j]))
+                        {
+                            trier = false;
+                            Canvas.SetLeft(ants[i], alea.Next(200, 1500));
+                            Canvas.SetTop(ants[i], alea.Next(0, 300));
+                            //Console.WriteLine(rectanglesants[i]);
+                            //Console.WriteLine(rectanglesants[j]);
+                        }
+
+                    }
+                }
+            } while (trier == false);
         }
 
         private void InitScore(int ajout)
@@ -189,8 +273,8 @@ namespace Froggun
 
             // Centre du joueur
             Vector2 posCentreJoueur = new Vector2(
-                (float)(posJoueur.X + (directionJoueur ? -player.ActualWidth / 2.0f : player.ActualWidth/2.0f)),
-                (float)(posJoueur.Y + (player.ActualHeight/2.0f))
+                (float)(posJoueur.X + player.Width / 2.0f),
+                (float)(posJoueur.Y + player.Height / 6.0f)
             );
 
             // Trouve la position de l'arme autour du joueur
@@ -210,7 +294,7 @@ namespace Froggun
             if (directionSouris.X > 0) inverseArme.ScaleY = 1;
             else inverseArme.ScaleY = -1;
 
-            inverseArme.ScaleX = -1;
+            //inverseArme.ScaleX = -1;
             gun.RenderTransform = rotationArme;
             gun.RenderTransform = inverseArme;
 
@@ -229,15 +313,16 @@ namespace Froggun
             posLangue.Y = (float)Mouse.GetPosition(canvas).Y;
 
             Vector2 posCentreJoueur = new Vector2(
-                (float)(posJoueur.X),
-                (float)(posJoueur.Y)
+                (float)(posJoueur.X + player.Width / 2.0f),
+                (float)(posJoueur.Y + player.Height / 2.0f)
             );
 
             Vector2 directionSouris = Vector2.Normalize(posLangue - posCentreJoueur);
 
             float angle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
             RotateTransform rotationArme = new RotateTransform(angle);
-            playerTongue.RenderTransform = rotationArme;
+            
+            if (!tirLangue) playerTongue.RenderTransform = rotationArme;
             
             Canvas.SetTop(playerTongue, directionSouris.X > 0 ? posCentreJoueur.Y : posCentreJoueur.Y + playerTongue.Height/2.0f);
             Canvas.SetLeft(playerTongue, posCentreJoueur.X);
@@ -245,12 +330,37 @@ namespace Froggun
 
         private void Loop(object? sender, EventArgs e) 
         {
-            int maxY = (int) grid.ActualHeight/2;
+            for (int i = 0; i < Balles.Count; i++) {
+                Balle balle = Balles[i];
+
+                balle.UpdatePositionBalles();
+
+                if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
+                 || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
+                    Balles.RemoveAt(i);
+            }
+
+            //fix direction:
+            if      (deplacerBas)                    directionJoueur = Directions.down;
+            else if (deplacerHaut)                   directionJoueur = Directions.up;
+            else if (deplacerDroite)                 directionJoueur = Directions.right;
+            else if (deplacerGauche)                 directionJoueur = Directions.left;
+            else if (deplacerBas && deplacerGauche)  directionJoueur = Directions.diagDownLeft;
+            else if (deplacerBas && deplacerDroite)  directionJoueur = Directions.diagDownRight;
+            else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
+            else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
 
             // Inverse l'image du joueur si nécessaire
-            if (directionJoueur) joueurFlip.ScaleX = -1; // droite
-            else joueurFlip.ScaleX = 1; // gauche
+            bool doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
+            if (doitFlip) joueurFlip.ScaleX = 1;
+            else joueurFlip.ScaleX = -1;
+
+            player.RenderTransformOrigin = new Point(0.5, 0.5);
             player.RenderTransform = joueurFlip;
+
+            if (directionJoueur == Directions.left || directionJoueur == Directions.right) player.Source = imgFrogSide;
+            if (directionJoueur == Directions.up || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight) player.Source = imgFrogBack;
+            if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
 
             PivoterArme();
             PivoterLangue();
@@ -283,6 +393,9 @@ namespace Froggun
 
         private void ShootTung()
         {
+            if (tirLangue) return;
+            else tirLangue = true;
+
             DoubleAnimation grow = new DoubleAnimation
             {
                 From = playerTongue.Width,
@@ -296,13 +409,34 @@ namespace Froggun
                 To = 0,
                 Duration = TimeSpan.FromMilliseconds(50)
             };
-
-            // lorsque l'animation grow est compléter, start l'animation shrink.
+            
+            // lorsque l'animation est compléter
+            shrink.Completed += (s, e) =>
+            {
+                tirLangue = false;
+            };
+            
             grow.Completed += (s, e) => { // s = object? sender  e = EventArgs event
                 playerTongue.BeginAnimation(Rectangle.WidthProperty, shrink);
             };
 
             playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
+        }
+
+        private void ShootGun()
+        {
+            Vector2 dirBalle = new Vector2((float)Mouse.GetPosition(canvas).X, (float)Mouse.GetPosition(canvas).Y);
+
+            Vector2 posCentreJoueur = new Vector2(
+                (float)(posArme.X + gun.Width / 2.0f),
+                (float)(posArme.Y + player.Height / 2.0f)
+            );
+            
+            Vector2 directionSouris = Vector2.Normalize(dirBalle - posCentreJoueur);
+            double angle = Math.Atan2(directionSouris.Y, directionSouris.X);
+
+            Balle balle = new Balle(posArme.X, posArme.Y, angle, vitesseBalle, canvas, imageBalle);
+            Balles.Add(balle);
         }
 
         private void keydown(object sender, KeyEventArgs e)
@@ -316,23 +450,25 @@ namespace Froggun
             {
                 deplacerDroite = true;
                 deplacerGauche = false;
-                directionJoueur = true;
+                directionJoueur = Directions.right;
             }
             if (e.Key == Key.Q || e.Key == Key.A)
             {
                 deplacerGauche = true;
                 deplacerDroite = false;
-                directionJoueur = false;
+                directionJoueur = Directions.left;
             }
             if (e.Key == Key.S)
             {
                 deplacerBas = true;
                 deplacerHaut = false;
+                directionJoueur = Directions.down;
             }
             if (e.Key == Key.Z || e.Key == Key.W)
             {
                 deplacerHaut = true;
                 deplacerBas = false;
+                directionJoueur = Directions.up;
             }
 
             if (e.Key == Key.E)
@@ -340,7 +476,52 @@ namespace Froggun
                 ShootTung();
             }
         }
+        private void EnnemiesAttack(object? sender, EventArgs e)
+        {
+            
+            Rect playerR = new Rect((int)Canvas.GetLeft(player), (int)Canvas.GetTop(player), (int)player.Width, (int)player.Height);
+            for (int i = 0; i < nbFireflys; i++)
+            {
+                double speedFactor = 0.5;
+                double xFirefly = Canvas.GetLeft(fireflys[i]);
+                double yFirefly = Canvas.GetTop(fireflys[i]);
+                Vector2 directionFirefly = new Vector2(
+                    (float)(Canvas.GetLeft(player) - xFirefly),
+                    (float)(Canvas.GetTop(player) - yFirefly)
+                );
+                directionFirefly = Vector2.Normalize(directionFirefly);
+                Canvas.SetLeft(fireflys[i], xFirefly + directionFirefly.X * vitesseDeplacement * speedFactor);
+                Canvas.SetTop(fireflys[i], yFirefly + directionFirefly.Y * vitesseDeplacement * speedFactor);
 
+                rectanglesfireflys[i] = new Rect(
+                    (int)Canvas.GetLeft(fireflys[i]),
+                    (int)Canvas.GetTop(fireflys[i]),
+                    (int)fireflys[i].Width,
+                    (int)fireflys[i].Height
+                );
+            }
+            for (int i = 0; i < nbAnts; i++)
+            {
+                double speedFactor = 0.8;
+                double xAnt = Canvas.GetLeft(ants[i]);
+                double yAnt = Canvas.GetTop(ants[i]);
+                Vector2 directionAnt = new Vector2(
+                    (float)(Canvas.GetLeft(player) - xAnt),
+                    (float)(Canvas.GetTop(player) - yAnt)
+                );
+
+                directionAnt = Vector2.Normalize(directionAnt);
+                Canvas.SetLeft(ants[i], xAnt + directionAnt.X * vitesseDeplacement * speedFactor);
+                Canvas.SetTop(ants[i], yAnt + directionAnt.Y * vitesseDeplacement * speedFactor);
+
+                rectanglesants[i] = new Rect(
+                    (int)Canvas.GetLeft(ants[i]),
+                    (int)Canvas.GetTop(ants[i]),
+                    (int)ants[i].Width,
+                    (int)ants[i].Height
+                );
+            }
+        }
         private void keyup(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.D)
@@ -360,6 +541,16 @@ namespace Froggun
                 deplacerHaut = false;
             }
 
+        }
+
+        private void leftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ShootGun();
+        }
+
+        private void rightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            ShootTung();
         }
     }
 }
