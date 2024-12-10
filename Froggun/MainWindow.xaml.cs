@@ -2,6 +2,7 @@
 using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Ink;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -60,7 +61,7 @@ namespace Froggun
         private bool deplacerBas = false;
         
         private const int nbAnts = 3;
-        private const int nbFireflys = 3;
+        private const int nbFireflys = 5;
         private static List<Image> ants;
         private static List<Image> fireflys;
         private static BitmapImage imgAnt;
@@ -150,19 +151,44 @@ namespace Froggun
 
         private void InitObjects()
         {
+            List<Rect> rectanglesfireflys = new List<Rect>();
+            List<Rect> rectanglesants = new List<Rect>();
             ants = new List<Image>();
             fireflys = new List<Image>();
             for (int i = 0; i < nbFireflys; i++)
             {
+
                 Image fly = new Image();
                 fly.Source = imgFly;
                 fly.Width = 50;
                 fly.Height = 50;
-                Canvas.SetLeft(fly, alea.Next(0, 1920));
+                Canvas.SetLeft(fly, alea.Next(200, 1300));
                 Canvas.SetTop(fly, alea.Next(0, 300));
                 canvas.Children.Add(fly);
                 fireflys.Add(fly);
+                Rect newRect = new Rect((int)Canvas.GetLeft(fly), (int)Canvas.GetTop(fly), (int)fly.Width, (int)fly.Height);
+                rectanglesfireflys.Add(newRect);
+
             }
+            bool trier;
+            do
+            {
+                trier = true;
+                for (int i = 0; i < nbFireflys - 1; i++)
+                {
+                    for (int j = nbFireflys - 1; j > i; j--)
+                    {
+                        if (rectanglesfireflys[i].IntersectsWith(rectanglesfireflys[j]))
+                        {
+                            trier = false;
+                            Canvas.SetLeft(fireflys[i], alea.Next(200, 1300));
+                            Canvas.SetTop(fireflys[i], alea.Next(0, 300));
+                        }
+
+                    }
+                }
+            } while (trier == false);
+
 
             for (int i = 0; i < nbAnts; i++)
             {
@@ -170,11 +196,36 @@ namespace Froggun
                 ant.Source = imgAnt;
                 ant.Width = 50;
                 ant.Height = 50;
-                Canvas.SetLeft(ant, alea.Next(0, 1920));
-                Canvas.SetTop(ant, alea.Next(600,1080));
+                Canvas.SetLeft(ant, alea.Next(200, 1300));
+                Canvas.SetTop(ant, alea.Next(0, 300));
                 canvas.Children.Add(ant);
                 ants.Add(ant);
+                Rect newRect = new Rect((int)Canvas.GetLeft(ant), (int)Canvas.GetTop(ant), (int)ant.Width, (int)ant.Height);
+                rectanglesants.Add(newRect);
             }
+            do
+            {
+                trier = true;
+                for (int i = 0; i < nbAnts - 1; i++)
+                {
+                    for (int j = nbAnts - 1; j > i; j--)
+                    {
+                        if (rectanglesants[i].IntersectsWith(rectanglesants[j]))
+                        {
+                            trier = false;
+                            Canvas.SetLeft(ants[i], alea.Next(200, 1500));
+                            Canvas.SetTop(ants[i], alea.Next(0, 300));
+                            Console.WriteLine(rectanglesants[i]);
+                            Console.WriteLine(rectanglesants[j]);
+                        }
+
+                    }
+                }
+            } while (trier == false);
+        }
+        private void GenerationObjetsPasCollision(int width, int heigth)
+        {
+            
         }
 
         private void InitScore(int ajout)
