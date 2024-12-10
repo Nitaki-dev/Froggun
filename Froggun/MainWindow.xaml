@@ -12,6 +12,7 @@
     KeyUp="keyup"
     MouseLeftButtonDown="leftButtonDown"
     MouseRightButtonDown="rightButtonDown"
+    ResizeMode="NoResize"
     mc:Ignorable="d">
     <Grid x:Name="grid">
         <Canvas x:Name="canvas">
