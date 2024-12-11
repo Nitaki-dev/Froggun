@@ -456,7 +456,8 @@ namespace Froggun
 
         private void keydown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.D && !pause)
+            if (e.Key == Key.D && !
+                pause)
             {
                 deplacerDroite = true;
                 deplacerGauche = false;
