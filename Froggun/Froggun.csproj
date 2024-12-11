@@ -24,7 +24,6 @@
 		<None Remove="img\extreme.jpg" />
 		<None Remove="img\facile.jpg" />
 		<None Remove="img\firefly.png" />
-		<None Remove="img\fly.png" />
 		<None Remove="img\fond.PNG" />
 		<None Remove="img\fond_accueil.jpg" />
 		<None Remove="img\frog.png" />
@@ -65,7 +64,6 @@
 		<Resource Include="img\ennemis\LL\5.png" />
 		<Resource Include="img\extreme.jpg" />
 		<Resource Include="img\facile.jpg" />
-		<Resource Include="img\fly.png" />
 		<Resource Include="img\fond_accueil.jpg" />
 		<Resource Include="img\frog_back.png" />
 		<Resource Include="img\frog_front.png" />

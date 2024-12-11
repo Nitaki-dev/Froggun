@@ -71,18 +71,10 @@
                 Content="0"
                 Foreground="White" />
             <Label
-                x:Name="labelTemps"
+                x:Name="labelWave"
                 Canvas.Left="44"
                 Canvas.Top="38"
                 Content="Temps restant : "
-                Foreground="White" />
-            <Label
-                x:Name="labelNombreTemps"
-                Canvas.Left="130"
-                Canvas.Top="38"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Content="60 "
                 Foreground="White" />
             <Image
                 Canvas.Left="746"
@@ -91,18 +83,28 @@
                 Height="41"
                 Source="/img/health5.png"
                 Stretch="Fill" />
-            <Image Height="41" Canvas.Left="746" Source="/img/health5.png" Stretch="Fill" Canvas.Top="128" Width="234"/>
+            <Image
+                Canvas.Left="746"
+                Canvas.Top="128"
+                Width="234"
+                Height="41"
+                Source="/img/health5.png"
+                Stretch="Fill" />
             <Label
-    x:Name="lab_Pause"
-    Canvas.Left="187"
-    Canvas.Top="192"
-    Width="906"
-    Height="300"
-    HorizontalAlignment="Left"
-    VerticalAlignment="Center"
-    Content="PAUSE" FontSize="300" FontWeight="Bold" FontFamily="72 Monospace" Foreground="White" >
+                x:Name="lab_Pause"
+                Canvas.Left="187"
+                Canvas.Top="192"
+                Width="906"
+                Height="300"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Content="PAUSE"
+                FontFamily="72 Monospace"
+                FontSize="300"
+                FontWeight="Bold"
+                Foreground="White">
                 <Label.Background>
-                    <ImageBrush/>
+                    <ImageBrush />
                 </Label.Background>
             </Label>
         </Canvas>

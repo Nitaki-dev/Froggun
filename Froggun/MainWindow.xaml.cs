@@ -28,7 +28,7 @@ namespace Froggun
         private double speedFactorAraignee = 0.8;
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer tempsRestant = new DispatcherTimer();
-        private static DispatcherTimer minVagues = new DispatcherTimer();
+        private static DispatcherTimer pauseVagues = new DispatcherTimer();
         private Rect playerR = new Rect();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
@@ -93,6 +93,11 @@ namespace Froggun
         private List<Ennemis> ennemis = new List<Ennemis>();
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
+
+        int pauseEntreVagues = 5; // en secondes
+        int pauseCounter = 0;
+        private bool isTimerRunning = false;
+
         public MainWindow()
         {
             InitImage();
@@ -183,43 +188,60 @@ namespace Froggun
                 difficulte = fentreDifficulte.Resultat;
             }
             lab_Pause.Visibility = Visibility.Collapsed;
+            
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
-            MinuterieVagues();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
         }
-        void MinuterieVagues()
+
+        void StartWave()
         {
-            minVagues = new DispatcherTimer();
-            minVagues.Interval = TimeSpan.FromSeconds(12);
-            minVagues.Tick += NouvelleVague;
-            minVagues.Start();
-            NouvelleVague(this, EventArgs.Empty);
+            if (isTimerRunning) return;
+            isTimerRunning = true;
+
+            pauseVagues = new DispatcherTimer();
+            pauseVagues.Interval = TimeSpan.FromSeconds(1);
+            pauseVagues.Tick += NouvelleVague;
+            pauseCounter = 0;
+            pauseVagues.Start();
         }
+
         private void NouvelleVague(object? sender, EventArgs e)
         {
-            for (int i = 0; i < alea.Next(1,5); i++)
+            Console.WriteLine($"New wave in {pauseEntreVagues-pauseCounter}!");
+            labelWave.Content = $"New wave in {pauseEntreVagues - pauseCounter}!";
+
+            pauseCounter++;
+            if (pauseCounter < pauseEntreVagues) return;
+
+            Console.WriteLine("Wave starting now!");
+            labelWave.Content = $"Wave starting now!";
+
+            for (int i = 0; i < alea.Next(1,5); i++) // Nombre random de spider
             {
                 int hautOuBas = alea.Next(0, 1);
+                Console.WriteLine($"Haut ou bas: {hautOuBas} (0=haut, 1=bas)");
                 if (hautOuBas == 0)
                 {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, 100, 100, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
                     ennemis.Add(spider);
                 }
                 else
                 {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, 100, 100, alea.Next(100, 1100), alea.Next(500, 600), 100, 100, 8, canvas);
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(500, 600), 100, 100, 8, canvas);
                     ennemis.Add(spider);
                 }
             }
+            pauseVagues.Stop(); 
+            isTimerRunning = false;
         }
+
         void InitialiserMinuterie()
         {
             minuterie = new DispatcherTimer();
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
-            //minuterie.Tick += EnnemiesAttack;
             minuterie.Tick += Loop;
             minuterie.Start();
         }
@@ -256,13 +278,13 @@ namespace Froggun
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
 
-            Proies fly1 = new Proies(TypeProies.Fly,
-                600, 600, //position
-                50, 50,   // taille
-                3, 500, 100, // vitesse, tail max du prochain pas, et delai entre chaque pas
-                new Vector2(0,0), new Vector2((float)grid.ActualWidth, (float)grid.ActualHeight), canvas); // zone où la proie peut navigeur
+            //Proies fly1 = new Proies(TypeProies.Fly,
+            //    600, 600, //position
+            //    50, 50,   // taille
+            //    3, 500, 100, // vitesse, tail max du prochain pas, et delai entre chaque pas
+            //    new Vector2(0,0), new Vector2((float)grid.ActualWidth, (float)grid.ActualHeight), canvas); // zone où la proie peut navigeur
 
-            proies.Add(fly1);
+            //proies.Add(fly1);
 
             //string imageDirectory1 = "img/ennemis/Food1";
             //int[] animationFrames1 = new int[] { 1, 2 };
@@ -375,9 +397,17 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e) 
         { if (pause) return;
 
+            // if no enemies start a wave
+                Console.WriteLine(ennemis.Count + "   " + proies.Count);
+            if (ennemis.Count <= 0 && proies.Count <= 0)
+            {
+                Console.WriteLine(isTimerRunning);
+                StartWave();
+            }
+
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
             Proies.UpdateProies(proies, playerRect);
 
             for (int i = 0; i < Balles.Count; i++)
@@ -445,8 +475,6 @@ namespace Froggun
             //        //    //canvas.Children.Remove(proie.Image);
             //        //    //expensionLangue = false;
             //        //}
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
-            Proies.UpdateProies(proies, playerRect);
 
             //        //if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
             //    } else

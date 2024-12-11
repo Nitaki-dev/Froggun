@@ -8,6 +8,7 @@ using System.Numerics;
 using System.Windows.Media;
 using static Froggun.MainWindow;
 using System.Windows.Shapes;
+using System.Windows.Automation;
 
 namespace Froggun
 {
@@ -30,43 +31,54 @@ namespace Froggun
         private string imagePath { get; set; }
         public int[] animationIndex { get; set; }
 
-        public double PV { get; set; }
-        public double maxPV{ get; set; }
 
         public Rect BoundingBox { get; set; }
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }
         private DispatcherTimer animationTimer { get; set; }
         private int Health { get; set; }
+        public double maxHealth{ get; set; }
         public bool IsAlive { get; private set; }
         public bool hasCollided { get; set; }
+        private Rectangle healthBarEmpty { get; set; }
         private Rectangle healthBar { get; set; }
 
 
-        public Ennemis(TypeEnnemis type, double PointVie, double MaxPointVie, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
+        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
         {
             X = x;
             Y = y;
             Width = width;
             Height = height;
             Speed = speed;
-            PV = PointVie;
-            maxPV = MaxPointVie;
-            healthBar = new Rectangle
+
+            healthBarEmpty = new Rectangle
             {
-                Fill = Brushes.Green, 
-                Width = width,  
-                Height = 10,  
+                Fill = Brushes.Gray,
+                Width = width,
+                Height = 10,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top
             };
+
+            Canvas.SetLeft(healthBarEmpty, X);
+            Canvas.SetTop(healthBarEmpty, Y - 15);
+
+            canvas.Children.Add(healthBarEmpty);
+
+            healthBar = new Rectangle
+            {
+                Fill = Brushes.Green,
+                Width = width,
+                Height = 10,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
+            };
+
             Canvas.SetLeft(healthBar, X);
-            Canvas.SetTop(healthBar, Y - 15); 
+            Canvas.SetTop(healthBar, Y - 15);
             canvas.Children.Add(healthBar);
 
-
-            //imagePath = path;
-            //animationIndex = animationIndex;
             isSlowed = false;
             IsAlive = true;
             switch (type)
@@ -74,25 +86,19 @@ namespace Froggun
                 case TypeEnnemis.Spider:
                     animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
                     imagePath = "img/ennemis/LL";
-                    Health = 3;
+                    Health = 200;
+                    maxHealth = 200;
                     break;
                 case TypeEnnemis.Ant:
                     animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
                     imagePath = "img/ennemis/LL";
-                    Health = 2;
+                    Health = 100;
+                    maxHealth = 100;
                     break;
             }
           
-
             currentFrameIndex = 0;
-
-            
-
-            Image = new Image
-            {
-                Width = width,
-                Height = height
-            };
+            Image = new Image { Width = width, Height = height };
             RenderOptions.SetBitmapScalingMode(Image, BitmapScalingMode.NearestNeighbor);
 
             Canvas.SetLeft(Image, X);
@@ -133,14 +139,19 @@ namespace Froggun
                 {
                     if (balles[j].hasHit) continue;
                     Rect rImgBalle = new Rect(
-            balles[j].X,
-            balles[j].Y,
-            25,
-            25
-        );
+                        balles[j].X,
+                        balles[j].Y,
+                        25,
+                        25
+                    );
+
                     if (ennemis[i].BoundingBox.IntersectsWith(rImgBalle) && !ennemis[i].hasCollided)
                     {
-                        ennemis[i].Health--;
+                        ennemis[i].Health-=50;
+
+                        if (!(ennemis[i].Health<=0))
+                            ennemis[i].healthBar.Width = ennemis[i].healthBar.ActualWidth * (ennemis[i].Health / ennemis[i].maxHealth);
+
                         balles[j].hasHit = true;
                         canvas.Children.Remove(balles[j].BalleImage);
                         balles.RemoveAt(j);
@@ -148,10 +159,13 @@ namespace Froggun
                         break;
                     }
                 }
+
                 if (ennemis[i].Health <= 0)
                 {
-                    ennemis[i].Die(canvas);
+                    ennemis[i].Die(ennemis, ennemis[i], canvas);
+                    continue;
                 }
+                
                 if (ennemis[i].isSlowed) ennemis[i].SpeedMultiplier = 0.5;
                 else ennemis[i].SpeedMultiplier = 0.25;
 
@@ -174,28 +188,29 @@ namespace Froggun
                 bool canMove = true; 
                 foreach (var autreEnnemi in ennemis)
                 {
-                    if (autreEnnemi == ennemis[i])
-                        continue;
+                    if (autreEnnemi == ennemis[i]) continue;
                 }
 
                 if (canMove)
                 {
                     ennemis[i].X = newX;
                     ennemis[i].Y = newY;
-                    
                 }
 
                 if (joueur.IntersectsWith(ennemis[i].BoundingBox))
                 {
-                    //health--;
+                    //health--; // for player
                     if (!ennemis[i].isSlowed) ennemis[i].SlowDown(3);
                 }
 
                 Canvas.SetLeft(ennemis[i].Image, ennemis[i].X);
                 Canvas.SetTop(ennemis[i].Image, ennemis[i].Y);
+                Canvas.SetLeft(ennemis[i].healthBarEmpty, ennemis[i].X);
+                Canvas.SetTop(ennemis[i].healthBarEmpty, ennemis[i].Y - 15);
                 Canvas.SetLeft(ennemis[i].healthBar, ennemis[i].X);
                 Canvas.SetTop(ennemis[i].healthBar, ennemis[i].Y - 15);
             }
+
             for (int i = 0; i < ennemis.Count - 1; i++)
             {
                 for (int j = ennemis.Count - 1; j > i; j--)
@@ -203,26 +218,29 @@ namespace Froggun
                     if (ennemis[i].BoundingBox.IntersectsWith(ennemis[j].BoundingBox))
                     {
                         Vector2 direction = new Vector2(
-                    (float)(joueur.X - ennemis[i].X),
-                    (float)(joueur.Y - ennemis[i].Y));
+                            (float)(joueur.X - ennemis[i].X),
+                            (float)(joueur.Y - ennemis[i].Y)
+                        );
                         direction = Vector2.Normalize(direction);
                         float collisionPushback = 3.0f;
                         ennemis[i].X += direction.X * collisionPushback;
                         ennemis[i].Y += direction.Y * collisionPushback;
                         ennemis[j].X -= direction.X * collisionPushback;
                         ennemis[j].Y -= direction.Y * collisionPushback;
-
-
                     }
                 }
             }
         }
-        public void Die(Canvas canvas)
+
+        public void Die(List<Ennemis> ennemis, Ennemis e, Canvas canvas)
         {
             IsAlive = false;
             Image.Visibility = Visibility.Hidden;
+            canvas.Children.Remove(healthBarEmpty);
             canvas.Children.Remove(healthBar);
+            ennemis.Remove(e);
         }
+        
         public void SlowDown(int durationInSeconds)
         {
             isSlowed = true;
