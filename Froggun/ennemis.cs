@@ -54,14 +54,14 @@ namespace Froggun
             maxPV = MaxPointVie;
             healthBar = new Rectangle
             {
-                Fill = Brushes.Green, // Цвет полосы здоровья
-                Width = width,  // Ширина полосы здоровья соответствует ширине врага
-                Height = 10,  // Высота полосы здоровья (можно настроить)
+                Fill = Brushes.Green, 
+                Width = width,  
+                Height = 10,  
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top
             };
             Canvas.SetLeft(healthBar, X);
-            Canvas.SetTop(healthBar, Y - 15);  // Немного выше врага, чтобы отображать здоровье
+            Canvas.SetTop(healthBar, Y - 15); 
             canvas.Children.Add(healthBar);
 
 
@@ -125,73 +125,76 @@ namespace Froggun
         public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur, List<Balle> balles, Canvas canvas)
         {
             
-            foreach (var ennemi in ennemis)
+            for (int i=0; i<ennemis.Count; i++)
             {
-                if (!ennemi.IsAlive) continue;
-                ennemi.hasCollided = false;
-                for (int i = 0; i < balles.Count; i++)
+                if (!ennemis[i].IsAlive) continue;
+                ennemis[i].hasCollided = false;
+                for (int j = 0; j < balles.Count; j++)
                 {
-                    if (balles[i].hasHit) continue;
+                    if (balles[j].hasHit) continue;
                     Rect rImgBalle = new Rect(
-            balles[i].X,
-            balles[i].Y,
+            balles[j].X,
+            balles[j].Y,
             25,
             25
         );
-                    if (ennemi.BoundingBox.IntersectsWith(rImgBalle) && !ennemi.hasCollided)
+                    if (ennemis[i].BoundingBox.IntersectsWith(rImgBalle) && !ennemis[i].hasCollided)
                     {
-                        ennemi.Health--;
-                        balles[i].hasHit = true;
-                        canvas.Children.Remove(balles[i].BalleImage);
-                        balles.RemoveAt(i);
-                        i--;
+                        ennemis[i].Health--;
+                        balles[j].hasHit = true;
+                        canvas.Children.Remove(balles[j].BalleImage);
+                        balles.RemoveAt(j);
+                        j--;
                         break;
                     }
                 }
-                if (ennemi.Health <= 0)
+                if (ennemis[i].Health <= 0)
                 {
-                    ennemi.Die();
+                    ennemis[i].Die(canvas);
                 }
-                if (ennemi.isSlowed) ennemi.SpeedMultiplier = 0.5;
-                else ennemi.SpeedMultiplier = 0.25;
+                if (ennemis[i].isSlowed) ennemis[i].SpeedMultiplier = 0.5;
+                else ennemis[i].SpeedMultiplier = 0.25;
 
-                ennemi.BoundingBox = new Rect(
-                    (int)ennemi.X,
-                    (int)ennemi.Y,
-                    (int)ennemi.Width,
-                    (int)ennemi.Height
+                ennemis[i].BoundingBox = new Rect(
+                    (int)ennemis[i].X,
+                    (int)ennemis[i].Y,
+                    (int)ennemis[i].Width,
+                    (int)ennemis[i].Height
                 );
 
                 Vector2 direction = new Vector2(
-                    (float)(joueur.X - ennemi.X),
-                    (float)(joueur.Y - ennemi.Y)
+                    (float)(joueur.X - ennemis[i].X),
+                    (float)(joueur.Y - ennemis[i].Y)
                 );
 
                 direction = Vector2.Normalize(direction);
-                double newX = ennemi.X + direction.X * ennemi.Speed * ennemi.SpeedMultiplier;
-                double newY = ennemi.Y + direction.Y * ennemi.Speed * ennemi.SpeedMultiplier;
+                double newX = ennemis[i].X + direction.X * ennemis[i].Speed * ennemis[i].SpeedMultiplier;
+                double newY = ennemis[i].Y + direction.Y * ennemis[i].Speed * ennemis[i].SpeedMultiplier;
 
                 bool canMove = true; 
                 foreach (var autreEnnemi in ennemis)
                 {
-                    if (autreEnnemi == ennemi)
+                    if (autreEnnemi == ennemis[i])
                         continue;
                 }
 
                 if (canMove)
                 {
-                    ennemi.X = newX;
-                    ennemi.Y = newY;
+                    ennemis[i].X = newX;
+                    ennemis[i].Y = newY;
+                    
                 }
 
-                if (joueur.IntersectsWith(ennemi.BoundingBox))
+                if (joueur.IntersectsWith(ennemis[i].BoundingBox))
                 {
                     //health--;
-                    if (!ennemi.isSlowed) ennemi.SlowDown(3);
+                    if (!ennemis[i].isSlowed) ennemis[i].SlowDown(3);
                 }
 
-                Canvas.SetLeft(ennemi.Image, ennemi.X);
-                Canvas.SetTop(ennemi.Image, ennemi.Y);
+                Canvas.SetLeft(ennemis[i].Image, ennemis[i].X);
+                Canvas.SetTop(ennemis[i].Image, ennemis[i].Y);
+                Canvas.SetLeft(ennemis[i].healthBar, ennemis[i].X);
+                Canvas.SetTop(ennemis[i].healthBar, ennemis[i].Y - 15);
             }
             for (int i = 0; i < ennemis.Count - 1; i++)
             {
@@ -214,10 +217,11 @@ namespace Froggun
                 }
             }
         }
-        public void Die()
+        public void Die(Canvas canvas)
         {
             IsAlive = false;
             Image.Visibility = Visibility.Hidden;
+            canvas.Children.Remove(healthBar);
         }
         public void SlowDown(int durationInSeconds)
         {
