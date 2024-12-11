@@ -12,8 +12,7 @@ namespace Froggun
     public enum TypeEnnemis
     {
         Spider,
-        Ant,
-        Fly
+        Ant
     }
 
     internal class Ennemis
@@ -27,7 +26,7 @@ namespace Froggun
         public double SpeedMultiplier { get; set; }
         public bool isSlowed { get; set; }
         private string imagePath { get; set; }
-        public int[] AnimationIndex { get; set; }
+        public int[] animationIndex { get; set; }
 
         public Rect BoundingBox { get; set; }
         public Image Image { get; set; }
@@ -35,16 +34,28 @@ namespace Froggun
         private DispatcherTimer animationTimer { get; set; }
 
 
-        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, string path, int[] animationIndex, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
+        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
         {
             X = x;
             Y = y;
             Width = width;
             Height = height;
             Speed = speed;
-            imagePath = path;
-            AnimationIndex = animationIndex;
+            //imagePath = path;
+            //animationIndex = animationIndex;
             isSlowed = false;
+
+            switch (type)
+            {
+                case TypeEnnemis.Spider:
+                    animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
+                    imagePath = "img/ennemis/LL";
+                    break;
+                case TypeEnnemis.Ant:
+                    animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
+                    imagePath = "img/ennemis/LL";
+                    break;
+            }
 
             currentFrameIndex = 0;
 
@@ -59,7 +70,7 @@ namespace Froggun
             Canvas.SetTop(Image, Y);
             canvas.Children.Add(Image);
 
-            BoundingBox = new Rect(X, Y, Width, Height);
+            BoundingBox = new Rect(X+5, Y+5, Width-10, Height-10);
 
             animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             animationTimer.Tick += AnimationTimer_Tick;
@@ -69,9 +80,9 @@ namespace Froggun
         private void AnimationTimer_Tick(object sender, EventArgs e)
         {
             currentFrameIndex++;
-            if (currentFrameIndex >= AnimationIndex.Length) currentFrameIndex = 0; 
+            if (currentFrameIndex >= animationIndex.Length) currentFrameIndex = 0; 
             
-            int frame = AnimationIndex[currentFrameIndex];
+            int frame = animationIndex[currentFrameIndex];
             BitmapImage newImageSource = GetImageSourceForFrame(frame);
             Image.Source = newImageSource;
         }
@@ -102,12 +113,21 @@ namespace Froggun
                 );
 
                 direction = Vector2.Normalize(direction);
+                double newX = ennemi.X + direction.X * ennemi.Speed * ennemi.SpeedMultiplier;
+                double newY = ennemi.Y + direction.Y * ennemi.Speed * ennemi.SpeedMultiplier;
 
-                //check if the thing can move here
-                // todo...
+                bool canMove = true; 
+                foreach (var autreEnnemi in ennemis)
+                {
+                    if (autreEnnemi == ennemi)
+                        continue;
+                }
 
-                ennemi.X += (direction.X * ennemi.Speed * ennemi.SpeedMultiplier);
-                ennemi.Y += (direction.Y * ennemi.Speed * ennemi.SpeedMultiplier);
+                if (canMove)
+                {
+                    ennemi.X = newX;
+                    ennemi.Y = newY;
+                }
 
                 if (joueur.IntersectsWith(ennemi.BoundingBox))
                 {
@@ -115,12 +135,11 @@ namespace Froggun
                     if (!ennemi.isSlowed) ennemi.SlowDown(3);
                 }
 
-                Console.WriteLine(ennemi.isSlowed);
-
                 Canvas.SetLeft(ennemi.Image, ennemi.X);
                 Canvas.SetTop(ennemi.Image, ennemi.Y);
             }
         }
+
         public void SlowDown(int durationInSeconds)
         {
             isSlowed = true;
