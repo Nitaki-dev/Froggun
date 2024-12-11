@@ -10,18 +10,43 @@
     Height="350"
     mc:Ignorable="d">
     <Grid>
+        <!--  Bouton Facile  -->
         <Button
             x:Name="boutonFacile"
             Width="150"
             Height="334"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
-            Click="boutonFacile_Click"
-            Content="Facile" >
+            Click="boutonFacile_Click">
             <Button.Background>
-                <ImageBrush ImageSource="/img/facile.jpg"/>
+                <ImageBrush ImageSource="/img/facile.jpg" />
             </Button.Background>
+            <!--  Texte du bouton  -->
+            <Button.Content>
+                <TextBlock
+                    Margin="0,0,0,280"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    FontSize="24"
+                    Foreground="White"
+                    Text="Facile" />
+            </Button.Content>
+            <!--  Style survol  -->
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="White" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
         </Button>
+
+        <!--  Bouton Moyen  -->
         <Button
             x:Name="boutonMoyen"
             Width="150"
@@ -29,12 +54,34 @@
             Margin="150,0,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
-            Click="boutonMoyen_Click"
-            Content="Moyen" >
+            Click="boutonMoyen_Click">
             <Button.Background>
-                <ImageBrush ImageSource="/img/moyen.jpg"/>
+                <ImageBrush ImageSource="/img/moyen.jpg" />
             </Button.Background>
+            <Button.Content>
+                <TextBlock
+                    Margin="0,0,0,280"
+                    HorizontalAlignment="Left"
+                    VerticalAlignment="Top"
+                    FontSize="24"
+                    Foreground="White"
+                    Text="Moyen" />
+            </Button.Content>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="White" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
         </Button>
+
+        <!--  Bouton Difficile  -->
         <Button
             x:Name="boutonDifficile"
             Width="150"
@@ -42,12 +89,34 @@
             Margin="300,0,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
-            Click="boutonDifficile_Click"
-            Content="Dificile" >
+            Click="boutonDifficile_Click">
             <Button.Background>
-                <ImageBrush ImageSource="/img/difficile.jpg"/>
+                <ImageBrush ImageSource="/img/difficile.jpg" />
             </Button.Background>
+            <Button.Content>
+                <TextBlock
+                    Margin="0,0,0,280"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    FontSize="24"
+                    Foreground="White"
+                    Text="Difficile" />
+            </Button.Content>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="White" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
         </Button>
+
+        <!--  Bouton Extrême  -->
         <Button
             x:Name="boutonExtreme"
             Width="150"
@@ -55,11 +124,32 @@
             Margin="450,0,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Center"
-            Click="boutonExtreme_Click"
-            Content="Extreme" >
+            Click="boutonExtreme_Click">
             <Button.Background>
-                <ImageBrush ImageSource="/img/extreme.jpg"/>
+                <ImageBrush ImageSource="/img/extreme.jpg" />
             </Button.Background>
+            <Button.Content>
+                <TextBlock
+                    Margin="0,0,0,280"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Top"
+                    FontSize="24"
+                    Foreground="White"
+                    Text="Extrême" />
+            </Button.Content>
+            <Button.Style>
+                <Style TargetType="Button">
+                    <Setter Property="Background" Value="Transparent" />
+                    <Setter Property="BorderBrush" Value="Transparent" />
+                    <Setter Property="Foreground" Value="White" />
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="BorderBrush" Value="White" />
+
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Button.Style>
         </Button>
     </Grid>
 </Window>

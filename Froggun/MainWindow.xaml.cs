@@ -177,7 +177,6 @@ namespace Froggun
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
             }
-            Console.WriteLine(difficulte.ToString());
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
