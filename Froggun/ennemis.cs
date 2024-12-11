@@ -6,6 +6,7 @@ using System.Windows.Threading;
 using System.IO;
 using System.Numerics;
 using System.Windows.Media;
+using static Froggun.MainWindow;
 
 namespace Froggun
 {
@@ -84,10 +85,12 @@ namespace Froggun
 
         public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur)
         {
+
             foreach (var ennemi in ennemis)
+
             {
                 if (ennemi.isSlowed) ennemi.SpeedMultiplier = 0.5;
-                else                 ennemi.SpeedMultiplier = 1.0;
+                else ennemi.SpeedMultiplier = 1.0;
 
                 ennemi.BoundingBox = new Rect(
                     (int)ennemi.X,
@@ -119,6 +122,35 @@ namespace Froggun
 
                 Canvas.SetLeft(ennemi.Image, ennemi.X);
                 Canvas.SetTop(ennemi.Image, ennemi.Y);
+            }
+            for (int i = 0; i < ennemis.Count - 1; i++)
+            {
+                Random alea = new Random();
+                for (int j = ennemis.Count - 1; j > i; j--)
+                {
+                    int aleatoire = alea.Next(1, 3);
+                    if (ennemis[i].BoundingBox.IntersectsWith(ennemis[j].BoundingBox))
+                    {
+                        Vector2 direction = new Vector2(
+                    (float)(joueur.X - ennemis[i].X),
+                    (float)(joueur.Y - ennemis[i].Y));
+                        if (aleatoire == 1)
+                        {
+                            ennemis[i].X -= (direction.X * ennemis[i].Speed * ennemis[i].SpeedMultiplier);
+                            ennemis[i].Y -= (direction.Y * ennemis[i].Speed * ennemis[i].SpeedMultiplier);
+
+                        }
+                        else if (aleatoire == 2)
+                        {
+                            ennemis[i].X -= (direction.X * ennemis[i].Speed * ennemis[i].SpeedMultiplier);
+                        }
+                        else
+                        {
+                            ennemis[i].Y -= (direction.Y * ennemis[i].Speed * ennemis[i].SpeedMultiplier);
+                        }
+
+                    }
+                }
             }
         }
         public void SlowDown(int durationInSeconds)
