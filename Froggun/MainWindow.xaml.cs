@@ -237,8 +237,8 @@ namespace Froggun
             ennemis.Add(spider2);
             ennemis.Add(spider3);
 
-            Proies fly1 = new Proies(TypeProies.Fly, 600, 600, 50, 50, 3, 500, 100, canvas);
-            proies.Add(fly1);
+            //Proies fly1 = new Proies(TypeProies.Fly, 600, 600, 50, 50, 3, 500, 100, canvas);
+            //proies.Add(fly1);
 
             //Ennemis fly1 = new Ennemis(TypeEnnemis.Fly, 400, 500, 50, 50, 8, canvas);
             //ennemis.Add(fly1);
