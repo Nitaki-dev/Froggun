@@ -86,6 +86,7 @@ namespace Froggun
 
         private List<Balle> Balles = new List<Balle>(); 
         private List<Ennemis> ennemis = new List<Ennemis>();
+        private List<Proies> proies = new List<Proies>();
 
         public MainWindow()
         {
@@ -206,8 +207,6 @@ namespace Froggun
 
         }
 
-        //private Dictionary<int, int> slowDownTimers = new Dictionary<int, int>();
-
         private void tempsEnMoins(object? sender, EventArgs e)
         {
             temps--;
@@ -229,13 +228,19 @@ namespace Froggun
         {
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
-            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 200, 200, 100, 100, 8, canvas, imageDirectory, animationFrames);
-            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 200, 400, 100, 100, 8, canvas, imageDirectory, animationFrames);
-            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 600, 300, 100, 100, 8, canvas, imageDirectory, animationFrames);
+            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 200, 200, 100, 100, 8, canvas);
+            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 300, 400, 100, 100, 8, canvas);
+            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 600, 300, 100, 100, 8, canvas);
 
             ennemis.Add(spider1);
             ennemis.Add(spider2);
             ennemis.Add(spider3);
+
+            Proies fly1 = new Proies(TypeProies.Fly, 600, 600, 50, 50, 3, 500, 100, canvas);
+            proies.Add(fly1);
+
+            //Ennemis fly1 = new Ennemis(TypeEnnemis.Fly, 400, 500, 50, 50, 8, canvas);
+            //ennemis.Add(fly1);
 
             //string imageDirectory1 = "img/ennemis/Food1";
             //int[] animationFrames1 = new int[] { 1, 2 };
@@ -312,18 +317,22 @@ namespace Froggun
 
         private void Loop(object? sender, EventArgs e) 
         {
+
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
 
-            for (int i = 0; i < Balles.Count; i++) {
+            for (int i = 0; i < Balles.Count; i++)
+            {
                 Balle balle = Balles[i];
                 balle.UpdatePositionBalles();
-
                 if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
                  || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
                     Balles.RemoveAt(i);
+                
             }
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect);
+
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles);
+            Proies.UpdateProies(proies, playerRect);
 
             //fix direction:
             if      (deplacerBas)                    directionJoueur = Directions.down;
@@ -451,11 +460,6 @@ namespace Froggun
                 deplacerHaut = true;
                 deplacerBas = false;
                 directionJoueur = Directions.up;
-            }
-
-            if (e.Key == Key.E)
-            {
-                ShootTung();
             }
         }
 
