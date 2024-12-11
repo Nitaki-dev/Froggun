@@ -29,19 +29,25 @@ namespace Froggun
         private string imagePath { get; set; }
         public int[] animationIndex { get; set; }
 
+        public double PV { get; set; }
+        public double maxPV{ get; set; }
+
         public Rect BoundingBox { get; set; }
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }
         private DispatcherTimer animationTimer { get; set; }
 
 
-        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
+        public Ennemis(TypeEnnemis type, double PointVie, double MaxPointVie, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
         {
             X = x;
             Y = y;
             Width = width;
             Height = height;
             Speed = speed;
+            PV = PointVie;
+            maxPV = MaxPointVie;
+
             //imagePath = path;
             //animationIndex = animationIndex;
             isSlowed = false;
@@ -102,11 +108,11 @@ namespace Froggun
                 foreach (var balle in balles)
                 {
                     Rect rImgBalle = new Rect(
-            balle.X,
-            balle.Y,
-            25,
-            25
-        );
+                        balle.X,
+                        balle.Y,
+                        25,
+                        25
+                    );
                     if (ennemi.BoundingBox.IntersectsWith(rImgBalle))
                     {
 

@@ -8,11 +8,12 @@ namespace Froggun
     {
         public double X { get; set; }
         public double Y { get; set; }
-        public double Angle { get; set; } // Radian
+        public double Angle { get; set; }
         public double Speed { get; set; }
+        public double Degats { get; set; }
         public Image BalleImage { get; set; }
         
-        public Balle(double x, double y, double angle, double speed, Canvas canvas, BitmapImage BalleImageSource)
+        public Balle(double x, double y, double angle, double speed, double Degats, Canvas canvas, BitmapImage BalleImageSource)
         {
             X = x;
             Y = y;

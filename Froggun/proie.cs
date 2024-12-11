@@ -34,10 +34,12 @@ namespace Froggun
 
         public double targetX;
         public double targetY;
+        public Vector2 minOffset { get; set; }
+        public Vector2 maxOffset { get; set; }
         private DispatcherTimer movementTimer;
 
 
-        public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Canvas canvas, Rect BoundingBox = new Rect())
+        public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Vector2 MinOffset, Vector2 MaxOffset, Canvas canvas, Rect BoundingBox = new Rect())
         {
             X = x;
             Y = y;
@@ -45,6 +47,8 @@ namespace Froggun
             Height = height;
             Speed = speed;
             newPosMaxDiff = newPosOffset;
+            minOffset = MinOffset;
+            maxOffset = MaxOffset;
 
             switch (type)
             {
