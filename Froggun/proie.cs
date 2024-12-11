@@ -98,7 +98,7 @@ namespace Froggun
             BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{imagePath}/{frame}.png"));
             return bitmapImage;
         }
-        
+
         private void GenerateRandomTarget(object? sender, EventArgs e)
         {
             Random random = new Random();
@@ -111,10 +111,10 @@ namespace Froggun
             foreach (var proie in proies)
             {
                 proie.BoundingBox = new Rect(
-                    (int)proie.X,
-                    (int)proie.Y,
-                    (int)proie.Width,
-                    (int)proie.Height
+                    (int)proie.X-5,
+                    (int)proie.Y-5,
+                    (int)proie.Width+10,
+                    (int)proie.Height+10
                 );
 
                 // Move the enemy
@@ -126,12 +126,14 @@ namespace Froggun
                 direction = Vector2.Normalize(direction);
                 double newX = proie.X + direction.X * proie.Speed;
                 double newY = proie.Y + direction.Y * proie.Speed;
-                Console.WriteLine(direction);
 
-                proie.X = newX;
-                proie.Y = newY;
-                Canvas.SetLeft(proie.Image, proie.X);
-                Canvas.SetTop(proie.Image, proie.Y);
+                if (newX > proie.minOffset.X && newX < proie.maxOffset.X && newY > proie.maxOffset.Y && newY < proie.maxOffset.Y)
+                {
+                    proie.X = newX;
+                    proie.Y = newY;
+                    Canvas.SetLeft(proie.Image, proie.X);
+                    Canvas.SetTop(proie.Image, proie.Y);
+                }
             }
         }
     }
