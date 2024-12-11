@@ -11,29 +11,80 @@
     mc:Ignorable="d">
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="/img/pageChoixtouche_aide.PNG"/>
+            <ImageBrush
+                ImageSource="/img/pageChoixtouche_aide.PNG"
+                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                TileMode="Tile">
+                <ImageBrush.RelativeTransform>
+                    <TransformGroup>
+                        <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="-1" />
+                        <SkewTransform CenterX="0.5" CenterY="0.5" />
+                        <RotateTransform CenterX="0.5" CenterY="0.5" />
+                        <TranslateTransform />
+                    </TransformGroup>
+                </ImageBrush.RelativeTransform>
+            </ImageBrush>
         </Grid.Background>
 
-        <!-- Ajouter un ScrollViewer pour permettre le défilement si nécessaire -->
+        <!--  Ajouter un ScrollViewer pour permettre le défilement si nécessaire  -->
 
         <StackPanel Margin="10">
-            <!-- Titre principal centré -->
-            <!-- Titre principal centré -->
-            <Label Content="Instructions de jeu" FontSize="20" FontWeight="Bold"  Foreground="#FFD4D4D4" />
-            <!-- Contenu principal -->
-            <TextBlock Text="• Objectif principal : Rester en vie donc ne pas perdre de cœur." TextWrapping="Wrap" Width="655"  Foreground="#FFD4D4D4"/>
+            <!--  Titre principal centré  -->
+            <!--  Titre principal centré  -->
+            <Label
+                Content="Instructions de jeu"
+                FontSize="20"
+                FontWeight="Bold"
+                Foreground="#FFD4D4D4" />
+            <!--  Contenu principal  -->
+            <TextBlock
+                Width="655"
+                Foreground="#FFD4D4D4"
+                Text="• Objectif principal : Rester en vie donc ne pas perdre de cœur."
+                TextWrapping="Wrap" />
 
-            <TextBlock Text="• Contrôles :" FontWeight="Bold" Margin="0,10,0,5"  Foreground="#FFD4D4D4"/>
+            <TextBlock
+                Margin="0,10,0,5"
+                FontWeight="Bold"
+                Foreground="#FFD4D4D4"
+                Text="• Contrôles :" />
 
-            <TextBlock Text="   o Déplacement : Utilisez les touches directionnelles ou les touches : " Margin="0,0,0,5" Foreground="#FFD4D4D4"/>
-            <TextBlock Text="     - 'Q' pour déplacer la grenouille à gauche." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
-            <TextBlock Text="     - 'D' pour déplacer la grenouille à droite." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
-            <TextBlock Text="     - 'Z' pour déplacer la grenouille en haut." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
-            <TextBlock Text="     - 'S' pour déplacer la grenouille en bas." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
-            <TextBlock Text="     - 'Ctrl' pour rouler / esquiver et aller plus vite." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
+            <TextBlock
+                Margin="0,0,0,5"
+                Foreground="#FFD4D4D4"
+                Text="   o Déplacement : Utilisez les touches directionnelles ou les touches : " />
+            <TextBlock
+                Margin="20,0,0,5"
+                Foreground="#FFD4D4D4"
+                Text="     - 'Q' pour déplacer la grenouille à gauche."
+                TextWrapping="Wrap" />
+            <TextBlock
+                Margin="20,0,0,5"
+                Foreground="#FFD4D4D4"
+                Text="     - 'D' pour déplacer la grenouille à droite."
+                TextWrapping="Wrap" />
+            <TextBlock
+                Margin="20,0,0,5"
+                Foreground="#FFD4D4D4"
+                Text="     - 'Z' pour déplacer la grenouille en haut."
+                TextWrapping="Wrap" />
+            <TextBlock
+                Margin="20,0,0,5"
+                Foreground="#FFD4D4D4"
+                Text="     - 'S' pour déplacer la grenouille en bas."
+                TextWrapping="Wrap" />
+            <TextBlock
+                Margin="20,0,0,5"
+                Foreground="#FFD4D4D4"
+                Text="     - 'Ctrl' pour rouler / esquiver et aller plus vite."
+                TextWrapping="Wrap" />
 
-            <TextBlock TextWrapping="Wrap" Margin="20,0,0,5"><Run Text="   o Tirer avec le pistolet : Appuyez sur la touche 'Clique Gauche' pour tirer avec le pistolet"  Foreground="#FFD4D4D4"/><Run Language="fr-fr" Text="."/></TextBlock>
-            <TextBlock Text="   o Tirer avec la langue : Appuyez sur la touche 'Clique Droit' pour tirer la langue." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
+            <TextBlock Margin="20,0,0,5" TextWrapping="Wrap"><Run Foreground="#FFD4D4D4" Text="   o Tirer avec le pistolet : Appuyez sur la touche 'Clique Gauche' pour tirer avec le pistolet" /><Run Language="fr-fr" Text="." /></TextBlock>
+            <TextBlock
+                Margin="20,0,0,5"
+                Foreground="#FFD4D4D4"
+                Text="   o Tirer avec la langue : Appuyez sur la touche 'Clique Droit' pour tirer la langue."
+                TextWrapping="Wrap" />
         </StackPanel>
         <Button
             x:Name="boutonQuitter"
@@ -41,12 +92,15 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonQuitter_Click"
-            Content="Quitter" FontSize="30" FontWeight="Bold"  Foreground="#FF960707">
+            Content="Quitter"
+            FontSize="30"
+            FontWeight="Bold"
+            Foreground="#FF960707">
             <Button.BorderBrush>
-                <ImageBrush/>
+                <ImageBrush />
             </Button.BorderBrush>
             <Button.Background>
-                <ImageBrush/>
+                <ImageBrush />
             </Button.Background>
         </Button>
 

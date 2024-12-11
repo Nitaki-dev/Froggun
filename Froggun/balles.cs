@@ -12,6 +12,8 @@ namespace Froggun
         public double Speed { get; set; }
         public double Degats { get; set; }
         public Image BalleImage { get; set; }
+        public bool hasHit { get; set; }
+
         
         public Balle(double x, double y, double angle, double speed, double Degats, Canvas canvas, BitmapImage BalleImageSource)
         {
@@ -19,7 +21,7 @@ namespace Froggun
             Y = y;
             Angle = angle;
             Speed = speed;
-
+            hasHit = false;
             BalleImage = new Image
             {
                 Source = BalleImageSource,

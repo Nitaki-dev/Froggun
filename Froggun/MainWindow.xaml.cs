@@ -27,6 +27,7 @@ namespace Froggun
         private double speedFactorAraignee = 0.8;
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer tempsRestant = new DispatcherTimer();
+        private static DispatcherTimer minVagues = new DispatcherTimer();
         private Rect playerR = new Rect();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
@@ -90,7 +91,7 @@ namespace Froggun
         private List<Balle> Balles = new List<Balle>(); 
         private List<Ennemis> ennemis = new List<Ennemis>();
         private List<Proies> proies = new List<Proies>();
-
+        public static string difficulte;
         public MainWindow()
         {
             InitImage();
@@ -130,8 +131,6 @@ namespace Froggun
                                 resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
                                 if (resultat == "jouer")
                                 {
-                                    // Logique pour lancer le jeu ici
-                                    MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
                                     break;  // Quitter la boucle et lancer le jeu
                                 }
 
@@ -164,8 +163,6 @@ namespace Froggun
                                 resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
                                 if (resultat == "jouer")
                                 {
-                                    // Logique pour lancer le jeu ici
-                                    MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
                                     break;  // Quitter la boucle et lancer le jeu
                                 }
 
@@ -180,17 +177,42 @@ namespace Froggun
                         while (resultat == "aide");  // Continue la boucle si le résultat est encore "parametre"
                     }
                 } while (resultat != "jouer");
-                
+                choixDifficulte fentreDifficulte = new choixDifficulte();
+                fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
+                difficulte = fentreDifficulte.Resultat;
             }
-
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
-
+            MinuterieVagues();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
         }
-
+        void MinuterieVagues()
+        {
+            minVagues = new DispatcherTimer();
+            minVagues.Interval = TimeSpan.FromSeconds(12);
+            minVagues.Tick += NouvelleVague;
+            minVagues.Start();
+            NouvelleVague(this, EventArgs.Empty);
+        }
+        private void NouvelleVague(object? sender, EventArgs e)
+        {
+            for (int i = 0; i < alea.Next(1,5); i++)
+            {
+                int hautOuBas = alea.Next(0, 1);
+                if (hautOuBas == 0)
+                {
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, 100, 100, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+                }
+                else
+                {
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, 100, 100, alea.Next(100, 1100), alea.Next(500, 600), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+                }
+            }
+        }
         void InitialiserMinuterie()
         {
             minuterie = new DispatcherTimer();

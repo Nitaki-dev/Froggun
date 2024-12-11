@@ -37,6 +37,9 @@ namespace Froggun
         private int currentFrameIndex { get; set; }
         private DispatcherTimer animationTimer { get; set; }
         private int Health { get; set; }
+        public bool IsAlive { get; private set; }
+        public bool hasCollided { get; set; }
+        public int indexBalle = 0;
 
 
         public Ennemis(TypeEnnemis type, double PointVie, double MaxPointVie, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
@@ -52,7 +55,7 @@ namespace Froggun
             //imagePath = path;
             //animationIndex = animationIndex;
             isSlowed = false;
-
+            IsAlive = true;
             switch (type)
             {
                 case TypeEnnemis.Spider:
@@ -108,25 +111,31 @@ namespace Froggun
 
         public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur, List<Balle> balles)
         {
-
+            
             foreach (var ennemi in ennemis)
             {
-                foreach (var balle in balles)
+                if (!ennemi.IsAlive) continue;
+                ennemi.hasCollided = false;
+                for (int i = 0; i < balles.Count; i++)
                 {
+                    if (balles[i].hasHit) continue;
                     Rect rImgBalle = new Rect(
-                        balle.X,
-                        balle.Y,
-                        25,
-                        25
-                    );
-                    if (ennemi.BoundingBox.IntersectsWith(rImgBalle))
+            balles[i].X,
+            balles[i].Y,
+            25,
+            25
+        );
+                    if (ennemi.BoundingBox.IntersectsWith(rImgBalle) && !ennemi.hasCollided)
                     {
                         ennemi.Health--;
+                        balles[i].hasHit = true;
+                        balles.RemoveAt(i);
+                        break;
                     }
                 }
                 if (ennemi.Health <= 0)
                 {
-                    Die();
+                    ennemi.Die();
                 }
                 if (ennemi.isSlowed) ennemi.SpeedMultiplier = 0.5;
                 else ennemi.SpeedMultiplier = 0.25;
@@ -190,9 +199,10 @@ namespace Froggun
                 }
             }
         }
-        public static void Die()
+        public void Die()
         {
-
+            IsAlive = false;
+            Image.Visibility = Visibility.Hidden;
         }
         public void SlowDown(int durationInSeconds)
         {

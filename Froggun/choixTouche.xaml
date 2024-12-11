@@ -12,7 +12,19 @@
     mc:Ignorable="d">
     <Grid>
         <Grid.Background>
-            <ImageBrush ImageSource="/img/pageChoixtouche_aide.PNG" />
+            <ImageBrush
+                ImageSource="/img/pageChoixtouche_aide.PNG"
+                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                TileMode="Tile">
+                <ImageBrush.RelativeTransform>
+                    <TransformGroup>
+                        <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="-1" />
+                        <SkewTransform CenterX="0.5" CenterY="0.5" />
+                        <RotateTransform CenterX="0.5" CenterY="0.5" />
+                        <TranslateTransform />
+                    </TransformGroup>
+                </ImageBrush.RelativeTransform>
+            </ImageBrush>
         </Grid.Background>
         <Button
             x:Name="boutonQuitter"
