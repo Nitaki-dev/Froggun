@@ -57,7 +57,7 @@
             x:Name="boutonParametreImage"
             Width="50"
             Height="40"
-            Margin="327,23,0,0"
+            Margin="322,14,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonParametre"
@@ -66,6 +66,18 @@
                 <ImageBrush ImageSource="/img/parametre.png" />
             </Button.Background>
         </Button>
+        <Button
+            x:Name="boutonAide"
+            Width="58"
+            Height="30"
+            Margin="24,19,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Background="#FFDDDDDD"
+            Click="ButtonAide_Click"
+            Content="Aide"
+            FontSize="20"
+            Opacity="0.7" RenderTransformOrigin="-0.123,-0.159" />
 
     </Grid>
 </Window>

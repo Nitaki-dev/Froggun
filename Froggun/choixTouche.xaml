@@ -12,11 +12,44 @@
     <Grid>
         <Button
             x:Name="boutonQuitter"
-            Margin="223,289,0,0"
+            Margin="233,289,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonQuitter_Click"
             Content="Quitter" />
+        <Label
+            x:Name="labelParametreSon"
+            Margin="10,10,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Parametre du son :" />
+        <Slider
+            x:Name="sliderSonBruit"
+            Width="101"
+            Height="21"
+            Margin="21,198,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top" />
+        <Label
+            x:Name="labelSonJeu"
+            Margin="21,39,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Son jeu :" />
+        <Label
+            x:Name="labelSonBruit"
+            Margin="21,149,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Son Bruits :"
+            RenderTransformOrigin="0.418,2.282" />
+        <Slider
+            x:Name="sliderSon"
+            Width="101"
+            Height="21"
+            Margin="21,70,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top" />
 
     </Grid>
 </Window>
