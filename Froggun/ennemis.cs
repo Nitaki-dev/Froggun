@@ -7,6 +7,7 @@ using System.IO;
 using System.Numerics;
 using System.Windows.Media;
 using static Froggun.MainWindow;
+using System.Windows.Shapes;
 
 namespace Froggun
 {
@@ -39,7 +40,7 @@ namespace Froggun
         private int Health { get; set; }
         public bool IsAlive { get; private set; }
         public bool hasCollided { get; set; }
-        public int indexBalle = 0;
+        private Rectangle healthBar { get; set; }
 
 
         public Ennemis(TypeEnnemis type, double PointVie, double MaxPointVie, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
@@ -51,6 +52,18 @@ namespace Froggun
             Speed = speed;
             PV = PointVie;
             maxPV = MaxPointVie;
+            healthBar = new Rectangle
+            {
+                Fill = Brushes.Green, // Цвет полосы здоровья
+                Width = width,  // Ширина полосы здоровья соответствует ширине врага
+                Height = 10,  // Высота полосы здоровья (можно настроить)
+                HorizontalAlignment = HorizontalAlignment.Left,
+                VerticalAlignment = VerticalAlignment.Top
+            };
+            Canvas.SetLeft(healthBar, X);
+            Canvas.SetTop(healthBar, Y - 15);  // Немного выше врага, чтобы отображать здоровье
+            canvas.Children.Add(healthBar);
+
 
             //imagePath = path;
             //animationIndex = animationIndex;
@@ -109,7 +122,7 @@ namespace Froggun
             return bitmapImage;
         }
 
-        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur, List<Balle> balles)
+        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur, List<Balle> balles, Canvas canvas)
         {
             
             foreach (var ennemi in ennemis)
@@ -129,7 +142,9 @@ namespace Froggun
                     {
                         ennemi.Health--;
                         balles[i].hasHit = true;
+                        canvas.Children.Remove(balles[i].BalleImage);
                         balles.RemoveAt(i);
+                        i--;
                         break;
                     }
                 }

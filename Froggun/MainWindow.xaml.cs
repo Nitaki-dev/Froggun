@@ -348,7 +348,7 @@ namespace Froggun
             }
 
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
             Proies.UpdateProies(proies, playerRect);
 
             //fix direction:
