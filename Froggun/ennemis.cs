@@ -83,11 +83,14 @@ namespace Froggun
             return bitmapImage;
         }
 
-        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur)
+        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur, List<Balle> balles)
         {
 
             foreach (var ennemi in ennemis)
-
+                
+            
+                
+                    
             {
                 if (ennemi.isSlowed) ennemi.SpeedMultiplier = 0.5;
                 else ennemi.SpeedMultiplier = 0.25;
@@ -144,6 +147,7 @@ namespace Froggun
                 }
             }
         }
+        
         public void SlowDown(int durationInSeconds)
         {
             isSlowed = true;

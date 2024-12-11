@@ -312,18 +312,21 @@ namespace Froggun
 
         private void Loop(object? sender, EventArgs e) 
         {
+
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
 
-            for (int i = 0; i < Balles.Count; i++) {
+            for (int i = 0; i < Balles.Count; i++)
+            {
                 Balle balle = Balles[i];
                 balle.UpdatePositionBalles();
-
                 if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
                  || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
                     Balles.RemoveAt(i);
+                
             }
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect);
+
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles);
 
             //fix direction:
             if      (deplacerBas)                    directionJoueur = Directions.down;
