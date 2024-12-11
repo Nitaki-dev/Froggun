@@ -21,6 +21,7 @@ namespace Froggun
         private static Random alea = new Random();
         
         private int score = 0;
+        private bool pause = false;
         private int temps = 60;
         private int health = 5;
         private double speedFactorFirefly = 0.5;
@@ -181,6 +182,7 @@ namespace Froggun
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
             }
+            lab_Pause.Visibility = Visibility.Collapsed;
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
@@ -371,7 +373,8 @@ namespace Froggun
         //}
 
         private void Loop(object? sender, EventArgs e) 
-        {
+        { if (pause) return;
+
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
 
             Ennemis.UpdateEnnemis(ennemis, playerRect, Balles);
@@ -537,29 +540,37 @@ namespace Froggun
 
         private void keydown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.D)
+            if (e.Key == Key.D && !pause)
             {
                 deplacerDroite = true;
                 deplacerGauche = false;
                 directionJoueur = Directions.right;
             }
-            if (e.Key == Key.Q || e.Key == Key.A)
+            if ((e.Key == Key.Q || e.Key == Key.A) && !pause)
             {
                 deplacerGauche = true;
                 deplacerDroite = false;
                 directionJoueur = Directions.left;
             }
-            if (e.Key == Key.S)
+            if (e.Key == Key.S && !pause)
             {
                 deplacerBas = true;
                 deplacerHaut = false;
                 directionJoueur = Directions.down;
             }
-            if (e.Key == Key.Z || e.Key == Key.W)
+            if ((e.Key == Key.Z || e.Key == Key.W) && !pause)
             {
                 deplacerHaut = true;
                 deplacerBas = false;
                 directionJoueur = Directions.up;
+            }
+            if (e.Key == Key.Escape || e.Key == Key.Space )
+            {
+                pause=!pause;
+                if (pause)
+                    lab_Pause.Visibility = Visibility.Visible;
+                else
+                    lab_Pause.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -586,11 +597,13 @@ namespace Froggun
 
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (pause) return;
             ShootGun();
         }
 
         private void rightButtonDown(object sender, MouseButtonEventArgs e)
         {
+            if (pause) return;
             ShootTung();
         }
     }
