@@ -36,6 +36,7 @@ namespace Froggun
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }
         private DispatcherTimer animationTimer { get; set; }
+        private int Health { get; set; }
 
 
         public Ennemis(TypeEnnemis type, double PointVie, double MaxPointVie, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
@@ -57,14 +58,19 @@ namespace Froggun
                 case TypeEnnemis.Spider:
                     animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
                     imagePath = "img/ennemis/LL";
+                    Health = 3;
                     break;
                 case TypeEnnemis.Ant:
                     animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
                     imagePath = "img/ennemis/LL";
+                    Health = 2;
                     break;
             }
+          
 
             currentFrameIndex = 0;
+
+            
 
             Image = new Image
             {
@@ -115,10 +121,13 @@ namespace Froggun
                     );
                     if (ennemi.BoundingBox.IntersectsWith(rImgBalle))
                     {
-
+                        ennemi.Health--;
                     }
                 }
-
+                if (ennemi.Health <= 0)
+                {
+                    Die();
+                }
                 if (ennemi.isSlowed) ennemi.SpeedMultiplier = 0.5;
                 else ennemi.SpeedMultiplier = 0.25;
 
@@ -181,7 +190,10 @@ namespace Froggun
                 }
             }
         }
+        public static void Die()
+        {
 
+        }
         public void SlowDown(int durationInSeconds)
         {
             isSlowed = true;
