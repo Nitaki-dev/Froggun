@@ -6,14 +6,17 @@
     xmlns:local="clr-namespace:Froggun"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="parametre"
-    Width="400"
+    Width="600"
     Height="400"
     mc:Ignorable="d">
-    <Grid x:Name="CanvaLevelJeu">
+    <Grid x:Name="CanvaLevelJeu" Margin="0,0,10,0">
+        <Grid.Background>
+            <ImageBrush ImageSource="/img/fond_accueil.jpg" />
+        </Grid.Background>
         <Label
             Width="380"
-            Height="61"
-            Margin="0,63,0,0"
+            Height="60"
+            Margin="0,4,0,0"
             HorizontalAlignment="Center"
             VerticalAlignment="Top"
             Content="FROGGUN"
@@ -22,48 +25,95 @@
             FontWeight="Bold" />
         <Button
             x:Name="boutonAnnuler"
-            Width="98"
+            Width="122"
             Height="46"
-            Margin="248,284,0,0"
+            Margin="447,320,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonAnnuler_Click"
-            Content="Annuler" />
+            Content="Quitter"
+            FontFamily="MV Boli"
+            FontSize="30">
+            <Button.BorderBrush>
+                <ImageBrush />
+            </Button.BorderBrush>
+            <Button.Background>
+                <ImageBrush />
+            </Button.Background>
+        </Button>
         <Button
             x:Name="boutnJouer"
-            Width="116"
-            Height="46"
-            Margin="40,284,0,0"
+            Width="146"
+            Height="49"
+            Margin="10,307,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonJouer_Click"
-            Content="Jouer" />
+            Content="Jouer"
+            FontFamily="MV Boli"
+            FontSize="30">
+            <Button.BorderBrush>
+                <ImageBrush />
+            </Button.BorderBrush>
+            <Button.Background>
+                <ImageBrush />
+            </Button.Background>
+        </Button>
         <Label
-            Margin="58,164,0,0"
+            Margin="461,140,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
-            Content="Difficultés : " />
+            Content="Difficultés : "
+            Foreground="#FF888888" />
+
+        <Button
+            x:Name="boutonParametreImage"
+            Width="50"
+            Height="40"
+            Margin="519,19,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="boutonParametre"
+            Content="       ">
+            <Button.BorderBrush>
+                <ImageBrush />
+            </Button.BorderBrush>
+            <Button.Foreground>
+                <ImageBrush />
+            </Button.Foreground>
+            <Button.Background>
+                <ImageBrush ImageSource="/img/parametre.png" />
+            </Button.Background>
+        </Button>
         <ComboBox
             Width="120"
-            Margin="177,168,0,0"
+            Margin="447,171,0,0"
             HorizontalAlignment="Left"
-            VerticalAlignment="Top">
+            VerticalAlignment="Top"
+            Background="Transparent"
+            BorderBrush="Transparent">
             <ComboBoxItem Content="Facile" />
             <ComboBoxItem Content="Intermediaire" />
             <ComboBoxItem Content="Difficile" />
             <ComboBoxItem Content="Expert" />
         </ComboBox>
         <Button
-            x:Name="boutonParametreImage"
-            Width="50"
-            Height="40"
-            Margin="327,23,0,0"
+            x:Name="boutonAide"
+            Width="58"
+            Height="30"
+            Margin="24,19,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
-            Click="boutonParametre"
-            Content="       ">
+            Click="ButtonAide_Click"
+            Content="Aide"
+            FontSize="20"
+            Opacity="0.7"
+            RenderTransformOrigin="-0.123,-0.159">
+            <Button.BorderBrush>
+                <ImageBrush />
+            </Button.BorderBrush>
             <Button.Background>
-                <ImageBrush ImageSource="/img/parametre.png" />
+                <ImageBrush />
             </Button.Background>
         </Button>
 
