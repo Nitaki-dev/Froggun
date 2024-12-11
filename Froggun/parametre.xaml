@@ -8,32 +8,232 @@
     Title="parametre"
     Width="600"
     Height="400"
+    ResizeMode="NoResize"
     mc:Ignorable="d">
-    <Grid x:Name="CanvaLevelJeu" Margin="0,0,10,0">
+
+    <Grid
+        x:Name="CanvaLevelJeu"
+        Height="384"
+        VerticalAlignment="Bottom">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="2*" />
+            <ColumnDefinition Width="3*" />
+        </Grid.ColumnDefinitions>
+
+
         <Grid.Background>
-            <ImageBrush ImageSource="/img/fond_accueil.jpg" />
+            <ImageBrush
+                ImageSource="/img/fond_accueil.jpg"
+                RenderOptions.BitmapScalingMode="NearestNeighbor"
+                TileMode="Tile">
+                <ImageBrush.RelativeTransform>
+                    <TransformGroup>
+                        <ScaleTransform CenterX="0.5" CenterY="0.5" ScaleX="-1" />
+                        <SkewTransform CenterX="0.5" CenterY="0.5" />
+                        <RotateTransform CenterX="0.5" CenterY="0.5" />
+                        <TranslateTransform />
+                    </TransformGroup>
+                </ImageBrush.RelativeTransform>
+            </ImageBrush>
         </Grid.Background>
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Rectangle
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch">
+            <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
+                    <LinearGradientBrush.RelativeTransform>
+                        <TransformGroup>
+                            <ScaleTransform CenterX="0.5" CenterY="0.5" />
+                            <SkewTransform CenterX="0.5" CenterY="0.5" />
+                            <RotateTransform Angle="270" CenterX="0.5" CenterY="0.5" />
+                            <TranslateTransform />
+                        </TransformGroup>
+                    </LinearGradientBrush.RelativeTransform>
+                    <GradientStop Offset="0" Color="Black" />
+                    <GradientStop Offset="1" Color="#00000000" />
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+        </Rectangle>
+
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center">
+            <Label
+                HorizontalAlignment="Center"
+                Content="FROGGUN"
+                FontFamily="Bodoni MT Black"
+                FontSize="42"
+                Foreground="White" />
+            <StackPanel HorizontalAlignment="Center">
+                <Button
+                    x:Name="boutnJouer"
+                    Width="169"
+                    Height="43"
+                    Click="boutonJouer_Click"
+                    Content="Jouer"
+                    FontSize="20">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="Black" />
+                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button
+                    Width="169"
+                    Height="43"
+                    Content="Difficulté"
+                    FontSize="20">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="Black" />
+                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button
+                    x:Name="boutonParametreImage"
+                    Width="169"
+                    Height="44"
+                    Click="boutonParametre"
+                    Content="Option"
+                    FontSize="20">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="Black" />
+                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button
+                    x:Name="boutonAide"
+                    Width="169"
+                    Height="43"
+                    Click="ButtonAide_Click"
+                    Content="Aide"
+                    FontSize="20">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="Black" />
+                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+                <Button
+                    x:Name="boutonAnnuler"
+                    Width="169"
+                    Height="43"
+                    Click="boutonAnnuler_Click"
+                    Content="Quitter"
+                    FontSize="20">
+                    <Button.Style>
+                        <Style TargetType="Button">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="Transparent" />
+                            <Setter Property="Foreground" Value="White" />
+                            <Style.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter Property="Background" Value="Black" />
+                                    <Setter Property="Opacity" Value="0.5" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+        <!--
+        <Rectangle
+            Height="384"
+            Margin="0,0,232,0"
+            VerticalAlignment="Center">
+            <Rectangle.Fill>
+                <LinearGradientBrush StartPoint="0,0" EndPoint="1,0">
+                    <GradientStop Offset="0.057" Color="Black" />
+                    <GradientStop Offset="1" Color="Transparent" />
+                    <GradientStop Offset="0.3" Color="#D22C2C2C" />
+                    <GradientStop Offset="0.533" Color="#AE4F4F4F" />
+                    <GradientStop Offset="0.71" Color="#97656565" />
+                    <GradientStop Offset="0.853" Color="#619B9B9B" />
+                </LinearGradientBrush>
+            </Rectangle.Fill>
+            <Rectangle.Stroke>
+                <ImageBrush />
+            </Rectangle.Stroke>
+        </Rectangle>
+
         <Label
             Width="380"
-            Height="60"
-            Margin="0,4,0,0"
-            HorizontalAlignment="Center"
+            Height="48"
+            Margin="22,10,0,0"
+            HorizontalAlignment="Left"
             VerticalAlignment="Top"
+            HorizontalContentAlignment="Center"
+            VerticalContentAlignment="Center"
+            Background="Transparent"
             Content="FROGGUN"
             FontFamily="Wide Latin"
             FontSize="35"
-            FontWeight="Bold" />
+            FontWeight="Bold"
+            Foreground="White" />
+
         <Button
             x:Name="boutonAnnuler"
             Width="122"
             Height="46"
-            Margin="447,320,0,0"
+            Margin="51,317,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonAnnuler_Click"
             Content="Quitter"
             FontFamily="MV Boli"
-            FontSize="30">
+            FontSize="30"
+            Foreground="White">
             <Button.BorderBrush>
                 <ImageBrush />
             </Button.BorderBrush>
@@ -41,17 +241,19 @@
                 <ImageBrush />
             </Button.Background>
         </Button>
+
         <Button
             x:Name="boutnJouer"
-            Width="146"
-            Height="49"
-            Margin="10,307,0,0"
+            Width="122"
+            Height="46"
+            Margin="51,58,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonJouer_Click"
             Content="Jouer"
             FontFamily="MV Boli"
-            FontSize="30">
+            FontSize="30"
+            Foreground="White">
             <Button.BorderBrush>
                 <ImageBrush />
             </Button.BorderBrush>
@@ -59,35 +261,43 @@
                 <ImageBrush />
             </Button.Background>
         </Button>
+
         <Label
-            Margin="461,140,0,0"
+            Width="164"
+            Height="52"
+            Margin="34,109,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
+            Background="Transparent"
             Content="Difficultés : "
-            Foreground="#FF888888" />
+            FontFamily="MV Boli"
+            FontSize="30"
+            Foreground="White" />
 
         <Button
             x:Name="boutonParametreImage"
-            Width="50"
+            Width="172"
             Height="40"
-            Margin="519,19,0,0"
+            Margin="30,203,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonParametre"
-            Content="       ">
+            Content="Parametre"
+            FontFamily="MV Boli"
+            FontSize="30"
+            Foreground="White"
+            RenderTransformOrigin="0.697,0.214">
             <Button.BorderBrush>
                 <ImageBrush />
             </Button.BorderBrush>
-            <Button.Foreground>
-                <ImageBrush />
-            </Button.Foreground>
             <Button.Background>
-                <ImageBrush ImageSource="/img/parametre.png" />
+                <ImageBrush />
             </Button.Background>
         </Button>
+
         <ComboBox
             Width="120"
-            Margin="447,171,0,0"
+            Margin="52,168,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Background="Transparent"
@@ -97,25 +307,28 @@
             <ComboBoxItem Content="Difficile" />
             <ComboBoxItem Content="Expert" />
         </ComboBox>
+
         <Button
             x:Name="boutonAide"
-            Width="58"
-            Height="30"
-            Margin="24,19,0,0"
+            Width="100"
+            Height="45"
+            Margin="62,257,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="ButtonAide_Click"
             Content="Aide"
-            FontSize="20"
+            FontFamily="MV Boli"
+            FontSize="30"
+            Foreground="White"
             Opacity="0.7"
             RenderTransformOrigin="-0.123,-0.159">
-            <Button.BorderBrush>
-                <ImageBrush />
-            </Button.BorderBrush>
             <Button.Background>
                 <ImageBrush />
             </Button.Background>
+            <Button.BorderBrush>
+                <ImageBrush />
+            </Button.BorderBrush>
         </Button>
-
+        -->
     </Grid>
 </Window>

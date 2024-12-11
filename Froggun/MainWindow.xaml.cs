@@ -228,16 +228,17 @@ namespace Froggun
         {
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
-            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 200, 200, 100, 100, 8, canvas);
-            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 300, 400, 100, 100, 8, canvas);
-            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 600, 300, 100, 100, 8, canvas);
+
+            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 100, 100, 200, 200, 100, 100, 8, canvas);
+            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 100, 100, 300, 400, 100, 100, 8, canvas);
+            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 100, 100, 600, 300, 100, 100, 8, canvas);
 
             ennemis.Add(spider1);
             ennemis.Add(spider2);
             ennemis.Add(spider3);
 
-            Proies fly1 = new Proies(TypeProies.Fly, 600, 600, 50, 50, 3, 500, 100, canvas);
-            proies.Add(fly1);
+            //Proies fly1 = new Proies(TypeProies.Fly, 600, 600, 50, 50, 3, 500, 100, canvas);
+            //proies.Add(fly1);
 
             //Ennemis fly1 = new Ennemis(TypeEnnemis.Fly, 400, 500, 50, 50, 8, canvas);
             //ennemis.Add(fly1);
@@ -431,7 +432,7 @@ namespace Froggun
             Vector2 directionSouris = Vector2.Normalize(dirBalle - posCentreJoueur);
             double angle = Math.Atan2(directionSouris.Y, directionSouris.X);
 
-            Balle balle = new Balle(posArme.X, posArme.Y, angle, vitesseBalle, canvas, imageBalle);
+            Balle balle = new Balle(posArme.X, posArme.Y, angle, vitesseBalle, 10, canvas, imageBalle);
             Balles.Add(balle);
         }
 

@@ -41,6 +41,7 @@
 		<None Remove="img\img_explosion3.png" />
 		<None Remove="img\img_explosion4.png" />
 		<None Remove="img\img_explosion5.png" />
+		<None Remove="img\pagechoixtouche_aide.PNG" />
 		<None Remove="img\parametre.png" />
 	</ItemGroup>
 
@@ -64,6 +65,7 @@
 		<Resource Include="img\frog_front.png" />
 		<Resource Include="img\frog_side.png" />
 		<Resource Include="img\gun.png" />
+		<Resource Include="img\pagechoixtouche_aide.PNG" />
 		<Resource Include="img\vie\health0.png" />
 		<Resource Include="img\vie\health1.png" />
 		<Resource Include="img\vie\health2.png" />

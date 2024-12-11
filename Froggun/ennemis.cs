@@ -29,6 +29,9 @@ namespace Froggun
         private string imagePath { get; set; }
         public int[] animationIndex { get; set; }
 
+        public double PV { get; set; }
+        public double maxPV{ get; set; }
+
         public Rect BoundingBox { get; set; }
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }
@@ -38,13 +41,16 @@ namespace Froggun
         public bool hasCollided { get; set; }
 
 
-        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
+        public Ennemis(TypeEnnemis type, double PointVie, double MaxPointVie, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
         {
             X = x;
             Y = y;
             Width = width;
             Height = height;
             Speed = speed;
+            PV = PointVie;
+            maxPV = MaxPointVie;
+
             //imagePath = path;
             //animationIndex = animationIndex;
             isSlowed = false;
