@@ -83,6 +83,19 @@
                 Content="60 "
                 Foreground="White" />
             <Image Height="41" Canvas.Left="746" Source="/img/health5.png" Stretch="Fill" Canvas.Top="128" Width="234"/>
+            <Label
+    x:Name="lab_Pause"
+    Canvas.Left="187"
+    Canvas.Top="192"
+    Width="906"
+    Height="300"
+    HorizontalAlignment="Left"
+    VerticalAlignment="Center"
+    Content="PAUSE" FontSize="300" FontWeight="Bold" FontFamily="72 Monospace" Foreground="White" >
+                <Label.Background>
+                    <ImageBrush/>
+                </Label.Background>
+            </Label>
         </Canvas>
     </Grid>
 </Window>
