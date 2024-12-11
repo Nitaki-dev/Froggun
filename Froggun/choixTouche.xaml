@@ -13,7 +13,7 @@
     <Grid>
         <Grid.Background>
             <ImageBrush
-                ImageSource="/img/pageChoixtouche_aide.PNG"
+                ImageSource="/img/pagechoixtouche_aide.PNG"
                 RenderOptions.BitmapScalingMode="NearestNeighbor"
                 TileMode="Tile">
                 <ImageBrush.RelativeTransform>

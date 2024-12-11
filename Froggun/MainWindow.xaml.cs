@@ -8,6 +8,8 @@ using System.Windows.Threading;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls.Primitives;
+using System.Xml.Linq;
+using System.Windows.Media.Media3D;
 
 namespace Froggun
 {
@@ -26,7 +28,7 @@ namespace Froggun
         private double speedFactorAraignee = 0.8;
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer tempsRestant = new DispatcherTimer();
-        private static DispatcherTimer minVagues = new DispatcherTimer();
+        private static DispatcherTimer pauseVagues = new DispatcherTimer();
         private Rect playerR = new Rect();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
@@ -78,9 +80,10 @@ namespace Froggun
         private static Vector2 posGun = new Vector2();
 
         private static Vector2 posLangue = new Vector2();
+        private static bool tirLangue, expensionLangue;
+        private static readonly int expensionLangueVitesse = 60, retractionLangueVitesse = 80;
         private static Vector2 posArme = new Vector2();
         private static int distancePisolet = 20;
-        private static bool tirLangue;
 
         private static Vector2 dirBalle = new Vector2();
         private static BitmapImage imageBalle;
@@ -90,6 +93,13 @@ namespace Froggun
         private List<Ennemis> ennemis = new List<Ennemis>();
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
+
+        int pauseEntreVagues = 1; // en secondes
+        //int pauseEntreVagues = 5; // en secondes
+        int pauseCounter = 0;
+        int waveCount = 0;
+        private bool isTimerRunning = false;
+
         public MainWindow()
         {
             InitImage();
@@ -111,7 +121,6 @@ namespace Froggun
                 {
                     if (resultat == "parametre")
                     {
-
                         do
                         {
                             // Affichage du Canvas pour la fenêtre controle
@@ -180,43 +189,62 @@ namespace Froggun
                 difficulte = fentreDifficulte.Resultat;
             }
             lab_Pause.Visibility = Visibility.Collapsed;
+            
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
-            MinuterieVagues();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
         }
-        void MinuterieVagues()
+
+        void StartWave()
         {
-            minVagues = new DispatcherTimer();
-            minVagues.Interval = TimeSpan.FromSeconds(12);
-            minVagues.Tick += NouvelleVague;
-            minVagues.Start();
-            NouvelleVague(this, EventArgs.Empty);
+            if (isTimerRunning) return;
+            isTimerRunning = true;
+
+            pauseVagues = new DispatcherTimer();
+            pauseVagues.Interval = TimeSpan.FromSeconds(1);
+            pauseVagues.Tick += NouvelleVague;
+            pauseCounter = 0;
+            pauseVagues.Start();
         }
+
         private void NouvelleVague(object? sender, EventArgs e)
         {
-            for (int i = 0; i < alea.Next(1,5); i++)
+            labelWave.Content = $"New wave in {pauseEntreVagues - pauseCounter}!";
+
+            pauseCounter++;
+            if (pauseCounter < pauseEntreVagues) return;
+
+
+            waveCount++;
+            // \operatorname{ceil}\left(\sqrt{\left(x\right)}^{3}\right) // LaTeX !!
+            int spiderCount = (int) Math.Ceiling(Math.Pow(Math.Sqrt(waveCount),3.0));
+            
+            labelWave.Content = $"Wave {waveCount}";
+
+            for (int i = 0; i < spiderCount; i++)
             {
                 int hautOuBas = alea.Next(0, 1);
                 if (hautOuBas == 0)
                 {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, 100, 100, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
                     ennemis.Add(spider);
                 }
                 else
                 {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, 100, 100, alea.Next(100, 1100), alea.Next(500, 600), 100, 100, 8, canvas);
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(500, 600), 100, 100, 8, canvas);
                     ennemis.Add(spider);
                 }
             }
+            pauseVagues.Stop(); 
+            isTimerRunning = false;
         }
+
         void InitialiserMinuterie()
         {
             minuterie = new DispatcherTimer();
             minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
-            //minuterie.Tick += EnnemiesAttack;
             minuterie.Tick += Loop;
             minuterie.Start();
         }
@@ -252,14 +280,14 @@ namespace Froggun
         {
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
-            
 
+            //Proies fly1 = new Proies(TypeProies.Fly,
+            //    600, 600, //position
+            //    50, 50,   // taille
+            //    3, 500, 100, // vitesse, tail max du prochain pas, et delai entre chaque pas
+            //    new Vector2(0,0), new Vector2((float)grid.ActualWidth, (float)grid.ActualHeight), canvas); // zone où la proie peut navigeur
 
-            //Proies fly1 = new Proies(TypeProies.Fly, 600, 600, 50, 50, 3, 500, 100, canvas);
             //proies.Add(fly1);
-
-            //Ennemis fly1 = new Ennemis(TypeEnnemis.Fly, 400, 500, 50, 50, 8, canvas);
-            //ennemis.Add(fly1);
 
             //string imageDirectory1 = "img/ennemis/Food1";
             //int[] animationFrames1 = new int[] { 1, 2 };
@@ -334,24 +362,136 @@ namespace Froggun
             Canvas.SetLeft(playerTongue, posCentreJoueur.X);
         }
 
+        //public bool DoesRectIntersectLine(double x0, double y0, double x1, double y1, Rect rect)
+        //{
+        //    x0 = Math.Round(x0);
+        //    y0 = Math.Round(y0);
+        //    x1 = Math.Round(x1);
+        //    y1 = Math.Round(y1);
+            
+        //    Point point1 = new Point(x0, y0);
+        //    Point point2 = new Point(x1, y1);
+
+        //    LineGeometry lineGeometry = new LineGeometry(point1, point2);
+
+        //    Rect geometryRect = rect;
+
+        //    return lineGeometry.Bounds.IntersectsWith(geometryRect);
+        //}
+
+
+        //private Point RotatePoint(Point point, Point center, double angle)
+        //{
+        //    double radians = angle * (Math.PI / 180); // Convert angle to radians
+        //    double cos = Math.Cos(radians);
+        //    double sin = Math.Sin(radians);
+
+        //    // Translate point to origin
+        //    double x = point.X - center.X;
+        //    double y = point.Y - center.Y;
+
+        //    // Rotate point
+        //    double rotatedX = x * cos - y * sin + center.X;
+        //    double rotatedY = x * sin + y * cos + center.Y;
+
+        //    return new Point(rotatedX, rotatedY);
+        //}
+
         private void Loop(object? sender, EventArgs e) 
         { if (pause) return;
 
+            // if no enemies start a wave
+            if (ennemis.Count <= 0 && proies.Count <= 0)
+            {
+                StartWave();
+            }
+
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
+
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
+            Proies.UpdateProies(proies, playerRect);
 
             for (int i = 0; i < Balles.Count; i++)
             {
                 Balle balle = Balles[i];
                 balle.UpdatePositionBalles();
                 if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
-                 || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
+                 || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight) {
                     Balles.RemoveAt(i);
-                
+                    canvas.Children.Remove(balle.BalleImage);
+                }
             }
 
+            //if (expensionLangue)
+            //{
+            //    if (playerTongue.Width < 300)
+            //    {
+            //        playerTongue.Width = 300;
+            //        var rotation = (RotateTransform)playerTongue.RenderTransform;
+            //        Point t1 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue));
+            //        Point t2 = new Point(Canvas.GetLeft(playerTongue)+playerTongue.Width, Canvas.GetTop(playerTongue)+playerTongue.Height);
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles);
-            Proies.UpdateProies(proies, playerRect);
+            //        Point point1 = RotatePoint(t1, t1, rotation.Angle);
+            //        Point point2 = RotatePoint(t2, t1, rotation.Angle);
+
+            //        // Define the rectangle
+            //        Rect rect = new Rect(100, 100, 150, 100);
+
+            //        // Add line to canvas
+            //        Line line = new Line
+            //        {
+            //            X1 = point1.X,
+            //            Y1 = point1.Y,
+            //            X2 = point2.X,
+            //            Y2 = point2.Y,
+            //            Stroke = Brushes.White,
+            //            StrokeThickness = 2
+            //        };
+            //        canvas.Children.Add(line);
+
+            //        // Add rectangle to canvas
+            //        Rectangle rectangle = new Rectangle
+            //        {
+            //            Width = rect.Width,
+            //            Height = rect.Height,
+            //            Stroke = Brushes.Red,
+            //            StrokeThickness = 2,
+            //            Fill = Brushes.Transparent
+            //        };
+            //        Canvas.SetLeft(rectangle, rect.X);
+            //        Canvas.SetTop(rectangle, rect.Y);
+            //        canvas.Children.Add(rectangle);
+
+            //        // Check if rectangle intersects with the line
+            //        if (DoesRectIntersectLine(point1.X,point1.Y, point2.X, point2.Y, rect))
+            //        {
+            //            line.Stroke = Brushes.Green; // Change the line color if intersected
+            //        }
+
+            //        //foreach (var proie in proies.ToList())
+            //        //{
+            //        //    bool test = DoesRectIntersectLine(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue), playerTongue.Width, playerTongue.Height, proie.BoundingBox);
+            //        //    Console.WriteLine(test);
+            //        //    //proies.Remove(proie);
+            //        //    //canvas.Children.Remove(proie.Image);
+            //        //    //expensionLangue = false;
+            //        //}
+
+            //        //if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
+            //    } else
+            //    {
+            //        expensionLangue = false;
+            //    }
+            //} 
+            //else
+            //{
+            //    if (playerTongue.Width > 0)
+            //    {
+            //        if (playerTongue.Width <= retractionLangueVitesse) playerTongue.Width = 0;
+            //        else playerTongue.Width -= retractionLangueVitesse;
+            //    }
+            //    else tirLangue = false;
+            //}
 
             //fix direction:
             if      (deplacerBas)                    directionJoueur = Directions.down;
@@ -409,32 +549,7 @@ namespace Froggun
         {
             if (tirLangue) return;
             else tirLangue = true;
-
-            DoubleAnimation grow = new DoubleAnimation
-            {
-                From = playerTongue.Width,
-                To = 300,
-                Duration = TimeSpan.FromMilliseconds(100)
-            };
-
-            DoubleAnimation shrink = new DoubleAnimation
-            {
-                From = 300,
-                To = 0,
-                Duration = TimeSpan.FromMilliseconds(50)
-            };
-            
-            // lorsque l'animation est compléter
-            shrink.Completed += (s, e) =>
-            {
-                tirLangue = false;
-            };
-            
-            grow.Completed += (s, e) => { // s = object? sender  e = EventArgs event
-                playerTongue.BeginAnimation(Rectangle.WidthProperty, shrink);
-            };
-
-            playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
+            expensionLangue = true;
         }
 
         private void ShootGun()
@@ -452,6 +567,16 @@ namespace Froggun
 
             Balle balle = new Balle(posArme.X, posArme.Y, angle, vitesseBalle, 10, canvas, imageBalle);
             Balles.Add(balle);
+        }
+
+        public void AfficheScore(int score)
+        {
+            labelScore.Content = $"Score : {score} ";
+        }
+
+        public void AfficheCombo(double combo)
+        {
+            labelScore.Content = $"Combo : {Math.Round(combo, 2)} ";
         }
 
         private void keydown(object sender, KeyEventArgs e)
