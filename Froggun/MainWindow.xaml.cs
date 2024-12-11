@@ -25,6 +25,7 @@ namespace Froggun
         private double speedFactorAraignee = 0.8;
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer tempsRestant = new DispatcherTimer();
+        private static DispatcherTimer minVagues = new DispatcherTimer();
         private Rect playerR = new Rect();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
@@ -183,11 +184,35 @@ namespace Froggun
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
-
+            MinuterieVagues();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
         }
-
+        void MinuterieVagues()
+        {
+            minVagues = new DispatcherTimer();
+            minVagues.Interval = TimeSpan.FromSeconds(12);
+            minVagues.Tick += NouvelleVague;
+            minVagues.Start();
+            NouvelleVague(this, EventArgs.Empty);
+        }
+        private void NouvelleVague(object? sender, EventArgs e)
+        {
+            for (int i = 0; i < alea.Next(1,5); i++)
+            {
+                int hautOuBas = alea.Next(0, 1);
+                if (hautOuBas == 0)
+                {
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, 100, 100, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+                }
+                else
+                {
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, 100, 100, alea.Next(100, 1100), alea.Next(500, 600), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+                }
+            }
+        }
         void InitialiserMinuterie()
         {
             minuterie = new DispatcherTimer();
@@ -228,14 +253,8 @@ namespace Froggun
         {
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
+            
 
-            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 100, 100, 200, 200, 100, 100, 8, canvas);
-            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 100, 100, 300, 400, 100, 100, 8, canvas);
-            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 100, 100, 600, 300, 100, 100, 8, canvas);
-
-            ennemis.Add(spider1);
-            ennemis.Add(spider2);
-            ennemis.Add(spider3);
 
             //Proies fly1 = new Proies(TypeProies.Fly, 600, 600, 50, 50, 3, 500, 100, canvas);
             //proies.Add(fly1);
