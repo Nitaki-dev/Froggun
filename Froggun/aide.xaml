@@ -6,23 +6,49 @@
     xmlns:local="clr-namespace:Froggun"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="aide"
-    Width="350"
+    Width="600"
     Height="350"
     mc:Ignorable="d">
     <Grid>
-        <Label
-            x:Name="labelTexte"
-            Margin="64,91,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Content="Label" />
+        <Grid.Background>
+            <ImageBrush ImageSource="/img/pageChoixtouche_aide.PNG"/>
+        </Grid.Background>
+
+        <!-- Ajouter un ScrollViewer pour permettre le défilement si nécessaire -->
+
+        <StackPanel Margin="10">
+            <!-- Titre principal centré -->
+            <!-- Titre principal centré -->
+            <Label Content="Instructions de jeu" FontSize="20" FontWeight="Bold"  Foreground="#FFD4D4D4" />
+            <!-- Contenu principal -->
+            <TextBlock Text="• Objectif principal : Rester en vie donc ne pas perdre de cœur." TextWrapping="Wrap" Width="655"  Foreground="#FFD4D4D4"/>
+
+            <TextBlock Text="• Contrôles :" FontWeight="Bold" Margin="0,10,0,5"  Foreground="#FFD4D4D4"/>
+
+            <TextBlock Text="   o Déplacement : Utilisez les touches directionnelles ou les touches : " Margin="0,0,0,5" Foreground="#FFD4D4D4"/>
+            <TextBlock Text="     - 'Q' pour déplacer la grenouille à gauche." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
+            <TextBlock Text="     - 'D' pour déplacer la grenouille à droite." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
+            <TextBlock Text="     - 'Z' pour déplacer la grenouille en haut." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
+            <TextBlock Text="     - 'S' pour déplacer la grenouille en bas." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
+            <TextBlock Text="     - 'Ctrl' pour rouler / esquiver et aller plus vite." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
+
+            <TextBlock TextWrapping="Wrap" Margin="20,0,0,5"><Run Text="   o Tirer avec le pistolet : Appuyez sur la touche 'Clique Gauche' pour tirer avec le pistolet"  Foreground="#FFD4D4D4"/><Run Language="fr-fr" Text="."/></TextBlock>
+            <TextBlock Text="   o Tirer avec la langue : Appuyez sur la touche 'Clique Droit' pour tirer la langue." TextWrapping="Wrap" Margin="20,0,0,5"  Foreground="#FFD4D4D4"/>
+        </StackPanel>
         <Button
             x:Name="boutonQuitter"
-            Margin="276,282,0,0"
+            Margin="477,268,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonQuitter_Click"
-            Content="Quitter" />
+            Content="Quitter" FontSize="30" FontWeight="Bold"  Foreground="#FF960707">
+            <Button.BorderBrush>
+                <ImageBrush/>
+            </Button.BorderBrush>
+            <Button.Background>
+                <ImageBrush/>
+            </Button.Background>
+        </Button>
 
     </Grid>
 </Window>
