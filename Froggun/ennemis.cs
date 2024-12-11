@@ -39,6 +39,7 @@ namespace Froggun
         private int Health { get; set; }
         public bool IsAlive { get; private set; }
         public bool hasCollided { get; set; }
+        public int indexBalle = 0;
 
 
         public Ennemis(TypeEnnemis type, double PointVie, double MaxPointVie, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
@@ -110,24 +111,25 @@ namespace Froggun
 
         public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur, List<Balle> balles)
         {
-
+            
             foreach (var ennemi in ennemis)
             {
                 if (!ennemi.IsAlive) continue;
                 ennemi.hasCollided = false;
-                foreach (var balle in balles)
+                for (int i = 0; i < balles.Count; i++)
                 {
-                    if (balle.hasHit) continue;
+                    if (balles[i].hasHit) continue;
                     Rect rImgBalle = new Rect(
-            balle.X,
-            balle.Y,
+            balles[i].X,
+            balles[i].Y,
             25,
             25
         );
                     if (ennemi.BoundingBox.IntersectsWith(rImgBalle) && !ennemi.hasCollided)
                     {
                         ennemi.Health--;
-                        balle.hasHit = true;
+                        balles[i].hasHit = true;
+                        balles.RemoveAt(i);
                         break;
                     }
                 }
