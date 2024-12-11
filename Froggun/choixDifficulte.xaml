@@ -1,0 +1,65 @@
+﻿<Window
+    x:Class="Froggun.choixDifficulte"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:Froggun"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Title="choixDifficulte"
+    Width="600"
+    Height="350"
+    mc:Ignorable="d">
+    <Grid>
+        <Button
+            x:Name="boutonFacile"
+            Width="150"
+            Height="334"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Click="boutonFacile_Click"
+            Content="Facile" >
+            <Button.Background>
+                <ImageBrush ImageSource="/img/facile.jpg"/>
+            </Button.Background>
+        </Button>
+        <Button
+            x:Name="boutonMoyen"
+            Width="150"
+            Height="334"
+            Margin="150,0,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Click="boutonMoyen_Click"
+            Content="Moyen" >
+            <Button.Background>
+                <ImageBrush ImageSource="/img/moyen.jpg"/>
+            </Button.Background>
+        </Button>
+        <Button
+            x:Name="boutonDifficile"
+            Width="150"
+            Height="334"
+            Margin="300,0,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Click="boutonDifficile_Click"
+            Content="Dificile" >
+            <Button.Background>
+                <ImageBrush ImageSource="/img/difficile.jpg"/>
+            </Button.Background>
+        </Button>
+        <Button
+            x:Name="boutonExtreme"
+            Width="150"
+            Height="334"
+            Margin="450,0,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"
+            Click="boutonExtreme_Click"
+            Content="Extreme" >
+            <Button.Background>
+                <ImageBrush ImageSource="/img/extreme.jpg"/>
+            </Button.Background>
+        </Button>
+    </Grid>
+</Window>

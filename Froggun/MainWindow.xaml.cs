@@ -87,7 +87,7 @@ namespace Froggun
         private List<Balle> Balles = new List<Balle>(); 
         private List<Ennemis> ennemis = new List<Ennemis>();
         private List<Proies> proies = new List<Proies>();
-
+        public static string difficulte;
         public MainWindow()
         {
             InitImage();
@@ -127,8 +127,6 @@ namespace Froggun
                                 resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
                                 if (resultat == "jouer")
                                 {
-                                    // Logique pour lancer le jeu ici
-                                    MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
                                     break;  // Quitter la boucle et lancer le jeu
                                 }
 
@@ -161,8 +159,6 @@ namespace Froggun
                                 resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
                                 if (resultat == "jouer")
                                 {
-                                    // Logique pour lancer le jeu ici
-                                    MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
                                     break;  // Quitter la boucle et lancer le jeu
                                 }
 
@@ -177,9 +173,11 @@ namespace Froggun
                         while (resultat == "aide");  // Continue la boucle si le résultat est encore "parametre"
                     }
                 } while (resultat != "jouer");
-                
+                choixDifficulte fentreDifficulte = new choixDifficulte();
+                fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
+                difficulte = fentreDifficulte.Resultat;
             }
-
+            Console.WriteLine(difficulte.ToString());
             InitialiserMinuterie();
             Minuterie();
             InitObjects();
