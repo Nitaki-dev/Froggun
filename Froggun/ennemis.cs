@@ -87,11 +87,21 @@ namespace Froggun
         {
 
             foreach (var ennemi in ennemis)
-                
-            
-                
-                    
             {
+                foreach (var balle in balles)
+                {
+                    Rect rImgBalle = new Rect(
+            balle.X,
+            balle.Y,
+            25,
+            25
+        );
+                    if (ennemi.BoundingBox.IntersectsWith(rImgBalle))
+                    {
+
+                    }
+                }
+
                 if (ennemi.isSlowed) ennemi.SpeedMultiplier = 0.5;
                 else ennemi.SpeedMultiplier = 0.25;
 
