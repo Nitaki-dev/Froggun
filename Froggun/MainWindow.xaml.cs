@@ -254,14 +254,6 @@ namespace Froggun
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
 
-            //Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 100, 100, 200, 200, 100, 100, 8, canvas);
-            //Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 100, 100, 300, 400, 100, 100, 8, canvas);
-            //Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 100, 100, 600, 300, 100, 100, 8, canvas);
-
-            //ennemis.Add(spider1);
-            //ennemis.Add(spider2);
-            //ennemis.Add(spider3);
-
             Proies fly1 = new Proies(TypeProies.Fly,
                 600, 600, //position
                 50, 50,   // taille
