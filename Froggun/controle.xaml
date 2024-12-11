@@ -10,49 +10,7 @@
     Height="450"
     mc:Ignorable="d">
     <Grid>
-        <Slider
-            x:Name="sliderSon"
-            Width="201"
-            Margin="45,163,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top" />
-        <Button
-            x:Name="boutonAide"
-            Width="168"
-            Height="68"
-            Margin="0,300,0,0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Top"
-            Background="#FFDDDDDD"
-            Click="ButtonAide_Click"
-            Content="Aide"
-            FontSize="30"
-            Opacity="0.7" />
-        <Slider
-            x:Name="sliderSon_Copy"
-            Width="201"
-            Margin="45,291,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top" />
-        <Label
-            x:Name="labelSonJeu"
-            Margin="45,132,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Content="Son jeu :" />
-        <Label
-            x:Name="labelSonBruit"
-            Margin="45,242,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Content="Son Bruits :"
-            RenderTransformOrigin="0.418,2.282" />
-        <Label
-            x:Name="labelParametreSon"
-            Margin="89,64,0,0"
-            HorizontalAlignment="Left"
-            VerticalAlignment="Top"
-            Content="Parametre du son :" />
+
         <Button
             x:Name="boutonChoixTouche"
             Width="118"

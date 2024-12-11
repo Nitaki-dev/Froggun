@@ -104,40 +104,79 @@ namespace Froggun
             {
                 string resultat = fentreNiveau.Resultat; // Récupérer le résultat de la fenêtre parametre
                                                          // Vérification si le résultat est "parametre", ce qui signifie que le processus doit continuer
-                if (resultat == "parametre")
+                do
                 {
-                    do
+                    if (resultat == "parametre")
                     {
-                        // Affichage du Canvas pour la fenêtre controle
-                        controle fentreControle = new controle();
-                        fentreControle.ShowDialog();  // Affiche la fenêtre controle de manière modale
 
-                        // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
-                        if (fentreControle.DialogResult == false)
+                        do
                         {
-                            // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
-                            fentreNiveau = new parametre();  // Nouvelle instance de parametre
-                            fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
+                            // Affichage du Canvas pour la fenêtre controle
+                            choixTouche fentrechoixTouche = new choixTouche();
+                            fentrechoixTouche.ShowDialog();  // Affiche la fenêtre controle de manière modale
 
-                            // Si l'utilisateur choisit "jouer", sortir de la boucle
-                            resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
-                            if (resultat == "jouer")
+                            // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
+                            if (fentrechoixTouche.DialogResult == false)
                             {
-                                // Logique pour lancer le jeu ici
-                                MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
-                                break;  // Quitter la boucle et lancer le jeu
-                            }
+                                // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
+                                fentreNiveau = new parametre();  // Nouvelle instance de parametre
+                                fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
 
-                            // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
-                            if (fentreNiveau.DialogResult == false)
-                            {
-                                Application.Current.Shutdown();
-                                return;
+                                // Si l'utilisateur choisit "jouer", sortir de la boucle
+                                resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
+                                if (resultat == "jouer")
+                                {
+                                    // Logique pour lancer le jeu ici
+                                    MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
+                                    break;  // Quitter la boucle et lancer le jeu
+                                }
+
+                                // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
+                                if (fentreNiveau.DialogResult == false)
+                                {
+                                    Application.Current.Shutdown();
+                                    return;
+                                }
                             }
                         }
+                        while (resultat == "parametre");  // Continue la boucle si le résultat est encore "parametre"
                     }
-                    while (resultat == "parametre");  // Continue la boucle si le résultat est encore "parametre"
-                }
+                    else if (resultat == "aide")
+                    {
+                        do
+                        {
+                            // Affichage du Canvas pour la fenêtre controle
+                            aide fentreaide = new aide();
+                            fentreaide.ShowDialog();  // Affiche la fenêtre controle de manière modale
+
+                            // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
+                            if (fentreaide.DialogResult == false)
+                            {
+                                // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
+                                fentreNiveau = new parametre();  // Nouvelle instance de parametre
+                                fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
+
+                                // Si l'utilisateur choisit "jouer", sortir de la boucle
+                                resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
+                                if (resultat == "jouer")
+                                {
+                                    // Logique pour lancer le jeu ici
+                                    MessageBox.Show("Lancement du jeu !");  // Remplacez ceci par le code de lancement réel du jeu
+                                    break;  // Quitter la boucle et lancer le jeu
+                                }
+
+                                // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
+                                if (fentreNiveau.DialogResult == false)
+                                {
+                                    Application.Current.Shutdown();
+                                    return;
+                                }
+                            }
+                        }
+                        while (resultat == "aide");  // Continue la boucle si le résultat est encore "parametre"
+                    }
+                } while (resultat != "jouer");
+                
             }
 
             InitialiserMinuterie();

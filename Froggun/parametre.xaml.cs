@@ -47,5 +47,11 @@ namespace Froggun
             Resultat = "parametre";  // Assigner la chaîne que vous souhaitez retourner
             this.DialogResult = true;
         }
+
+        private void ButtonAide_Click(object sender, RoutedEventArgs e)
+        {
+            Resultat = "aide";  // Assigner la chaîne que vous souhaitez retourner
+            this.DialogResult = true;
+        }
     }
 }
