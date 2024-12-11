@@ -8,6 +8,8 @@ using System.Windows.Threading;
 using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
 using System.Windows.Controls.Primitives;
+using System.Xml.Linq;
+using System.Windows.Media.Media3D;
 
 namespace Froggun
 {
@@ -76,9 +78,10 @@ namespace Froggun
         private static Vector2 posGun = new Vector2();
 
         private static Vector2 posLangue = new Vector2();
+        private static bool tirLangue, expensionLangue;
+        private static readonly int expensionLangueVitesse = 60, retractionLangueVitesse = 80;
         private static Vector2 posArme = new Vector2();
         private static int distancePisolet = 20;
-        private static bool tirLangue;
 
         private static Vector2 dirBalle = new Vector2();
         private static BitmapImage imageBalle;
@@ -229,19 +232,21 @@ namespace Froggun
             string imageDirectory = "img/ennemis/LL";
             int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
 
-            Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 100, 100, 200, 200, 100, 100, 8, canvas);
-            Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 100, 100, 300, 400, 100, 100, 8, canvas);
-            Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 100, 100, 600, 300, 100, 100, 8, canvas);
+            //Ennemis spider1 = new Ennemis(TypeEnnemis.Spider, 100, 100, 200, 200, 100, 100, 8, canvas);
+            //Ennemis spider2 = new Ennemis(TypeEnnemis.Spider, 100, 100, 300, 400, 100, 100, 8, canvas);
+            //Ennemis spider3 = new Ennemis(TypeEnnemis.Spider, 100, 100, 600, 300, 100, 100, 8, canvas);
 
-            ennemis.Add(spider1);
-            ennemis.Add(spider2);
-            ennemis.Add(spider3);
+            //ennemis.Add(spider1);
+            //ennemis.Add(spider2);
+            //ennemis.Add(spider3);
 
-            //Proies fly1 = new Proies(TypeProies.Fly, 600, 600, 50, 50, 3, 500, 100, canvas);
-            //proies.Add(fly1);
+            Proies fly1 = new Proies(TypeProies.Fly,
+                600, 600, //position
+                50, 50,   // taille
+                3, 500, 100, // vitesse, tail max du prochain pas, et delai entre chaque pas
+                new Vector2(0,0), new Vector2((float)grid.ActualWidth, (float)grid.ActualHeight), canvas); // zone où la proie peut navigeur
 
-            //Ennemis fly1 = new Ennemis(TypeEnnemis.Fly, 400, 500, 50, 50, 8, canvas);
-            //ennemis.Add(fly1);
+            proies.Add(fly1);
 
             //string imageDirectory1 = "img/ennemis/Food1";
             //int[] animationFrames1 = new int[] { 1, 2 };
@@ -316,24 +321,129 @@ namespace Froggun
             Canvas.SetLeft(playerTongue, posCentreJoueur.X);
         }
 
+        //public bool DoesRectIntersectLine(double x0, double y0, double x1, double y1, Rect rect)
+        //{
+        //    x0 = Math.Round(x0);
+        //    y0 = Math.Round(y0);
+        //    x1 = Math.Round(x1);
+        //    y1 = Math.Round(y1);
+            
+        //    Point point1 = new Point(x0, y0);
+        //    Point point2 = new Point(x1, y1);
+
+        //    LineGeometry lineGeometry = new LineGeometry(point1, point2);
+
+        //    Rect geometryRect = rect;
+
+        //    return lineGeometry.Bounds.IntersectsWith(geometryRect);
+        //}
+
+
+        //private Point RotatePoint(Point point, Point center, double angle)
+        //{
+        //    double radians = angle * (Math.PI / 180); // Convert angle to radians
+        //    double cos = Math.Cos(radians);
+        //    double sin = Math.Sin(radians);
+
+        //    // Translate point to origin
+        //    double x = point.X - center.X;
+        //    double y = point.Y - center.Y;
+
+        //    // Rotate point
+        //    double rotatedX = x * cos - y * sin + center.X;
+        //    double rotatedY = x * sin + y * cos + center.Y;
+
+        //    return new Point(rotatedX, rotatedY);
+        //}
+
         private void Loop(object? sender, EventArgs e) 
         {
-
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
+
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles);
+            Proies.UpdateProies(proies, playerRect);
 
             for (int i = 0; i < Balles.Count; i++)
             {
                 Balle balle = Balles[i];
                 balle.UpdatePositionBalles();
                 if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
-                 || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
+                 || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight) {
                     Balles.RemoveAt(i);
-                
+                    canvas.Children.Remove(balle.BalleImage);
+                }
             }
 
+            //if (expensionLangue)
+            //{
+            //    if (playerTongue.Width < 300)
+            //    {
+            //        playerTongue.Width = 300;
+            //        var rotation = (RotateTransform)playerTongue.RenderTransform;
+            //        Point t1 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue));
+            //        Point t2 = new Point(Canvas.GetLeft(playerTongue)+playerTongue.Width, Canvas.GetTop(playerTongue)+playerTongue.Height);
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles);
-            Proies.UpdateProies(proies, playerRect);
+            //        Point point1 = RotatePoint(t1, t1, rotation.Angle);
+            //        Point point2 = RotatePoint(t2, t1, rotation.Angle);
+
+            //        // Define the rectangle
+            //        Rect rect = new Rect(100, 100, 150, 100);
+
+            //        // Add line to canvas
+            //        Line line = new Line
+            //        {
+            //            X1 = point1.X,
+            //            Y1 = point1.Y,
+            //            X2 = point2.X,
+            //            Y2 = point2.Y,
+            //            Stroke = Brushes.White,
+            //            StrokeThickness = 2
+            //        };
+            //        canvas.Children.Add(line);
+
+            //        // Add rectangle to canvas
+            //        Rectangle rectangle = new Rectangle
+            //        {
+            //            Width = rect.Width,
+            //            Height = rect.Height,
+            //            Stroke = Brushes.Red,
+            //            StrokeThickness = 2,
+            //            Fill = Brushes.Transparent
+            //        };
+            //        Canvas.SetLeft(rectangle, rect.X);
+            //        Canvas.SetTop(rectangle, rect.Y);
+            //        canvas.Children.Add(rectangle);
+
+            //        // Check if rectangle intersects with the line
+            //        if (DoesRectIntersectLine(point1.X,point1.Y, point2.X, point2.Y, rect))
+            //        {
+            //            line.Stroke = Brushes.Green; // Change the line color if intersected
+            //        }
+
+            //        //foreach (var proie in proies.ToList())
+            //        //{
+            //        //    bool test = DoesRectIntersectLine(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue), playerTongue.Width, playerTongue.Height, proie.BoundingBox);
+            //        //    Console.WriteLine(test);
+            //        //    //proies.Remove(proie);
+            //        //    //canvas.Children.Remove(proie.Image);
+            //        //    //expensionLangue = false;
+            //        //}
+
+            //        //if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
+            //    } else
+            //    {
+            //        expensionLangue = false;
+            //    }
+            //} 
+            //else
+            //{
+            //    if (playerTongue.Width > 0)
+            //    {
+            //        if (playerTongue.Width <= retractionLangueVitesse) playerTongue.Width = 0;
+            //        else playerTongue.Width -= retractionLangueVitesse;
+            //    }
+            //    else tirLangue = false;
+            //}
 
             //fix direction:
             if      (deplacerBas)                    directionJoueur = Directions.down;
@@ -391,32 +501,7 @@ namespace Froggun
         {
             if (tirLangue) return;
             else tirLangue = true;
-
-            DoubleAnimation grow = new DoubleAnimation
-            {
-                From = playerTongue.Width,
-                To = 300,
-                Duration = TimeSpan.FromMilliseconds(100)
-            };
-
-            DoubleAnimation shrink = new DoubleAnimation
-            {
-                From = 300,
-                To = 0,
-                Duration = TimeSpan.FromMilliseconds(50)
-            };
-            
-            // lorsque l'animation est compléter
-            shrink.Completed += (s, e) =>
-            {
-                tirLangue = false;
-            };
-            
-            grow.Completed += (s, e) => { // s = object? sender  e = EventArgs event
-                playerTongue.BeginAnimation(Rectangle.WidthProperty, shrink);
-            };
-
-            playerTongue.BeginAnimation(Rectangle.WidthProperty, grow);
+            expensionLangue = true;
         }
 
         private void ShootGun()
