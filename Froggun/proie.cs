@@ -72,7 +72,7 @@ namespace Froggun
             Canvas.SetTop(Image, Y);
             canvas.Children.Add(Image);
 
-            BoundingBox = new Rect(X, Y, Width, Height);
+            BoundingBox = new Rect(X+15, Y+15, Width-30, Height-30);
 
             animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             animationTimer.Tick += AnimationTimer_Tick;
@@ -99,11 +99,14 @@ namespace Froggun
             return bitmapImage;
         }
 
-        private void GenerateRandomTarget(object? sender, EventArgs e)
+        public void GenerateRandomTarget(object? sender, EventArgs e)
         {
             Random random = new Random();
             targetX = X + random.Next(newPosMaxDiff);
             targetY = Y + random.Next(newPosMaxDiff);
+
+            targetX = Math.Clamp(targetX, minOffset.X, maxOffset.X-Width);
+            targetY = Math.Clamp(targetY, minOffset.Y, maxOffset.Y-Height);
         }
 
         public static void UpdateProies(List<Proies> proies, Rect joueur)
@@ -111,10 +114,10 @@ namespace Froggun
             foreach (var proie in proies)
             {
                 proie.BoundingBox = new Rect(
-                    (int)proie.X-5,
-                    (int)proie.Y-5,
-                    (int)proie.Width+10,
-                    (int)proie.Height+10
+                    (int)proie.X-15,
+                    (int)proie.Y-15,
+                    (int)proie.Width+30,
+                    (int)proie.Height+30
                 );
 
                 // Move the enemy
@@ -127,13 +130,12 @@ namespace Froggun
                 double newX = proie.X + direction.X * proie.Speed;
                 double newY = proie.Y + direction.Y * proie.Speed;
 
-                if (newX > proie.minOffset.X && newX < proie.maxOffset.X && newY > proie.maxOffset.Y && newY < proie.maxOffset.Y)
-                {
-                    proie.X = newX;
-                    proie.Y = newY;
-                    Canvas.SetLeft(proie.Image, proie.X);
-                    Canvas.SetTop(proie.Image, proie.Y);
-                }
+                Console.WriteLine(proie.minOffset + "    " + proie.maxOffset);
+
+                proie.X = newX;
+                proie.Y = newY;
+                Canvas.SetLeft(proie.Image, proie.X);
+                Canvas.SetTop(proie.Image, proie.Y);
             }
         }
     }

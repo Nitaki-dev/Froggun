@@ -10,6 +10,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Controls.Primitives;
 using System.Xml.Linq;
 using System.Windows.Media.Media3D;
+using System.Reflection.PortableExecutable;
 
 namespace Froggun
 {
@@ -219,7 +220,7 @@ namespace Froggun
 
             waveCount++;
             // \operatorname{ceil}\left(\sqrt{\left(x\right)}^{3}\right) // LaTeX !!
-            int spiderCount = (int) Math.Ceiling(Math.Pow(Math.Sqrt(waveCount),3.0));
+            int spiderCount = (int) Math.Ceiling(Math.Pow(Math.Sqrt(waveCount),3.0)) % 10;
             
             labelWave.Content = $"Wave {waveCount}";
 
@@ -278,22 +279,13 @@ namespace Froggun
 
         private void InitObjects()
         {
-            string imageDirectory = "img/ennemis/LL";
-            int[] animationFrames = new int[] { 1, 2, 3, 1, 4, 5 };
+            Proies fly1 = new Proies(TypeProies.Fly,
+                600, 600, //position
+                50, 50,   // taille
+                3, 500, 200, // vitesse, tail max du prochain pas, et delai entre chaque pas
+                new Vector2(0, 0), new Vector2((float)1700, (float)600), canvas); // zone où la proie peut navigeur
 
-            //Proies fly1 = new Proies(TypeProies.Fly,
-            //    600, 600, //position
-            //    50, 50,   // taille
-            //    3, 500, 100, // vitesse, tail max du prochain pas, et delai entre chaque pas
-            //    new Vector2(0,0), new Vector2((float)grid.ActualWidth, (float)grid.ActualHeight), canvas); // zone où la proie peut navigeur
-
-            //proies.Add(fly1);
-
-            //string imageDirectory1 = "img/ennemis/Food1";
-            //int[] animationFrames1 = new int[] { 1, 2 };
-            //Ennemis Food = new Ennemis(300, 200, 64, 64, 8, canvas, imageDirectory1, animationFrames1);
-
-            //ennemis.Add(Food);
+            proies.Add(fly1);
         }
 
         private void InitScore(int ajout)
@@ -301,23 +293,24 @@ namespace Froggun
             score += ajout;
         }
 
-        private void PivoterArme() {
+        private void PivoterArme()
+        {
             posArme.X = (float)Mouse.GetPosition(canvas).X;
             posArme.Y = (float)Mouse.GetPosition(canvas).Y;
 
             // Centre du joueur
             Vector2 posCentreJoueur = new Vector2(
                 (float)(posJoueur.X + player.Width / 2.0f),
-                (float)(posJoueur.Y + player.Height / 6.0f)
+                (float)(posJoueur.Y + player.Height / 2.0f)
             );
 
             // Trouve la position de l'arme autour du joueur
             Vector2 directionSouris = Vector2.Normalize(posArme - posCentreJoueur);
             float distanceJoueurSouris = Vector2.Distance(posCentreJoueur, posArme);
             posArme = posCentreJoueur + (directionSouris * distancePisolet);
-            
+
             // Trouve l'angle de l'arme du joueur
-            float angle = (float) (Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
+            float angle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
 
             // Initialisation des transformes de l'image de l'arme du joueur
             TransformGroup myTransformGroup = new TransformGroup();
@@ -328,7 +321,6 @@ namespace Froggun
             if (directionSouris.X > 0) inverseArme.ScaleY = 1;
             else inverseArme.ScaleY = -1;
 
-            //inverseArme.ScaleX = -1;
             gun.RenderTransform = rotationArme;
             gun.RenderTransform = inverseArme;
 
@@ -362,40 +354,82 @@ namespace Froggun
             Canvas.SetLeft(playerTongue, posCentreJoueur.X);
         }
 
-        //public bool DoesRectIntersectLine(double x0, double y0, double x1, double y1, Rect rect)
-        //{
-        //    x0 = Math.Round(x0);
-        //    y0 = Math.Round(y0);
-        //    x1 = Math.Round(x1);
-        //    y1 = Math.Round(y1);
-            
-        //    Point point1 = new Point(x0, y0);
-        //    Point point2 = new Point(x1, y1);
+        public static bool TryGetIntersection(Line line1, Line line2, out Point intersection)
+        {
+            // explication de https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+            Point p = new Point(line1.X1, line1.Y1);
+            Point r = new Point(line1.X2 - line1.X1, line1.Y2 - line1.Y1); // r = (X2 - X1, Y2 - Y1)
+            Point q = new Point(line2.X1, line2.Y1);
+            Point s = new Point(line2.X2 - line2.X1, line2.Y2 - line2.Y1); // s = (X2 - X1, Y2 - Y1)
 
-        //    LineGeometry lineGeometry = new LineGeometry(point1, point2);
+            // Calculate cross products (2D vectors)
+            double rCrossS = CrossProduct(r, s);
+            Point qMinusP = new Point(q.X - p.X, q.Y - p.Y);
+            double qMinusPCrossS = CrossProduct(qMinusP, s);
+            double qMinusPCrossR = CrossProduct(qMinusP, r);
 
-        //    Rect geometryRect = rect;
+            // Case 1: r × s == 0 (collinear or parallel)
+            if (rCrossS == 0)
+            {
+                // If (q - p) × r == 0, the lines are collinear
+                if (qMinusPCrossR == 0)
+                {
+                    // Check if the segments overlap
+                    double t0 = (qMinusP.X * r.X + qMinusP.Y * r.Y) / (r.X * r.X + r.Y * r.Y);
+                    double t1 = t0 + (s.X * r.X + s.Y * r.Y) / (r.X * r.X + r.Y * r.Y);
 
-        //    return lineGeometry.Bounds.IntersectsWith(geometryRect);
-        //}
+                    // If the segments overlap, return the intersection point
+                    if ((t0 >= 0 && t0 <= 1) || (t1 >= 0 && t1 <= 1))
+                    {
+                        intersection = new Point(p.X + t0 * r.X, p.Y + t0 * r.Y); // Use t0 as the intersection point
+                        return true;
+                    }
+                }
+                // If the lines are parallel and not collinear
+                intersection = new Point();
+                return false;
+            }
 
+            // Case 2: r × s != 0 (lines are not parallel)
+            if (rCrossS != 0)
+            {
+                double t = qMinusPCrossS / rCrossS;
+                double u = qMinusPCrossR / rCrossS;
 
-        //private Point RotatePoint(Point point, Point center, double angle)
-        //{
-        //    double radians = angle * (Math.PI / 180); // Convert angle to radians
-        //    double cos = Math.Cos(radians);
-        //    double sin = Math.Sin(radians);
+                // Check if the intersection point lies within the bounds of both segments
+                if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
+                {
+                    intersection = new Point(p.X + t * r.X, p.Y + t * r.Y);
+                    return true;
+                }
+            }
 
-        //    // Translate point to origin
-        //    double x = point.X - center.X;
-        //    double y = point.Y - center.Y;
+            // Case 3: Lines are parallel but do not intersect
+            intersection = new Point();
+            return false;
+        }
+        
+        private static double CrossProduct(Point v1, Point v2)
+        {
+            return v1.X * v2.Y - v1.Y * v2.X;
+        }
 
-        //    // Rotate point
-        //    double rotatedX = x * cos - y * sin + center.X;
-        //    double rotatedY = x * sin + y * cos + center.Y;
+        private Point RotatePoint(Point point, Point center, double angle)
+        {
+            double radians = angle * (Math.PI / 180); // Convert angle to radians
+            double cos = Math.Cos(radians);
+            double sin = Math.Sin(radians);
 
-        //    return new Point(rotatedX, rotatedY);
-        //}
+            // Translate point to origin
+            double x = point.X - center.X;
+            double y = point.Y - center.Y;
+
+            // Rotate point
+            double rotatedX = x * cos - y * sin + center.X;
+            double rotatedY = x * sin + y * cos + center.Y;
+
+            return new Point(rotatedX, rotatedY);
+        }
 
         private void Loop(object? sender, EventArgs e) 
         { if (pause) return;
@@ -403,7 +437,7 @@ namespace Froggun
             // if no enemies start a wave
             if (ennemis.Count <= 0 && proies.Count <= 0)
             {
-                StartWave();
+                //StartWave();
             }
 
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
@@ -422,76 +456,149 @@ namespace Froggun
                 }
             }
 
-            //if (expensionLangue)
-            //{
-            //    if (playerTongue.Width < 300)
-            //    {
-            //        playerTongue.Width = 300;
-            //        var rotation = (RotateTransform)playerTongue.RenderTransform;
-            //        Point t1 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue));
-            //        Point t2 = new Point(Canvas.GetLeft(playerTongue)+playerTongue.Width, Canvas.GetTop(playerTongue)+playerTongue.Height);
+            if (expensionLangue)
+            {
+                if (playerTongue.Width < 300)
+                {
+                    Vector2 posCentreJoueur = new Vector2(
+                        (float)(posJoueur.X + player.Width / 2.0f),
+                        (float)(posJoueur.Y + player.Height / 2.0f)
+                    );
 
-            //        Point point1 = RotatePoint(t1, t1, rotation.Angle);
-            //        Point point2 = RotatePoint(t2, t1, rotation.Angle);
+                    Line test = new Line
+                    {
+                        X1 = posCentreJoueur.X - 1,
+                        Y1 = posCentreJoueur.Y - 1,
+                        X2 = posCentreJoueur.X + 1,
+                        Y2 = posCentreJoueur.Y + 1,
+                        Stroke = Brushes.Red,
+                        StrokeThickness = 2
+                    };
 
-            //        // Define the rectangle
-            //        Rect rect = new Rect(100, 100, 150, 100);
+                    // create two lines from start to end of tongue
+                    var rotation = (RotateTransform)playerTongue.RenderTransform;
+                    Point tcentre = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height/2.0f);
 
-            //        // Add line to canvas
-            //        Line line = new Line
-            //        {
-            //            X1 = point1.X,
-            //            Y1 = point1.Y,
-            //            X2 = point2.X,
-            //            Y2 = point2.Y,
-            //            Stroke = Brushes.White,
-            //            StrokeThickness = 2
-            //        };
-            //        canvas.Children.Add(line);
+                    Point t11 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue));
+                    Point t12 = new Point(Canvas.GetLeft(playerTongue)+playerTongue.Width, Canvas.GetTop(playerTongue));
 
-            //        // Add rectangle to canvas
-            //        Rectangle rectangle = new Rectangle
-            //        {
-            //            Width = rect.Width,
-            //            Height = rect.Height,
-            //            Stroke = Brushes.Red,
-            //            StrokeThickness = 2,
-            //            Fill = Brushes.Transparent
-            //        };
-            //        Canvas.SetLeft(rectangle, rect.X);
-            //        Canvas.SetTop(rectangle, rect.Y);
-            //        canvas.Children.Add(rectangle);
+                    Point t21 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height);
+                    Point t22 = new Point(Canvas.GetLeft(playerTongue) + playerTongue.Width, Canvas.GetTop(playerTongue) + playerTongue.Height);
 
-            //        // Check if rectangle intersects with the line
-            //        if (DoesRectIntersectLine(point1.X,point1.Y, point2.X, point2.Y, rect))
-            //        {
-            //            line.Stroke = Brushes.Green; // Change the line color if intersected
-            //        }
+                    Point point_start_1 = RotatePoint(t11, tcentre, rotation.Angle);
+                    Point point_start_2 = RotatePoint(t21, tcentre, rotation.Angle);
+                    Point point_end_1 = RotatePoint(t22, tcentre, rotation.Angle);
+                    Point point_end_2 = RotatePoint(t12, tcentre, rotation.Angle);
 
-            //        //foreach (var proie in proies.ToList())
-            //        //{
-            //        //    bool test = DoesRectIntersectLine(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue), playerTongue.Width, playerTongue.Height, proie.BoundingBox);
-            //        //    Console.WriteLine(test);
-            //        //    //proies.Remove(proie);
-            //        //    //canvas.Children.Remove(proie.Image);
-            //        //    //expensionLangue = false;
-            //        //}
+                    Line line_frog_1 = new Line
+                    {
+                        X1 = point_start_1.X,
+                        Y1 = point_start_1.Y,
+                        X2 = point_end_1.X,
+                        Y2 = point_end_1.Y,
+                        StrokeThickness = 2,
+                        Stroke = Brushes.Red
+                    };
 
-            //        //if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
-            //    } else
-            //    {
-            //        expensionLangue = false;
-            //    }
-            //} 
-            //else
-            //{
-            //    if (playerTongue.Width > 0)
-            //    {
-            //        if (playerTongue.Width <= retractionLangueVitesse) playerTongue.Width = 0;
-            //        else playerTongue.Width -= retractionLangueVitesse;
-            //    }
-            //    else tirLangue = false;
-            //}
+                    Line line_frog_2 = new Line
+                    {
+                        X1 = point_start_2.X,
+                        Y1 = point_start_2.Y,
+                        X2 = point_end_2.X,
+                        Y2 = point_end_2.Y,
+                        StrokeThickness = 2,
+                        Stroke = Brushes.Red
+                    };
+
+                    foreach (var proie in proies.ToList())
+                    {
+                        /*
+                         *   A--------B 
+                         *   |        |
+                         *   |        |
+                         *   C--------D
+                         */
+
+                        Point intersection;
+                        Line line_AB = new Line
+                        {
+                            X1 = proie.BoundingBox.X,
+                            Y1 = proie.BoundingBox.Y,
+                            X2 = proie.BoundingBox.X + proie.BoundingBox.Width,
+                            Y2 = proie.BoundingBox.Y,
+                            StrokeThickness = 2,
+                            Stroke = Brushes.Red
+                        };
+                        Line line_BD = new Line
+                        {
+                            X1 = proie.BoundingBox.X + proie.BoundingBox.Width,
+                            Y1 = proie.BoundingBox.Y,
+                            X2 = proie.BoundingBox.X + proie.BoundingBox.Width,
+                            Y2 = proie.BoundingBox.Y + proie.BoundingBox.Height,
+                            StrokeThickness = 2,
+                            Stroke = Brushes.Red
+                        };
+                        Line line_DC = new Line
+                        {
+                            X1 = proie.BoundingBox.X + proie.BoundingBox.Width,
+                            Y1 = proie.BoundingBox.Y + proie.BoundingBox.Height,
+                            X2 = proie.BoundingBox.X,
+                            Y2 = proie.BoundingBox.Y + proie.BoundingBox.Height,
+                            StrokeThickness = 2,
+                            Stroke = Brushes.Red
+                        };
+                        Line line_CA = new Line
+                        {
+                            X1 = proie.BoundingBox.X,
+                            Y1 = proie.BoundingBox.Y + proie.BoundingBox.Height,
+                            X2 = proie.BoundingBox.Y,
+                            Y2 = proie.BoundingBox.Y,
+                            StrokeThickness = 2,
+                            Stroke = Brushes.Red
+                        };
+
+                        //canvas.Children.Add(line_AB);
+                        //canvas.Children.Add(line_BD);
+                        //canvas.Children.Add(line_DC);
+                        //canvas.Children.Add(line_CA);
+
+                        //canvas.Children.Add(line_frog_1);
+                        //canvas.Children.Add(line_frog_2);
+
+                        if (TryGetIntersection(line_frog_1, line_AB, out intersection)
+                         || TryGetIntersection(line_frog_1, line_BD, out intersection)
+                         || TryGetIntersection(line_frog_1, line_DC, out intersection)
+                         || TryGetIntersection(line_frog_1, line_CA, out intersection)
+                          
+                         || TryGetIntersection(line_frog_2, line_AB, out intersection)
+                         || TryGetIntersection(line_frog_2, line_BD, out intersection)
+                         || TryGetIntersection(line_frog_2, line_DC, out intersection)
+                         || TryGetIntersection(line_frog_2, line_CA, out intersection))
+                        {
+                            Console.WriteLine($"ate a {proie.type}");
+                            expensionLangue = false;
+                            line_frog_1.Stroke = Brushes.Green;
+                            line_frog_2.Stroke = Brushes.Green;
+                            canvas.Children.Remove(proie.Image);
+                            proies.Remove(proie);
+                        }
+                    }
+                if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
+                }
+                else
+                {
+                    expensionLangue = false;
+                }
+            }
+            else
+            {
+                if (playerTongue.Width > 0)
+                {
+                    if (playerTongue.Width <= retractionLangueVitesse) playerTongue.Width = 0;
+                    else playerTongue.Width -= retractionLangueVitesse;
+                }
+                else tirLangue = false;
+            }
 
             //fix direction:
             if      (deplacerBas)                    directionJoueur = Directions.down;

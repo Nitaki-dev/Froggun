@@ -14,7 +14,10 @@
     MouseRightButtonDown="rightButtonDown"
     ResizeMode="NoResize"
     mc:Ignorable="d">
-    <Grid x:Name="grid">
+    <Grid
+        x:Name="grid"
+        Width="1280"
+        Height="720">
         <Canvas x:Name="canvas">
             <Canvas.Background>
                 <ImageBrush
