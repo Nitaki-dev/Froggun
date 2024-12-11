@@ -94,8 +94,10 @@ namespace Froggun
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
 
-        int pauseEntreVagues = 5; // en secondes
+        int pauseEntreVagues = 1; // en secondes
+        //int pauseEntreVagues = 5; // en secondes
         int pauseCounter = 0;
+        int waveCount = 0;
         private bool isTimerRunning = false;
 
         public MainWindow()
@@ -209,19 +211,21 @@ namespace Froggun
 
         private void NouvelleVague(object? sender, EventArgs e)
         {
-            Console.WriteLine($"New wave in {pauseEntreVagues-pauseCounter}!");
             labelWave.Content = $"New wave in {pauseEntreVagues - pauseCounter}!";
 
             pauseCounter++;
             if (pauseCounter < pauseEntreVagues) return;
 
-            Console.WriteLine("Wave starting now!");
-            labelWave.Content = $"Wave starting now!";
 
-            for (int i = 0; i < alea.Next(1,5); i++) // Nombre random de spider
+            waveCount++;
+            // \operatorname{ceil}\left(\sqrt{\left(x\right)}^{3}\right) // LaTeX !!
+            int spiderCount = (int) Math.Ceiling(Math.Pow(Math.Sqrt(waveCount),3.0));
+            
+            labelWave.Content = $"Wave {waveCount}";
+
+            for (int i = 0; i < spiderCount; i++)
             {
                 int hautOuBas = alea.Next(0, 1);
-                Console.WriteLine($"Haut ou bas: {hautOuBas} (0=haut, 1=bas)");
                 if (hautOuBas == 0)
                 {
                     Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
@@ -397,10 +401,8 @@ namespace Froggun
         { if (pause) return;
 
             // if no enemies start a wave
-                Console.WriteLine(ennemis.Count + "   " + proies.Count);
             if (ennemis.Count <= 0 && proies.Count <= 0)
             {
-                Console.WriteLine(isTimerRunning);
                 StartWave();
             }
 
@@ -565,6 +567,16 @@ namespace Froggun
 
             Balle balle = new Balle(posArme.X, posArme.Y, angle, vitesseBalle, 10, canvas, imageBalle);
             Balles.Add(balle);
+        }
+
+        public void AfficheScore(int score)
+        {
+            labelScore.Content = $"Score : {score} ";
+        }
+
+        public void AfficheCombo(double combo)
+        {
+            labelScore.Content = $"Combo : {Math.Round(combo, 2)} ";
         }
 
         private void keydown(object sender, KeyEventArgs e)

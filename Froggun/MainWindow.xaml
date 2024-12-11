@@ -53,28 +53,23 @@
                 Stretch="Fill" />
             <Label
                 x:Name="labelScore"
-                Canvas.Left="1103"
-                Canvas.Top="27"
-                Height="45"
+                Canvas.Left="10"
+                Canvas.Top="38"
+                Width="175"
+                Height="28"
                 HorizontalAlignment="Left"
-                VerticalAlignment="Top"
+                VerticalAlignment="Center"
                 Content="Score : "
-                FontFamily="Amiri Quran"
-                FontSize="16"
-                Foreground="White" />
-            <Label
-                x:Name="labelNumScore"
-                Canvas.Left="1161"
-                Canvas.Top="43"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Top"
-                Content="0"
+                FontFamily="72 Black"
+                FontSize="18"
                 Foreground="White" />
             <Label
                 x:Name="labelWave"
-                Canvas.Left="44"
-                Canvas.Top="38"
-                Content="Temps restant : "
+                Canvas.Left="10"
+                Canvas.Top="10"
+                Content="Vagues"
+                FontFamily="72 Black"
+                FontSize="16"
                 Foreground="White" />
             <Image
                 Canvas.Left="746"
@@ -107,6 +102,18 @@
                     <ImageBrush />
                 </Label.Background>
             </Label>
+            <Label
+                x:Name="labelCombo"
+                Canvas.Left="10"
+                Canvas.Top="66"
+                Width="175"
+                Height="28"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Content="Combo :"
+                FontFamily="72 Black"
+                FontSize="18"
+                Foreground="White" />
         </Canvas>
     </Grid>
 </Window>
