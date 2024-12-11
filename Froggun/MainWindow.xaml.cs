@@ -119,7 +119,6 @@ namespace Froggun
                 {
                     if (resultat == "parametre")
                     {
-
                         do
                         {
                             // Affichage du Canvas pour la fenêtre controle
