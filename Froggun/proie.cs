@@ -34,12 +34,10 @@ namespace Froggun
 
         public double targetX;
         public double targetY;
-        public Vector2 minOffset { get; set; }
-        public Vector2 maxOffset { get; set; }
         private DispatcherTimer movementTimer;
 
 
-        public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Vector2 MinOffset, Vector2 MaxOffset, Canvas canvas, Rect BoundingBox = new Rect())
+        public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Canvas canvas, Rect BoundingBox = new Rect())
         {
             X = x;
             Y = y;
@@ -47,8 +45,6 @@ namespace Froggun
             Height = height;
             Speed = speed;
             newPosMaxDiff = newPosOffset;
-            minOffset = MinOffset;
-            maxOffset = MaxOffset;
 
             switch (type)
             {
@@ -102,11 +98,8 @@ namespace Froggun
         public void GenerateRandomTarget(object? sender, EventArgs e)
         {
             Random random = new Random();
-            targetX = X + random.Next(newPosMaxDiff);
-            targetY = Y + random.Next(newPosMaxDiff);
-
-            targetX = Math.Clamp(targetX, minOffset.X, maxOffset.X-Width);
-            targetY = Math.Clamp(targetY, minOffset.Y, maxOffset.Y-Height);
+            targetX = X + random.Next(-newPosMaxDiff, newPosMaxDiff);
+            targetY = Y + random.Next(-newPosMaxDiff, newPosMaxDiff);
         }
 
         public static void UpdateProies(List<Proies> proies, Rect joueur)
@@ -130,10 +123,15 @@ namespace Froggun
                 double newX = proie.X + direction.X * proie.Speed;
                 double newY = proie.Y + direction.Y * proie.Speed;
 
-                Console.WriteLine(proie.minOffset + "    " + proie.maxOffset);
-
                 proie.X = newX;
                 proie.Y = newY;
+
+                if (proie.X < -proie.Width) proie.X += 1280;
+                if (proie.Y < -proie.Height) proie.Y += 740;
+
+                if (proie.X > 1280) proie.X -= 1280-proie.Width;
+                if (proie.Y > 720) proie.Y -= 740-proie.Height;
+
                 Canvas.SetLeft(proie.Image, proie.X);
                 Canvas.SetTop(proie.Image, proie.Y);
             }

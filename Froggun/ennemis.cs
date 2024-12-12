@@ -130,103 +130,112 @@ namespace Froggun
 
         public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur, List<Balle> balles, Canvas canvas)
         {
-            
-            for (int i=0; i<ennemis.Count; i++)
+            // Cache bounding box and other frequently used values
+            Rect rJoueur = joueur;
+
+            for (int i = 0; i < ennemis.Count; i++)
             {
-                if (!ennemis[i].IsAlive) continue;
-                ennemis[i].hasCollided = false;
+                Ennemis ennemi = ennemis[i];
+                if (!ennemi.IsAlive) continue;
+
+                ennemi.hasCollided = false;
+
+                // Handle collision with balls
                 for (int j = 0; j < balles.Count; j++)
                 {
-                    if (balles[j].hasHit) continue;
-                    Rect rImgBalle = new Rect(
-                        balles[j].X,
-                        balles[j].Y,
-                        25,
-                        25
-                    );
+                    Balle balle = balles[j];
+                    if (balle.hasHit) continue;
 
-                    if (ennemis[i].BoundingBox.IntersectsWith(rImgBalle) && !ennemis[i].hasCollided)
+                    Rect rImgBalle = new Rect(balle.X, balle.Y, 25, 25);
+
+                    if (ennemi.BoundingBox.IntersectsWith(rImgBalle) && !ennemi.hasCollided)
                     {
-                        ennemis[i].Health-=50;
+                        ennemi.Health -= 50;
+                        if (ennemi.Health <= 0)
+                            ennemi.Die(ennemis, ennemi, canvas);
 
-                        if (!(ennemis[i].Health<=0))
-                            ennemis[i].healthBar.Width = ennemis[i].healthBar.ActualWidth * (ennemis[i].Health / ennemis[i].maxHealth);
+                        if (ennemi.Health > 0)
+                        {
+                            ennemi.healthBar.Width = ennemi.healthBar.ActualWidth * (ennemi.Health / ennemi.maxHealth);
+                        }
 
-                        balles[j].hasHit = true;
-                        canvas.Children.Remove(balles[j].BalleImage);
+                        balle.hasHit = true;
+                        canvas.Children.Remove(balle.BalleImage);
                         balles.RemoveAt(j);
-                        j--;
+                        j--; // Adjust the index after removal
                         break;
                     }
                 }
 
-                if (ennemis[i].Health <= 0)
-                {
-                    ennemis[i].Die(ennemis, ennemis[i], canvas);
-                    continue;
-                }
-                
-                if (ennemis[i].isSlowed) ennemis[i].SpeedMultiplier = 0.5;
-                else ennemis[i].SpeedMultiplier = 0.25;
+                // Skip if enemy is dead
+                if (ennemi.Health <= 0) continue;
 
-                ennemis[i].BoundingBox = new Rect(
-                    (int)ennemis[i].X,
-                    (int)ennemis[i].Y,
-                    (int)ennemis[i].Width,
-                    (int)ennemis[i].Height
-                );
+                // Adjust movement speed based on status (isSlowed)
+                ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.5 : 0.25;
 
-                Vector2 direction = new Vector2(
-                    (float)(joueur.X - ennemis[i].X),
-                    (float)(joueur.Y - ennemis[i].Y)
-                );
+                // Update the bounding box (optimized for reuse)
+                ennemi.BoundingBox = new Rect(ennemi.X, ennemi.Y, ennemi.Width, ennemi.Height);
 
+                // Calculate direction towards the player (only do this if necessary)
+                Vector2 direction = new Vector2((float)(rJoueur.X - ennemi.X), (float)(rJoueur.Y - ennemi.Y));
                 direction = Vector2.Normalize(direction);
-                double newX = ennemis[i].X + direction.X * ennemis[i].Speed * ennemis[i].SpeedMultiplier;
-                double newY = ennemis[i].Y + direction.Y * ennemis[i].Speed * ennemis[i].SpeedMultiplier;
 
-                bool canMove = true; 
-                foreach (var autreEnnemi in ennemis)
+                double newX = ennemi.X + direction.X * ennemi.Speed * ennemi.SpeedMultiplier;
+                double newY = ennemi.Y + direction.Y * ennemi.Speed * ennemi.SpeedMultiplier;
+
+                // Check if enemy can move (avoid unnecessary checks)
+                bool canMove = true;
+                for (int j = 0; j < ennemis.Count; j++)
                 {
-                    if (autreEnnemi == ennemis[i]) continue;
+                    if (i == j) continue; // Skip self
+                    if (ennemis[i].BoundingBox.IntersectsWith(ennemis[j].BoundingBox))
+                    {
+                        canMove = false;
+                        break; // No need to check further
+                    }
                 }
 
                 if (canMove)
                 {
-                    ennemis[i].X = newX;
-                    ennemis[i].Y = newY;
+                    ennemi.X = newX;
+                    ennemi.Y = newY;
                 }
 
-                if (joueur.IntersectsWith(ennemis[i].BoundingBox))
+                // Check if the enemy collides with the player
+                if (rJoueur.IntersectsWith(ennemi.BoundingBox) && !ennemi.isSlowed)
                 {
-                    //health--; // for player
-                    if (!ennemis[i].isSlowed) ennemis[i].SlowDown(3);
+                    ennemi.SlowDown(3); // Slow down effect
                 }
 
-                Canvas.SetLeft(ennemis[i].Image, ennemis[i].X);
-                Canvas.SetTop(ennemis[i].Image, ennemis[i].Y);
-                Canvas.SetLeft(ennemis[i].healthBarEmpty, ennemis[i].X);
-                Canvas.SetTop(ennemis[i].healthBarEmpty, ennemis[i].Y - 15);
-                Canvas.SetLeft(ennemis[i].healthBar, ennemis[i].X);
-                Canvas.SetTop(ennemis[i].healthBar, ennemis[i].Y - 15);
+                // Efficiently update canvas positions
+                Canvas.SetLeft(ennemi.Image, ennemi.X);
+                Canvas.SetTop(ennemi.Image, ennemi.Y);
+                Canvas.SetLeft(ennemi.healthBarEmpty, ennemi.X);
+                Canvas.SetTop(ennemi.healthBarEmpty, ennemi.Y - 15);
+                Canvas.SetLeft(ennemi.healthBar, ennemi.X);
+                Canvas.SetTop(ennemi.healthBar, ennemi.Y - 15);
             }
 
+            // Collision handling between enemies
             for (int i = 0; i < ennemis.Count - 1; i++)
             {
-                for (int j = ennemis.Count - 1; j > i; j--)
+                Ennemis ennemiA = ennemis[i];
+                for (int j = i + 1; j < ennemis.Count; j++)
                 {
-                    if (ennemis[i].BoundingBox.IntersectsWith(ennemis[j].BoundingBox))
+                    Ennemis ennemiB = ennemis[j];
+
+                    if (ennemiA.BoundingBox.IntersectsWith(ennemiB.BoundingBox))
                     {
-                        Vector2 direction = new Vector2(
-                            (float)(joueur.X - ennemis[i].X),
-                            (float)(joueur.Y - ennemis[i].Y)
-                        );
+                        // Resolve collision by pushing enemies apart
+                        Vector2 direction = new Vector2((float)(rJoueur.X - ennemiA.X), (float)(rJoueur.Y - ennemiA.Y));
                         direction = Vector2.Normalize(direction);
+
                         float collisionPushback = 3.0f;
-                        ennemis[i].X += direction.X * collisionPushback;
-                        ennemis[i].Y += direction.Y * collisionPushback;
-                        ennemis[j].X -= direction.X * collisionPushback;
-                        ennemis[j].Y -= direction.Y * collisionPushback;
+                        ennemiA.X += direction.X * collisionPushback;
+                        ennemiA.Y += direction.Y * collisionPushback;
+
+                        ennemiB.X -= direction.X * collisionPushback;
+                        ennemiB.Y -= direction.Y * collisionPushback;
                     }
                 }
             }

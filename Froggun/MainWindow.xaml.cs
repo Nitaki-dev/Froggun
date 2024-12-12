@@ -5,12 +5,7 @@ using System.Windows.Media;
 using System.Windows.Shapes;
 using System.Windows.Controls;
 using System.Windows.Threading;
-using System.Windows.Media.Animation;
 using System.Windows.Media.Imaging;
-using System.Windows.Controls.Primitives;
-using System.Xml.Linq;
-using System.Windows.Media.Media3D;
-using System.Reflection.PortableExecutable;
 
 namespace Froggun
 {
@@ -56,7 +51,8 @@ namespace Froggun
         private const float forceSaut = 15.0f;
         private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
-        private const float friction = 0.4f;
+        //private const float friction = 0.4f;
+        private const float friction = 0.8f;
         private const float gravite = 0.5f;
         
         private bool verrouillageMouvement = false;
@@ -78,6 +74,8 @@ namespace Froggun
         private static Vector2 posSouris = new Vector2();
         private double moveSpeed = 20.0;
 
+        private float currentAngle;
+
         private static Vector2 posGun = new Vector2();
 
         private static Vector2 posLangue = new Vector2();
@@ -95,8 +93,7 @@ namespace Froggun
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
 
-        int pauseEntreVagues = 1; // en secondes
-        //int pauseEntreVagues = 5; // en secondes
+        int pauseEntreVagues = 5; // en secondes
         int pauseCounter = 0;
         int waveCount = 0;
         private bool isTimerRunning = false;
@@ -192,10 +189,10 @@ namespace Froggun
             lab_Pause.Visibility = Visibility.Collapsed;
             
             InitialiserMinuterie();
-            Minuterie();
-            InitObjects();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
+            //Measure(new Size(Width, Height));
+            //Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
         }
 
         void StartWave()
@@ -231,11 +228,17 @@ namespace Froggun
                 {
                     Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
                     ennemis.Add(spider);
+
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(50, 200), alea.Next(100, 1100), 50, 50, 3, 500, 200, canvas);
+                    proies.Add(fly);
                 }
                 else
                 {
                     Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(500, 600), 100, 100, 8, canvas);
                     ennemis.Add(spider);
+
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(100, 1100), alea.Next(50, 200), 50, 50, 3, 500, 200, canvas);
+                    proies.Add(fly);
                 }
             }
             pauseVagues.Stop(); 
@@ -250,21 +253,6 @@ namespace Froggun
             minuterie.Start();
         }
 
-        private void Minuterie()
-        {
-            tempsRestant = new DispatcherTimer();
-            tempsRestant.Interval = TimeSpan.FromSeconds(1);
-            tempsRestant.Tick += tempsEnMoins;
-            tempsRestant.Start();
-            playerR = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
-
-        }
-
-        private void tempsEnMoins(object? sender, EventArgs e)
-        {
-            temps--;
-        }
-        
         private void InitImage()
         {
             imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
@@ -277,126 +265,93 @@ namespace Froggun
             imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
         }
 
-        private void InitObjects()
+        private void UpdateMousePosition()
         {
-            Proies fly1 = new Proies(TypeProies.Fly,
-                600, 600, //position
-                50, 50,   // taille
-                3, 500, 200, // vitesse, tail max du prochain pas, et delai entre chaque pas
-                new Vector2(0, 0), new Vector2((float)1700, (float)600), canvas); // zone où la proie peut navigeur
-
-            proies.Add(fly1);
-        }
-
-        private void InitScore(int ajout)
-        {
-            score += ajout;
-        }
-
-        private void PivoterArme()
-        {
-            posArme.X = (float)Mouse.GetPosition(canvas).X;
-            posArme.Y = (float)Mouse.GetPosition(canvas).Y;
-
-            // Centre du joueur
+            // Get the mouse position once and calculate the direction to player center
+            Point mousePos = Mouse.GetPosition(canvas);
             Vector2 posCentreJoueur = new Vector2(
                 (float)(posJoueur.X + player.Width / 2.0f),
                 (float)(posJoueur.Y + player.Height / 2.0f)
             );
 
-            // Trouve la position de l'arme autour du joueur
-            Vector2 directionSouris = Vector2.Normalize(posArme - posCentreJoueur);
-            float distanceJoueurSouris = Vector2.Distance(posCentreJoueur, posArme);
+            // Calculate direction vector and angle once
+            Vector2 directionSouris = Vector2.Normalize(new Vector2((float)mousePos.X, (float)mousePos.Y) - posCentreJoueur);
+            currentAngle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
+
+            // Update positions for both the weapon and tongue
+            UpdateWeaponPosition(mousePos, posCentreJoueur, directionSouris);
+            UpdateTonguePosition(mousePos, posCentreJoueur, directionSouris);
+        }
+
+        private void UpdateWeaponPosition(Point mousePos, Vector2 posCentreJoueur, Vector2 directionSouris)
+        {
+            // Calculate weapon position around the player
+            float distanceJoueurSouris = Vector2.Distance(posCentreJoueur, new Vector2((float)mousePos.X, (float)mousePos.Y));
             posArme = posCentreJoueur + (directionSouris * distancePisolet);
 
-            // Trouve l'angle de l'arme du joueur
-            float angle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
-
-            // Initialisation des transformes de l'image de l'arme du joueur
-            TransformGroup myTransformGroup = new TransformGroup();
+            // Apply transforms for the weapon
+            TransformGroup transformGroup = new TransformGroup();
             ScaleTransform inverseArme = new ScaleTransform();
-            RotateTransform rotationArme = new RotateTransform(angle);
+            RotateTransform rotationArme = new RotateTransform(currentAngle);
 
-            // Inverser l'image de l'arme si à gauche
-            if (directionSouris.X > 0) inverseArme.ScaleY = 1;
-            else inverseArme.ScaleY = -1;
+            // Flip the weapon image if the mouse is to the left
+            inverseArme.ScaleY = directionSouris.X > 0 ? 1 : -1;
 
-            gun.RenderTransform = rotationArme;
-            gun.RenderTransform = inverseArme;
+            transformGroup.Children.Add(inverseArme);
+            transformGroup.Children.Add(rotationArme);
+            gun.RenderTransform = transformGroup;
 
-            myTransformGroup.Children.Add(inverseArme);
-            myTransformGroup.Children.Add(rotationArme);
-
-            gun.RenderTransform = myTransformGroup;
-
+            // Set the position of the weapon
             Canvas.SetTop(gun, posArme.Y);
             Canvas.SetLeft(gun, posArme.X);
         }
 
-        private void PivoterLangue()
+        private void UpdateTonguePosition(Point mousePos, Vector2 posCentreJoueur, Vector2 directionSouris)
         {
-            posLangue.X = (float)Mouse.GetPosition(canvas).X;
-            posLangue.Y = (float)Mouse.GetPosition(canvas).Y;
-
-            Vector2 posCentreJoueur = new Vector2(
-                (float)(posJoueur.X + player.Width / 2.0f),
-                (float)(posJoueur.Y + player.Height / 2.0f)
-            );
-
-            Vector2 directionSouris = Vector2.Normalize(posLangue - posCentreJoueur);
-
-            float angle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
-            RotateTransform rotationArme = new RotateTransform(angle);
-            
+            // Set tongue rotation based on the calculated angle
+            RotateTransform rotationArme = new RotateTransform(currentAngle);
             if (!tirLangue) playerTongue.RenderTransform = rotationArme;
-            
-            Canvas.SetTop(playerTongue, directionSouris.X > 0 ? posCentreJoueur.Y : posCentreJoueur.Y + playerTongue.Height/2.0f);
+
+            // Set the position of the tongue
+            Canvas.SetTop(playerTongue, directionSouris.X > 0 ? posCentreJoueur.Y : posCentreJoueur.Y + playerTongue.Height / 2.0f);
             Canvas.SetLeft(playerTongue, posCentreJoueur.X);
         }
 
         public static bool TryGetIntersection(Line line1, Line line2, out Point intersection)
         {
-            // explication de https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+            // explication: https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
             Point p = new Point(line1.X1, line1.Y1);
-            Point r = new Point(line1.X2 - line1.X1, line1.Y2 - line1.Y1); // r = (X2 - X1, Y2 - Y1)
+            Point r = new Point(line1.X2 - line1.X1, line1.Y2 - line1.Y1);
             Point q = new Point(line2.X1, line2.Y1);
-            Point s = new Point(line2.X2 - line2.X1, line2.Y2 - line2.Y1); // s = (X2 - X1, Y2 - Y1)
+            Point s = new Point(line2.X2 - line2.X1, line2.Y2 - line2.Y1);
 
-            // Calculate cross products (2D vectors)
             double rCrossS = CrossProduct(r, s);
             Point qMinusP = new Point(q.X - p.X, q.Y - p.Y);
             double qMinusPCrossS = CrossProduct(qMinusP, s);
             double qMinusPCrossR = CrossProduct(qMinusP, r);
 
-            // Case 1: r × s == 0 (collinear or parallel)
             if (rCrossS == 0)
             {
-                // If (q - p) × r == 0, the lines are collinear
                 if (qMinusPCrossR == 0)
                 {
-                    // Check if the segments overlap
                     double t0 = (qMinusP.X * r.X + qMinusP.Y * r.Y) / (r.X * r.X + r.Y * r.Y);
                     double t1 = t0 + (s.X * r.X + s.Y * r.Y) / (r.X * r.X + r.Y * r.Y);
 
-                    // If the segments overlap, return the intersection point
                     if ((t0 >= 0 && t0 <= 1) || (t1 >= 0 && t1 <= 1))
                     {
-                        intersection = new Point(p.X + t0 * r.X, p.Y + t0 * r.Y); // Use t0 as the intersection point
+                        intersection = new Point(p.X + t0 * r.X, p.Y + t0 * r.Y);
                         return true;
                     }
                 }
-                // If the lines are parallel and not collinear
                 intersection = new Point();
                 return false;
             }
 
-            // Case 2: r × s != 0 (lines are not parallel)
             if (rCrossS != 0)
             {
                 double t = qMinusPCrossS / rCrossS;
                 double u = qMinusPCrossR / rCrossS;
-
-                // Check if the intersection point lies within the bounds of both segments
+                
                 if (t >= 0 && t <= 1 && u >= 0 && u <= 1)
                 {
                     intersection = new Point(p.X + t * r.X, p.Y + t * r.Y);
@@ -404,7 +359,6 @@ namespace Froggun
                 }
             }
 
-            // Case 3: Lines are parallel but do not intersect
             intersection = new Point();
             return false;
         }
@@ -414,9 +368,9 @@ namespace Froggun
             return v1.X * v2.Y - v1.Y * v2.X;
         }
 
-        private Point RotatePoint(Point point, Point center, double angle)
+        private Point RotatePoint(Point point, Point center, double a)
         {
-            double radians = angle * (Math.PI / 180); // Convert angle to radians
+            double radians = a * (Math.PI / 180); // Convert angle to radians
             double cos = Math.Cos(radians);
             double sin = Math.Sin(radians);
 
@@ -437,7 +391,7 @@ namespace Froggun
             // if no enemies start a wave
             if (ennemis.Count <= 0 && proies.Count <= 0)
             {
-                //StartWave();
+                StartWave();
             }
 
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
@@ -477,10 +431,10 @@ namespace Froggun
 
                     // create two lines from start to end of tongue
                     var rotation = (RotateTransform)playerTongue.RenderTransform;
-                    Point tcentre = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height/2.0f);
+                    Point tcentre = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height / 2.0f);
 
                     Point t11 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue));
-                    Point t12 = new Point(Canvas.GetLeft(playerTongue)+playerTongue.Width, Canvas.GetTop(playerTongue));
+                    Point t12 = new Point(Canvas.GetLeft(playerTongue) + playerTongue.Width, Canvas.GetTop(playerTongue));
 
                     Point t21 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height);
                     Point t22 = new Point(Canvas.GetLeft(playerTongue) + playerTongue.Width, Canvas.GetTop(playerTongue) + playerTongue.Height);
@@ -569,7 +523,7 @@ namespace Froggun
                          || TryGetIntersection(line_frog_1, line_BD, out intersection)
                          || TryGetIntersection(line_frog_1, line_DC, out intersection)
                          || TryGetIntersection(line_frog_1, line_CA, out intersection)
-                          
+
                          || TryGetIntersection(line_frog_2, line_AB, out intersection)
                          || TryGetIntersection(line_frog_2, line_BD, out intersection)
                          || TryGetIntersection(line_frog_2, line_DC, out intersection)
@@ -583,7 +537,7 @@ namespace Froggun
                             proies.Remove(proie);
                         }
                     }
-                if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
+                    if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
                 }
                 else
                 {
@@ -601,7 +555,7 @@ namespace Froggun
             }
 
             //fix direction:
-            if      (deplacerBas)                    directionJoueur = Directions.down;
+            if (deplacerBas)                         directionJoueur = Directions.down;
             else if (deplacerHaut)                   directionJoueur = Directions.up;
             else if (deplacerDroite)                 directionJoueur = Directions.right;
             else if (deplacerGauche)                 directionJoueur = Directions.left;
@@ -622,8 +576,7 @@ namespace Froggun
             if (directionJoueur == Directions.up || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight) player.Source = imgFrogBack;
             if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
 
-            PivoterArme();
-            PivoterLangue();
+            UpdateMousePosition();
 
             if (deplacerHaut && Canvas.GetTop(player) > 0) vitesseJoueur.Y = -vitesseDeplacement;  // bouger vers le haut
             else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight-player.ActualHeight) vitesseJoueur.Y = vitesseDeplacement; // bouger vers le bas 
@@ -636,8 +589,8 @@ namespace Froggun
             }
             posJoueur.Y += vitesseJoueur.Y;
 
-            if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth-player.ActualWidth) vitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
-            else if (deplacerGauche && Canvas.GetLeft(player) > 0) vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
+            if      (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth-player.ActualWidth) vitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
+            else if (deplacerGauche && Canvas.GetLeft(player) > 0)                                   vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
             else
             {
                 // réduire la vitesse du joueur en fonction de la friction
@@ -649,7 +602,6 @@ namespace Froggun
             posJoueur.X += vitesseJoueur.X;
             Canvas.SetLeft(player, posJoueur.X);
             Canvas.SetTop(player, posJoueur.Y);
-            
         }
 
         private void ShootTung()
@@ -661,18 +613,8 @@ namespace Froggun
 
         private void ShootGun()
         {
-            Vector2 dirBalle = new Vector2((float)Mouse.GetPosition(canvas).X, (float)Mouse.GetPosition(canvas).Y);
-
-            // Centre du joueur
-            Vector2 posCentreJoueur = new Vector2(
-                (float)(posJoueur.X + player.Width / 2.0f),
-                (float)(posJoueur.Y + player.Height / 6.0f)
-            );
-
-            Vector2 directionSouris = Vector2.Normalize(dirBalle - posCentreJoueur);
-            double angle = Math.Atan2(directionSouris.Y, directionSouris.X);
-
-            Balle balle = new Balle(posArme.X, posArme.Y, angle, vitesseBalle, 10, canvas, imageBalle);
+            double a = currentAngle * Math.PI / 180.0;
+            Balle balle = new Balle(posArme.X, posArme.Y, a, vitesseBalle, 10, canvas, imageBalle);
             Balles.Add(balle);
         }
 
