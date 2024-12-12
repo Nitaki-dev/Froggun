@@ -6,6 +6,8 @@ using System.Windows.Shapes;
 using System.Windows.Controls;
 using System.Windows.Threading;
 using System.Windows.Media.Imaging;
+using System.Media;
+using System.IO;
 
 namespace Froggun
 {
@@ -97,13 +99,17 @@ namespace Froggun
         int pauseCounter = 0;
         int waveCount = 0;
         private bool isTimerRunning = false;
-
+        public SoundPlayer musique;
+        public Stream audioStream;
+        
         public MainWindow()
         {
             InitImage();
-            InitializeComponent();
-            // Création de la fenêtre parametre avec un Canvas
-            parametre fentreNiveau = new parametre();
+            InitializeComponent(); 
+            
+
+        // Création de la fenêtre parametre avec un Canvas
+        parametre fentreNiveau = new parametre();
             fentreNiveau.ShowDialog();  // Affichage de la fenêtre parametre
 
             // Si la fenêtre parametre est fermée avec DialogResult == false, fermer l'application
@@ -606,13 +612,32 @@ namespace Froggun
 
         private void ShootTung()
         {
+            SonLangue();
             if (tirLangue) return;
             else tirLangue = true;
             expensionLangue = true;
         }
-
+        private void SonGun()
+        {
+            // Charger le fichier audio depuis les ressources
+            Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
+            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            // Créer un objet SoundPlayer pour lire le son
+            SoundPlayer musique = new SoundPlayer(audioStream);
+            musique.Play();
+        }
+        private void SonLangue()
+        {
+            // Charger le fichier audio depuis les ressources
+            Uri audioUri = new Uri("/son/langue.wav", UriKind.RelativeOrAbsolute);
+            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            // Créer un objet SoundPlayer pour lire le son
+            SoundPlayer musique = new SoundPlayer(audioStream);
+            musique.Play();
+        }
         private void ShootGun()
         {
+            SonGun();
             double a = currentAngle * Math.PI / 180.0;
             Balle balle = new Balle(posArme.X, posArme.Y, a, vitesseBalle, 10, canvas, imageBalle);
             Balles.Add(balle);
@@ -630,8 +655,7 @@ namespace Froggun
 
         private void keydown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.D && !
-                pause)
+            if (e.Key == Key.D && !pause)
             {
                 deplacerDroite = true;
                 deplacerGauche = false;
