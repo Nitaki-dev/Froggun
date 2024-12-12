@@ -49,6 +49,7 @@
 		<None Remove="img\vie\health4.png" />
 		<None Remove="son\coupdefeu.wav" />
 		<None Remove="son\langue.wav" />
+		<None Remove="son\mortEnnemie.wav" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -90,5 +91,6 @@
 		<Resource Include="img\parametre.png" />
 		<Resource Include="son\coupdefeu.wav" />
 		<Resource Include="son\langue.wav" />
+		<Resource Include="son\mortEnnemie.wav" />
 	</ItemGroup>
 </Project>

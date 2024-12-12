@@ -653,6 +653,7 @@ namespace Froggun
             SoundPlayer musique = new SoundPlayer(audioStream);
             musique.Play();
         }
+        
         private void ShootGun()
         {
             SonGun();
