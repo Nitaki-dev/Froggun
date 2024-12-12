@@ -36,7 +36,6 @@ namespace Froggun
         public double targetY;
         private DispatcherTimer movementTimer;
 
-
         public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Canvas canvas, Rect BoundingBox = new Rect())
         {
             X = x;

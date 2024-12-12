@@ -8,6 +8,7 @@ using System.Windows.Threading;
 using System.Windows.Media.Imaging;
 using System.Media;
 using System.IO;
+using System.Diagnostics;
 
 namespace Froggun
 {
@@ -18,16 +19,9 @@ namespace Froggun
     {
         private static Random alea = new Random();
         
-        private int score = 0;
         private bool pause = false;
-        private int temps = 60;
-        private int health = 5;
-        private double speedFactorFirefly = 0.5;
-        private double speedFactorAraignee = 0.8;
         private static DispatcherTimer minuterie = new DispatcherTimer();
-        private static DispatcherTimer tempsRestant = new DispatcherTimer();
         private static DispatcherTimer pauseVagues = new DispatcherTimer();
-        private Rect playerR = new Rect();
 
         private static ScaleTransform joueurFlip = new ScaleTransform();
         private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
@@ -50,43 +44,25 @@ namespace Froggun
         }
         Directions directionJoueur = Directions.right;
 
-        private const float forceSaut = 15.0f;
-        private const float vitesseMaxChute = 9.8f;
         private const float vitesseDeplacement = 8.0f;
-        //private const float friction = 0.4f;
-        private const float friction = 0.8f;
-        private const float gravite = 0.5f;
-        
-        private bool verrouillageMouvement = false;
-        private bool estAuSol = false;
-        private bool plongeVersSol = false;
+        private const float friction = 0.4f;
+        //private const float friction = 0.8f;
+
         private bool deplacerGauche = false;
         private bool deplacerDroite = false;
         private bool deplacerHaut = false;
         private bool deplacerBas = false;
         
-        private const int nbAnts = 3;
-        private const int nbFireflys = 5;
-        private static List<Image> ants;
-        private static List<Image> fireflys;
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
-        List<Rect> rectanglesfireflys = new List<Rect>();
-        List<Rect> rectanglesants = new List<Rect>();
-        private static Vector2 posSouris = new Vector2();
-        private double moveSpeed = 20.0;
 
         private float currentAngle;
 
-        private static Vector2 posGun = new Vector2();
-
-        private static Vector2 posLangue = new Vector2();
         private static bool tirLangue, expensionLangue;
         private static readonly int expensionLangueVitesse = 60, retractionLangueVitesse = 80;
         private static Vector2 posArme = new Vector2();
         private static int distancePisolet = 20;
 
-        private static Vector2 dirBalle = new Vector2();
         private static BitmapImage imageBalle;
         private static double vitesseBalle = 30.0f;
 
@@ -99,17 +75,17 @@ namespace Froggun
         int pauseCounter = 0;
         int waveCount = 0;
         private bool isTimerRunning = false;
-        public SoundPlayer musique;
-        public Stream audioStream;
+
+        //public SoundPlayer musique;
+        //public Stream audioStream;
         
         public MainWindow()
         {
             InitImage();
             InitializeComponent(); 
-            
 
-        // Création de la fenêtre parametre avec un Canvas
-        parametre fentreNiveau = new parametre();
+            // Création de la fenêtre parametre avec un Canvas
+            parametre fentreNiveau = new parametre();
             fentreNiveau.ShowDialog();  // Affichage de la fenêtre parametre
 
             // Si la fenêtre parametre est fermée avec DialogResult == false, fermer l'application
@@ -264,9 +240,9 @@ namespace Froggun
                     proies.Add(fly);
                 }
             }
-            bool trier;
             Console.WriteLine(spiderCount);
             Console.WriteLine(ennemis.Count);
+            /*
             //do
             //{
             //    trier = true;
@@ -288,7 +264,6 @@ namespace Froggun
             //                    ennemis[i].X = alea.Next(0, 1200);
             //                    ennemis[i].Y = alea.Next(50, 150);
             //                }
-
             //                else if (hautBasGaucheDroite2 == 2)
             //                {
             //                    ennemis[i].X = alea.Next(1100, 1200);
@@ -303,9 +278,7 @@ namespace Froggun
             //        }
             //    }
             //} while (trier == false);
-
-
-
+            */
             pauseVagues.Stop(); 
             isTimerRunning = false;
         }
@@ -451,7 +424,10 @@ namespace Froggun
         }
 
         private void Loop(object? sender, EventArgs e) 
-        { if (pause) return;
+        {
+            if (pause) return;
+            //Stopwatch stopwatch = new Stopwatch();
+            //stopwatch.Start();
 
             // if no enemies start a wave
             if (ennemis.Count <= 0 && proies.Count <= 0)
@@ -464,160 +440,8 @@ namespace Froggun
             Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
             Proies.UpdateProies(proies, playerRect);
 
-            for (int i = 0; i < Balles.Count; i++)
-            {
-                Balle balle = Balles[i];
-                balle.UpdatePositionBalles();
-                if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
-                 || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight) {
-                    Balles.RemoveAt(i);
-                    canvas.Children.Remove(balle.BalleImage);
-                }
-            }
-
-            if (expensionLangue)
-            {
-                if (playerTongue.Width < 300)
-                {
-                    Vector2 posCentreJoueur = new Vector2(
-                        (float)(posJoueur.X + player.Width / 2.0f),
-                        (float)(posJoueur.Y + player.Height / 2.0f)
-                    );
-
-                    Line test = new Line
-                    {
-                        X1 = posCentreJoueur.X - 1,
-                        Y1 = posCentreJoueur.Y - 1,
-                        X2 = posCentreJoueur.X + 1,
-                        Y2 = posCentreJoueur.Y + 1,
-                        Stroke = Brushes.Red,
-                        StrokeThickness = 2
-                    };
-
-                    // create two lines from start to end of tongue
-                    var rotation = (RotateTransform)playerTongue.RenderTransform;
-                    Point tcentre = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height / 2.0f);
-
-                    Point t11 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue));
-                    Point t12 = new Point(Canvas.GetLeft(playerTongue) + playerTongue.Width, Canvas.GetTop(playerTongue));
-
-                    Point t21 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height);
-                    Point t22 = new Point(Canvas.GetLeft(playerTongue) + playerTongue.Width, Canvas.GetTop(playerTongue) + playerTongue.Height);
-
-                    Point point_start_1 = RotatePoint(t11, tcentre, rotation.Angle);
-                    Point point_start_2 = RotatePoint(t21, tcentre, rotation.Angle);
-                    Point point_end_1 = RotatePoint(t22, tcentre, rotation.Angle);
-                    Point point_end_2 = RotatePoint(t12, tcentre, rotation.Angle);
-
-                    Line line_frog_1 = new Line
-                    {
-                        X1 = point_start_1.X,
-                        Y1 = point_start_1.Y,
-                        X2 = point_end_1.X,
-                        Y2 = point_end_1.Y,
-                        StrokeThickness = 2,
-                        Stroke = Brushes.Red
-                    };
-
-                    Line line_frog_2 = new Line
-                    {
-                        X1 = point_start_2.X,
-                        Y1 = point_start_2.Y,
-                        X2 = point_end_2.X,
-                        Y2 = point_end_2.Y,
-                        StrokeThickness = 2,
-                        Stroke = Brushes.Red
-                    };
-
-                    foreach (var proie in proies.ToList())
-                    {
-                        /*
-                         *   A--------B 
-                         *   |        |
-                         *   |        |
-                         *   C--------D
-                         */
-
-                        Point intersection;
-                        Line line_AB = new Line
-                        {
-                            X1 = proie.BoundingBox.X,
-                            Y1 = proie.BoundingBox.Y,
-                            X2 = proie.BoundingBox.X + proie.BoundingBox.Width,
-                            Y2 = proie.BoundingBox.Y,
-                            StrokeThickness = 2,
-                            Stroke = Brushes.Red
-                        };
-                        Line line_BD = new Line
-                        {
-                            X1 = proie.BoundingBox.X + proie.BoundingBox.Width,
-                            Y1 = proie.BoundingBox.Y,
-                            X2 = proie.BoundingBox.X + proie.BoundingBox.Width,
-                            Y2 = proie.BoundingBox.Y + proie.BoundingBox.Height,
-                            StrokeThickness = 2,
-                            Stroke = Brushes.Red
-                        };
-                        Line line_DC = new Line
-                        {
-                            X1 = proie.BoundingBox.X + proie.BoundingBox.Width,
-                            Y1 = proie.BoundingBox.Y + proie.BoundingBox.Height,
-                            X2 = proie.BoundingBox.X,
-                            Y2 = proie.BoundingBox.Y + proie.BoundingBox.Height,
-                            StrokeThickness = 2,
-                            Stroke = Brushes.Red
-                        };
-                        Line line_CA = new Line
-                        {
-                            X1 = proie.BoundingBox.X,
-                            Y1 = proie.BoundingBox.Y + proie.BoundingBox.Height,
-                            X2 = proie.BoundingBox.Y,
-                            Y2 = proie.BoundingBox.Y,
-                            StrokeThickness = 2,
-                            Stroke = Brushes.Red
-                        };
-
-                        //canvas.Children.Add(line_AB);
-                        //canvas.Children.Add(line_BD);
-                        //canvas.Children.Add(line_DC);
-                        //canvas.Children.Add(line_CA);
-
-                        //canvas.Children.Add(line_frog_1);
-                        //canvas.Children.Add(line_frog_2);
-
-                        if (TryGetIntersection(line_frog_1, line_AB, out intersection)
-                         || TryGetIntersection(line_frog_1, line_BD, out intersection)
-                         || TryGetIntersection(line_frog_1, line_DC, out intersection)
-                         || TryGetIntersection(line_frog_1, line_CA, out intersection)
-
-                         || TryGetIntersection(line_frog_2, line_AB, out intersection)
-                         || TryGetIntersection(line_frog_2, line_BD, out intersection)
-                         || TryGetIntersection(line_frog_2, line_DC, out intersection)
-                         || TryGetIntersection(line_frog_2, line_CA, out intersection))
-                        {
-                            Console.WriteLine($"ate a {proie.type}");
-                            expensionLangue = false;
-                            line_frog_1.Stroke = Brushes.Green;
-                            line_frog_2.Stroke = Brushes.Green;
-                            canvas.Children.Remove(proie.Image);
-                            proies.Remove(proie);
-                        }
-                    }
-                    if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
-                }
-                else
-                {
-                    expensionLangue = false;
-                }
-            }
-            else
-            {
-                if (playerTongue.Width > 0)
-                {
-                    if (playerTongue.Width <= retractionLangueVitesse) playerTongue.Width = 0;
-                    else playerTongue.Width -= retractionLangueVitesse;
-                }
-                else tirLangue = false;
-            }
+            CheckOutofboundsBullets();
+            CheckEatingFly();
 
             //fix direction:
             if (deplacerBas)                         directionJoueur = Directions.down;
@@ -667,37 +491,189 @@ namespace Froggun
             posJoueur.X += vitesseJoueur.X;
             Canvas.SetLeft(player, posJoueur.X);
             Canvas.SetTop(player, posJoueur.Y);
+
+            //stopwatch.Stop();
+            //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
+        }
+
+        private void CheckOutofboundsBullets()
+        {
+            for (int i = 0; i < Balles.Count; i++)
+            {
+                Balle balle = Balles[i];
+                balle.UpdatePositionBalles();
+                if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
+                 || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
+                {
+                    Balles.RemoveAt(i);
+                    canvas.Children.Remove(balle.BalleImage);
+                }
+            }
+        }
+
+        private void CheckEatingFly()
+        {
+            if (expensionLangue)
+            {
+                if (playerTongue.Width < 300)
+                {
+                    // create two lines from start to end of tongue
+                    var rotation = (RotateTransform)playerTongue.RenderTransform;
+                    Point tcentre = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height / 2.0f);
+
+                    Point t11 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue));
+                    Point t12 = new Point(Canvas.GetLeft(playerTongue) + playerTongue.Width, Canvas.GetTop(playerTongue));
+
+                    Point t21 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height);
+                    Point t22 = new Point(Canvas.GetLeft(playerTongue) + playerTongue.Width, Canvas.GetTop(playerTongue) + playerTongue.Height);
+
+                    Point point_start_1 = RotatePoint(t11, tcentre, rotation.Angle);
+                    Point point_start_2 = RotatePoint(t21, tcentre, rotation.Angle);
+                    Point point_end_1 = RotatePoint(t22, tcentre, rotation.Angle);
+                    Point point_end_2 = RotatePoint(t12, tcentre, rotation.Angle);
+
+                    Line line_frog_1 = new Line
+                    {
+                        X1 = point_start_1.X,
+                        Y1 = point_start_1.Y,
+                        X2 = point_end_1.X,
+                        Y2 = point_end_1.Y,
+                        StrokeThickness = 2,
+                        Stroke = Brushes.Red
+                    };
+
+                    Line line_frog_2 = new Line
+                    {
+                        X1 = point_start_2.X,
+                        Y1 = point_start_2.Y,
+                        X2 = point_end_2.X,
+                        Y2 = point_end_2.Y,
+                        StrokeThickness = 2,
+                        Stroke = Brushes.Red
+                    };
+
+                    //canvas.Children.Add(line_frog_1);
+                    //canvas.Children.Add(line_frog_2);
+
+                    foreach (var proie in proies.ToList())
+                    {
+                        /*
+                         *   A--------B 
+                         *   |        |
+                         *   |        |
+                         *   C--------D
+                         */
+
+                        Point intersection;
+                        Line line_AB = new Line
+                        {
+                            X1 = proie.BoundingBox.X,
+                            Y1 = proie.BoundingBox.Y,
+                            X2 = proie.BoundingBox.X + proie.BoundingBox.Width,
+                            Y2 = proie.BoundingBox.Y,
+                            StrokeThickness = 2,
+                            Stroke = Brushes.Red
+                        };
+                        Line line_BD = new Line
+                        {
+                            X1 = proie.BoundingBox.X + proie.BoundingBox.Width,
+                            Y1 = proie.BoundingBox.Y,
+                            X2 = proie.BoundingBox.X + proie.BoundingBox.Width,
+                            Y2 = proie.BoundingBox.Y + proie.BoundingBox.Height,
+                            StrokeThickness = 2,
+                            Stroke = Brushes.Red
+                        };
+                        Line line_DC = new Line
+                        {
+                            X1 = proie.BoundingBox.X + proie.BoundingBox.Width,
+                            Y1 = proie.BoundingBox.Y + proie.BoundingBox.Height,
+                            X2 = proie.BoundingBox.X,
+                            Y2 = proie.BoundingBox.Y + proie.BoundingBox.Height,
+                            StrokeThickness = 2,
+                            Stroke = Brushes.Red
+                        };
+                        Line line_CA = new Line
+                        {
+                            X1 = proie.BoundingBox.X,
+                            Y1 = proie.BoundingBox.Y + proie.BoundingBox.Height,
+                            X2 = proie.BoundingBox.X,
+                            Y2 = proie.BoundingBox.Y,
+                            StrokeThickness = 2,
+                            Stroke = Brushes.Red
+                        };
+
+                        //canvas.Children.Add(line_AB);
+                        //canvas.Children.Add(line_BD);
+                        //canvas.Children.Add(line_DC);
+                        //canvas.Children.Add(line_CA);
+
+                        if (TryGetIntersection(line_frog_1, line_AB, out intersection)
+                         || TryGetIntersection(line_frog_1, line_BD, out intersection)
+                         || TryGetIntersection(line_frog_1, line_DC, out intersection)
+                         || TryGetIntersection(line_frog_1, line_CA, out intersection)
+
+                         || TryGetIntersection(line_frog_2, line_AB, out intersection)
+                         || TryGetIntersection(line_frog_2, line_BD, out intersection)
+                         || TryGetIntersection(line_frog_2, line_DC, out intersection)
+                         || TryGetIntersection(line_frog_2, line_CA, out intersection))
+                        {
+                            Console.WriteLine($"ate a {proie.type}");
+                            expensionLangue = false;
+                            line_frog_1.Stroke = Brushes.Green;
+                            line_frog_2.Stroke = Brushes.Green;
+                            canvas.Children.Remove(proie.Image);
+                            proies.Remove(proie);
+                        }
+                    }
+                    if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
+                }
+                else
+                {
+                    expensionLangue = false;
+                }
+            }
+            else
+            {
+                if (playerTongue.Width > 0)
+                {
+                    if (playerTongue.Width <= retractionLangueVitesse) playerTongue.Width = 0;
+                    else playerTongue.Width -= retractionLangueVitesse;
+                }
+                else tirLangue = false;
+            }
+
         }
 
         private void ShootTung()
         {
-            SonLangue();
+            //SonLangue();
             if (tirLangue) return;
             else tirLangue = true;
             expensionLangue = true;
         }
         private void SonGun()
         {
-            // Charger le fichier audio depuis les ressources
-            Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
-            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
-            // Créer un objet SoundPlayer pour lire le son
-            SoundPlayer musique = new SoundPlayer(audioStream);
-            musique.Play();
+            //// Charger le fichier audio depuis les ressources
+            //Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
+            //Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            //// Créer un objet SoundPlayer pour lire le son
+            //SoundPlayer musique = new SoundPlayer(audioStream);
+            //musique.Play();
         }
         private void SonLangue()
         {
-            // Charger le fichier audio depuis les ressources
-            Uri audioUri = new Uri("/son/langue.wav", UriKind.RelativeOrAbsolute);
-            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
-            // Créer un objet SoundPlayer pour lire le son
-            SoundPlayer musique = new SoundPlayer(audioStream);
-            musique.Play();
+            //// Charger le fichier audio depuis les ressources
+            //Uri audioUri = new Uri("/son/langue.wav", UriKind.RelativeOrAbsolute);
+            //Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            //// Créer un objet SoundPlayer pour lire le son
+            //SoundPlayer musique = new SoundPlayer(audioStream);
+            //musique.Play();
         }
         
         private void ShootGun()
         {
-            SonGun();
+            //SonGun();
+            Console.WriteLine("test");
             double a = currentAngle * Math.PI / 180.0;
             Balle balle = new Balle(posArme.X, posArme.Y, a, vitesseBalle, 10, canvas, imageBalle);
             Balles.Add(balle);
@@ -773,6 +749,7 @@ namespace Froggun
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (pause) return;
+            Console.WriteLine("test");
             ShootGun();
         }
 

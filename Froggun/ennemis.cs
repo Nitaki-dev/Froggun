@@ -250,9 +250,10 @@ namespace Froggun
             SoundPlayer musique = new SoundPlayer(audioStream);
             musique.Play();
         }
+
         public void Die(List<Ennemis> ennemis, Ennemis e, Canvas canvas)
         {
-            SonMortEnnemie();
+            //SonMortEnnemie();
             IsAlive = false;
             Image.Visibility = Visibility.Hidden;
             canvas.Children.Remove(Image);
