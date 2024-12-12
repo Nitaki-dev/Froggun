@@ -258,7 +258,48 @@ namespace Froggun
                     proies.Add(fly);
                 }
             }
-            
+            bool trier;
+            Console.WriteLine(spiderCount);
+            Console.WriteLine(ennemis.Count);
+            //do
+            //{
+            //    trier = true;
+            //    for (int i = 0; i < spiderCount - 1; i++)
+            //    {
+            //        for (int j = spiderCount - 1; j > i; j--)
+            //        {
+            //            if (ennemis[i].BoundingBox.IntersectsWith(ennemis[j].BoundingBox))
+            //            {
+            //                trier=false;
+            //                int hautBasGaucheDroite2 = alea.Next(0, 3);
+            //                if (hautBasGaucheDroite2 == 0)
+            //                {
+            //                    ennemis[i].X = alea.Next(0, 100);
+            //                    ennemis[i].Y = alea.Next(0, 600);
+            //                }
+            //                else if (hautBasGaucheDroite2 == 1)
+            //                {
+            //                    ennemis[i].X = alea.Next(0, 1200);
+            //                    ennemis[i].Y = alea.Next(50, 150);
+            //                }
+
+            //                else if (hautBasGaucheDroite2 == 2)
+            //                {
+            //                    ennemis[i].X = alea.Next(1100, 1200);
+            //                    ennemis[i].Y = alea.Next(0, 600);
+            //                }
+            //                else
+            //                {
+            //                    ennemis[i].X = alea.Next(0, 1200);
+            //                    ennemis[i].Y = alea.Next(500, 600);
+            //                }
+            //            }
+            //        }
+            //    }
+            //} while (trier == false);
+
+
+
             pauseVagues.Stop(); 
             isTimerRunning = false;
         }
