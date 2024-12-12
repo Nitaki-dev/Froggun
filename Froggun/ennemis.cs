@@ -245,6 +245,7 @@ namespace Froggun
         {
             IsAlive = false;
             Image.Visibility = Visibility.Hidden;
+            canvas.Children.Remove(Image);
             canvas.Children.Remove(healthBarEmpty);
             canvas.Children.Remove(healthBar);
             ennemis.Remove(e);
