@@ -224,29 +224,47 @@ namespace Froggun
             waveCount++;
             // \operatorname{ceil}\left(\sqrt{\left(x\right)}^{3}\right) // LaTeX !!
             int spiderCount = (int) Math.Ceiling(Math.Pow(Math.Sqrt(waveCount),3.0)) % 10;
-            
+
             labelWave.Content = $"Wave {waveCount}";
 
             for (int i = 0; i < spiderCount; i++)
             {
-                int hautOuBas = alea.Next(0, 1);
-                if (hautOuBas == 0)
+                int hautBasGaucheDroite = alea.Next(0, 3);
+                if (hautBasGaucheDroite == 0)
                 {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(50, 200), 100, 100, 8, canvas);
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 100), alea.Next(0, 600), 100, 100, 8, canvas);
                     ennemis.Add(spider);
 
-                    Proies fly = new Proies(TypeProies.Fly, alea.Next(50, 200), alea.Next(100, 1100), 50, 50, 3, 500, 200, canvas);
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 100), alea.Next(0, 600), 50, 50, 3, 500, 200, canvas);
+                    proies.Add(fly);
+                }
+                else if (hautBasGaucheDroite == 1)
+                {
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 1200), alea.Next(50, 150), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 1200), alea.Next(50, 150), 50, 50, 3, 500, 200, canvas);
+                    proies.Add(fly);
+                }
+
+                else if (hautBasGaucheDroite == 2)
+                {
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(1100, 1200), alea.Next(0, 600), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(1100, 1200), alea.Next(0, 600), 50, 50, 3, 500, 200, canvas);
                     proies.Add(fly);
                 }
                 else
                 {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(100, 1100), alea.Next(500, 600), 100, 100, 8, canvas);
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 1200), alea.Next(500, 600), 100, 100, 8, canvas);
                     ennemis.Add(spider);
 
-                    Proies fly = new Proies(TypeProies.Fly, alea.Next(100, 1100), alea.Next(50, 200), 50, 50, 3, 500, 200, canvas);
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 1200), alea.Next(500, 600), 50, 50, 3, 500, 200, canvas);
                     proies.Add(fly);
                 }
             }
+            
             pauseVagues.Stop(); 
             isTimerRunning = false;
         }
