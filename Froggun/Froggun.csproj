@@ -47,6 +47,8 @@
 		<None Remove="img\pagechoixtouche_aide.PNG" />
 		<None Remove="img\parametre.png" />
 		<None Remove="img\vie\health4.png" />
+		<None Remove="son\coupdefeu.wav" />
+		<None Remove="son\langue.wav" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -86,5 +88,7 @@
 		<Resource Include="img\explosion\img_explosion4.png" />
 		<Resource Include="img\explosion\img_explosion5.png" />
 		<Resource Include="img\parametre.png" />
+		<Resource Include="son\coupdefeu.wav" />
+		<Resource Include="son\langue.wav" />
 	</ItemGroup>
 </Project>
