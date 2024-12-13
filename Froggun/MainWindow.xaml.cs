@@ -9,6 +9,8 @@ using System.Windows.Media.Imaging;
 using System.Media;
 using System.IO;
 using System.Diagnostics;
+using System.Diagnostics.Tracing;
+using System.Dynamic;
 
 namespace Froggun
 {
@@ -23,6 +25,8 @@ namespace Froggun
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer pauseVagues = new DispatcherTimer();
 
+        private static TransformGroup joueurTransformGroup= new TransformGroup();
+        private static RotateTransform joueurRoulade = new RotateTransform();
         private static ScaleTransform joueurFlip = new ScaleTransform();
         private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
         private static Vector2 vitesseJoueur = new Vector2();
@@ -44,6 +48,7 @@ namespace Froggun
         }
         Directions directionJoueur = Directions.right;
 
+        private float correctionVitesseDiagonal = (float) (1.0f / Math.Sqrt(2.0f)); //pythagore
         private const float vitesseDeplacement = 8.0f;
         private const float friction = 0.4f;
         //private const float friction = 0.8f;
@@ -53,6 +58,11 @@ namespace Froggun
         private bool deplacerHaut = false;
         private bool deplacerBas = false;
         
+        bool doitFlip = false;
+        bool estEnRoulade = false;
+        double tempsRoulade = 0;
+        double dureeRoulade = 300; // 5 secondes
+
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
 
@@ -426,15 +436,14 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e) 
         {
             if (pause) return;
+
             //Stopwatch stopwatch = new Stopwatch();
             //stopwatch.Start();
 
             // if no enemies start a wave
             if (ennemis.Count <= 0 && proies.Count <= 0)
-            {
                 StartWave();
-            }
-
+            
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
 
             Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
@@ -443,55 +452,116 @@ namespace Froggun
             CheckOutofboundsBullets();
             CheckEatingFly();
 
-            //fix direction:
-            if (deplacerBas)                         directionJoueur = Directions.down;
-            else if (deplacerHaut)                   directionJoueur = Directions.up;
-            else if (deplacerDroite)                 directionJoueur = Directions.right;
-            else if (deplacerGauche)                 directionJoueur = Directions.left;
-            else if (deplacerBas && deplacerGauche)  directionJoueur = Directions.diagDownLeft;
-            else if (deplacerBas && deplacerDroite)  directionJoueur = Directions.diagDownRight;
-            else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
-            else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
+            if (!estEnRoulade)
+            {
+                //fix direction:
+                if (deplacerBas  && deplacerDroite)      directionJoueur = Directions.diagDownRight;
+                else if (deplacerBas  && deplacerGauche) directionJoueur = Directions.diagDownLeft;
+                else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
+                else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
+                else if (deplacerDroite)            directionJoueur = Directions.right;
+                else if (deplacerGauche)            directionJoueur = Directions.left;
+                else if (deplacerBas)               directionJoueur = Directions.down;
+                else if (deplacerHaut)              directionJoueur = Directions.up;
 
-            // Inverse l'image du joueur si nécessaire
-            bool doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
-            if (doitFlip) joueurFlip.ScaleX = 1;
-            else joueurFlip.ScaleX = -1;
-
-            player.RenderTransformOrigin = new Point(0.5, 0.5);
-            player.RenderTransform = joueurFlip;
-
-            if (directionJoueur == Directions.left || directionJoueur == Directions.right) player.Source = imgFrogSide;
-            if (directionJoueur == Directions.up || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight) player.Source = imgFrogBack;
-            if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
+                // Inverse l'image du joueur si nécessaire
+                doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
+                joueurFlip.ScaleX = doitFlip ? 1 : -1;
+                
+                // Change l'image du joueur dépendament de sa direction
+                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       player.Source = imgFrogSide;
+                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   player.Source = imgFrogBack;
+                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
+            }
 
             UpdateMousePosition();
 
-            if (deplacerHaut && Canvas.GetTop(player) > 0) vitesseJoueur.Y = -vitesseDeplacement;  // bouger vers le haut
-            else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight-player.ActualHeight) vitesseJoueur.Y = vitesseDeplacement; // bouger vers le bas 
+            if (estEnRoulade)
+            {
+                // animation de la roulade 
+                tempsRoulade += 16.6666667;
+                joueurRoulade.Angle = ((tempsRoulade / dureeRoulade) * 2*Math.PI) * 180/Math.PI * (doitFlip ? 1 : -1);
+                vitesseJoueur.X = 0;
+                vitesseJoueur.Y = 0;
+
+                switch (directionJoueur)
+                {
+                    case Directions.down:
+                        vitesseJoueur.Y =  15.0f;
+                        break;
+                    case Directions.up:
+                        vitesseJoueur.Y = -15.0f;
+                        break;
+                    case Directions.right:
+                        vitesseJoueur.X =  15.0f;
+                        break;
+                    case Directions.left:
+                        vitesseJoueur.X = -15.0f;
+                        break;
+                    case Directions.diagDownLeft:
+                        vitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y =  15.0f * correctionVitesseDiagonal;
+                        break;
+                    case Directions.diagDownRight:
+                        vitesseJoueur.X =  15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y =  15.0f * correctionVitesseDiagonal;
+                        break;
+                    case Directions.diagUpLeft:
+                        vitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
+                        break;
+                    case Directions.diagUpRight:
+                        vitesseJoueur.X =  15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
+                        break;
+                }
+
+                if (tempsRoulade > dureeRoulade)
+                {
+                    estEnRoulade = false;
+                    tempsRoulade = 0;
+                }
+            }
             else
             {
-                // réduire la vitesse du joueur en fonction de la friction
-                vitesseJoueur.Y *= friction;
-                // si la vitesse (positive) est inférieure à 0.1f, arrêter le mouvement
-                if (Math.Abs(vitesseJoueur.Y) < 0.1f) vitesseJoueur.Y = 0;
+                joueurRoulade.Angle = 0;
+
+                if      (deplacerGauche && Canvas.GetLeft(player) > 0)                                   vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
+                else if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth-player.ActualWidth) vitesseJoueur.X =  vitesseDeplacement; // bouger vers la droite
+                else
+                {
+                    vitesseJoueur.X *= friction; // réduire la vitesse du joueur en fonction de la friction
+                    if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0; // si la vitesse (positive) est inférieure à 0.1, arrêter le mouvement
+                }
+
+                if      (deplacerHaut && Canvas.GetTop(player) > 0)                                    vitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
+                else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight-player.ActualHeight) vitesseJoueur.Y =  vitesseDeplacement; // bouger vers le bas 
+                else
+                {
+                    vitesseJoueur.Y *= friction; 
+                    if (Math.Abs(vitesseJoueur.Y) < 0.1f) vitesseJoueur.Y = 0;
+                }
+
+                // Corrigé la vitesse du joueur si il bouge en diagonale (car sqrt(2) = 1.4 et pas 1)
+                if (directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight ||
+                    directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) {
+                    vitesseJoueur.X *= correctionVitesseDiagonal;
+                    vitesseJoueur.Y *= correctionVitesseDiagonal;
+                }
             }
+
+            posJoueur.X += vitesseJoueur.X;
             posJoueur.Y += vitesseJoueur.Y;
 
-            if      (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth-player.ActualWidth) vitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
-            else if (deplacerGauche && Canvas.GetLeft(player) > 0)                                   vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
-            else
-            {
-                // réduire la vitesse du joueur en fonction de la friction
-                vitesseJoueur.X *= friction;
-                // si la vitesse (positive) est inférieure à 0.1f, arrêter le mouvement
-                if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0;
-            }
-                
-            posJoueur.X += vitesseJoueur.X;
+            joueurTransformGroup.Children.Clear();
+            player.RenderTransformOrigin = new Point(0.5, 0.5);
+            joueurTransformGroup.Children.Add(joueurRoulade);
+            joueurTransformGroup.Children.Add(joueurFlip);
+            player.RenderTransform = joueurTransformGroup;
+            
             Canvas.SetLeft(player, posJoueur.X);
             Canvas.SetTop(player, posJoueur.Y);
-
+            
             //stopwatch.Stop();
             //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
         }
@@ -651,6 +721,7 @@ namespace Froggun
             else tirLangue = true;
             expensionLangue = true;
         }
+        
         private void SonGun()
         {
             //// Charger le fichier audio depuis les ressources
@@ -660,6 +731,7 @@ namespace Froggun
             //SoundPlayer musique = new SoundPlayer(audioStream);
             //musique.Play();
         }
+        
         private void SonLangue()
         {
             //// Charger le fichier audio depuis les ressources
@@ -673,7 +745,6 @@ namespace Froggun
         private void ShootGun()
         {
             //SonGun();
-            Console.WriteLine("test");
             double a = currentAngle * Math.PI / 180.0;
             Balle balle = new Balle(posArme.X, posArme.Y, a, vitesseBalle, 10, canvas, imageBalle);
             Balles.Add(balle);
@@ -715,6 +786,10 @@ namespace Froggun
                 deplacerBas = false;
                 directionJoueur = Directions.up;
             }
+            if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
+            {
+                estEnRoulade = true;
+            }
             if (e.Key == Key.Escape || e.Key == Key.Space )
             {
                 pause=!pause;
@@ -749,7 +824,6 @@ namespace Froggun
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (pause) return;
-            Console.WriteLine("test");
             ShootGun();
         }
 
