@@ -54,6 +54,8 @@ namespace Froggun
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
         public static int bulletOffset = 0;
+        public double score = 0;
+        public int combo = 0;
         int pauseEntreVagues = 5; // en secondes
         int pauseCounter = 0;
         int waveCount = 0;
@@ -478,7 +480,6 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             if (pause) return;
-
             //Stopwatch stopwatch = new Stopwatch();
             //stopwatch.Start();
 
@@ -494,8 +495,10 @@ namespace Froggun
             
             Rect playerRect = new Rect(joueur.posJoueur.X, joueur.posJoueur.Y, player.Width, player.Height);
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur, ref score);
             Proies.UpdateProies(canvas, proies, playerRect);
+            AfficheScore();
+            
 
             AffichageDeVie(joueur.nombreDeVie);
             CheckBallesSortieEcran();
@@ -714,7 +717,7 @@ namespace Froggun
             Balles.Add(balle);
         }
 
-        public void AfficheScore(int score)
+        public void AfficheScore()
         {
             labelScore.Content = $"Score : {score} ";
         }
