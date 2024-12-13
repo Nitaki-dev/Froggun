@@ -767,7 +767,7 @@ namespace Froggun
 
         public void AfficheCombo()
         {
-            labelScore.Content = $"Combo : {combo} ";
+            labelCombo.Content = $"Combo : {combo} ";
         }
 
         private void keydown(object sender, KeyEventArgs e)
