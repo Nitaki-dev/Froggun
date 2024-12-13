@@ -1,63 +1,72 @@
-﻿    using System.Numerics;
-    using System.Windows;
-    using System.Windows.Input;
-    using System.Windows.Media;
-    using System.Windows.Shapes;
-    using System.Windows.Controls;
-    using System.Windows.Threading;
-    using System.Windows.Media.Imaging;
-    using System.Media;
-    using System.IO;
-    using System.Diagnostics;
+﻿using System.Numerics;
+using System.Windows;
+using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Shapes;
+using System.Windows.Controls;
+using System.Windows.Threading;
+using System.Windows.Media.Imaging;
+using System.Media;
+using System.IO;
+using System.Diagnostics;
+using System.Diagnostics.Tracing;
+using System.Dynamic;
 
-    namespace Froggun
+namespace Froggun
+{
+    /// <summary>
+    /// Interaction logic for MainWindow.xaml
+    /// </summary>
+    public partial class MainWindow : Window
     {
-        /// <summary>
-        /// Interaction logic for MainWindow.xaml
-        /// </summary>
-        public partial class MainWindow : Window
+        private static Random alea = new Random();
+        
+        private bool pause = false;
+        private static DispatcherTimer minuterie = new DispatcherTimer();
+        private static DispatcherTimer pauseVagues = new DispatcherTimer();
+
+        private static TransformGroup joueurTransformGroup= new TransformGroup();
+        private static RotateTransform joueurRoulade = new RotateTransform();
+        private static ScaleTransform joueurFlip = new ScaleTransform();
+        private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
+        private static Vector2 vitesseJoueur = new Vector2();
+
+        private static BitmapImage imgFrogFront;
+        private static BitmapImage imgFrogBack;
+        private static BitmapImage imgFrogSide;
+
+        public enum Directions
         {
-            private static Random alea = new Random();
+            left, //0
+            right, //1
+            up, //2
+            down, //3
+            diagUpLeft, //4
+            diagUpRight, //5
+            diagDownLeft, //6
+            diagDownRight //7
+        }
+        Directions directionJoueur = Directions.right;
+
+        private float correctionVitesseDiagonal = (float) (1.0f / Math.Sqrt(2.0f)); //pythagore
+        private const float vitesseDeplacement = 8.0f;
+        private const float friction = 0.4f;
+        //private const float friction = 0.8f;
+
+        private bool deplacerGauche = false;
+        private bool deplacerDroite = false;
+        private bool deplacerHaut = false;
+        private bool deplacerBas = false;
         
-            private bool pause = false;
-            private static DispatcherTimer minuterie = new DispatcherTimer();
-            private static DispatcherTimer pauseVagues = new DispatcherTimer();
+        bool doitFlip = false;
+        bool estEnRoulade = false;
+        double tempsRoulade = 0;
+        double dureeRoulade = 300; // 5 secondes
 
-            private static ScaleTransform joueurFlip = new ScaleTransform();
-            private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
-            private static Vector2 vitesseJoueur = new Vector2();
-            //private int 
+        private static BitmapImage imgAnt;
+        private static BitmapImage imgFly;
 
-            private static BitmapImage imgFrogFront;
-            private static BitmapImage imgFrogBack;
-            private static BitmapImage imgFrogSide;
-
-            public enum Directions
-            {
-                left, //0
-                right, //1
-                up, //2
-                down, //3
-                diagUpLeft, //4
-                diagUpRight, //5
-                diagDownLeft, //6
-                diagDownRight //7
-            }
-            Directions directionJoueur = Directions.right;
-
-            private const float vitesseDeplacement = 8.0f;
-            private const float friction = 0.4f;
-            //private const float friction = 0.8f;
-
-            private bool deplacerGauche = false;
-            private bool deplacerDroite = false;
-            private bool deplacerHaut = false;
-            private bool deplacerBas = false;
-        
-            private static BitmapImage imgAnt;
-            private static BitmapImage imgFly;
-        
-            private float currentAngle;
+        private float currentAngle;
 
             private static bool tirLangue, expensionLangue;
             private static readonly int expensionLangueVitesse = 60, retractionLangueVitesse = 80;
@@ -67,117 +76,179 @@
             private static BitmapImage imageBalle;
             private static double vitesseBalle = 30.0f;
 
-            private List<Balle> Balles = new List<Balle>(); 
-            private List<Ennemis> ennemis = new List<Ennemis>();
-            private List<Proies> proies = new List<Proies>();
-            //private Player player;
-            public static string difficulte;
-            int pauseEntreVagues = 5; // en secondes
-            int pauseCounter = 0;
-            int waveCount = 0;
-            private bool isTimerRunning = false;
+        private static BitmapImage imageVie5;
+        private static BitmapImage imageVie4;
+        private static BitmapImage imageVie3;
+        private static BitmapImage imageVie2;
+        private static BitmapImage imageVie1;
+        private static BitmapImage imageVie0;
+        public int nombreDeVie = 5;
 
-            //public SoundPlayer musique;
-            //public Stream audioStream;
-        
-            public MainWindow()
+        private List<Balle> Balles = new List<Balle>(); 
+        private List<Ennemis> ennemis = new List<Ennemis>();
+        private List<Proies> proies = new List<Proies>();
+        public static string difficulte;
+
+        int pauseEntreVagues = 5; // en secondes
+        int pauseCounter = 0;
+        int waveCount = 0;
+        private bool isTimerRunning = false;
+
+        public SoundPlayer musique;
+        public Stream audioStream;
+        private MediaPlayer musiqueDeFond;
+        private MediaPlayer musiqueDeJeu;
+
+        public MainWindow()
+        {
+            InitImage();
+            InitializeComponent();
+            InitMusique(true);
+
+             // Création de la fenêtre parametre avec un Canvas
+             parametre fentreNiveau = new parametre();
+            fentreNiveau.ShowDialog();  // Affichage de la fenêtre parametre
+
+            // Si la fenêtre parametre est fermée avec DialogResult == false, fermer l'application
+            if (fentreNiveau.DialogResult == false)
             {
-                InitImage();
-                InitializeComponent(); 
-
-                // Création de la fenêtre parametre avec un Canvas
-                parametre fentreNiveau = new parametre();
-                fentreNiveau.ShowDialog();  // Affichage de la fenêtre parametre
-
-                // Si la fenêtre parametre est fermée avec DialogResult == false, fermer l'application
-                if (fentreNiveau.DialogResult == false)
+                Application.Current.Shutdown();
+            }
+            else
+            {
+                string resultat = fentreNiveau.Resultat; // Récupérer le résultat de la fenêtre parametre
+                                                         // Vérification si le résultat est "parametre", ce qui signifie que le processus doit continuer
+                do
                 {
-                    Application.Current.Shutdown();
-                }
-                else
-                {
-                    string resultat = fentreNiveau.Resultat; // Récupérer le résultat de la fenêtre parametre
-                                                             // Vérification si le résultat est "parametre", ce qui signifie que le processus doit continuer
-                    do
+                    if (resultat == "parametre")
                     {
-                        if (resultat == "parametre")
+                        do
                         {
-                            do
+                            // Affichage du Canvas pour la fenêtre controle
+                            choixTouche fentrechoixTouche = new choixTouche();
+                            fentrechoixTouche.ShowDialog();  // Affiche la fenêtre controle de manière modale
+
+                            // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
+                            if (fentrechoixTouche.DialogResult == false)
                             {
-                                // Affichage du Canvas pour la fenêtre controle
-                                choixTouche fentrechoixTouche = new choixTouche();
-                                fentrechoixTouche.ShowDialog();  // Affiche la fenêtre controle de manière modale
+                                // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
+                                fentreNiveau = new parametre();  // Nouvelle instance de parametre
+                                fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
 
-                                // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
-                                if (fentrechoixTouche.DialogResult == false)
+                                // Si l'utilisateur choisit "jouer", sortir de la boucle
+                                resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
+                                if (resultat == "jouer")
                                 {
-                                    // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
-                                    fentreNiveau = new parametre();  // Nouvelle instance de parametre
-                                    fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
+                                    break;  // Quitter la boucle et lancer le jeu
+                                }
 
-                                    // Si l'utilisateur choisit "jouer", sortir de la boucle
-                                    resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
-                                    if (resultat == "jouer")
-                                    {
-                                        break;  // Quitter la boucle et lancer le jeu
-                                    }
-
-                                    // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
-                                    if (fentreNiveau.DialogResult == false)
-                                    {
-                                        Application.Current.Shutdown();
-                                        return;
-                                    }
+                                // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
+                                if (fentreNiveau.DialogResult == false)
+                                {
+                                    Application.Current.Shutdown();
+                                    return;
                                 }
                             }
-                            while (resultat == "parametre");  // Continue la boucle si le résultat est encore "parametre"
                         }
-                        else if (resultat == "aide")
+                        while (resultat == "parametre");  // Continue la boucle si le résultat est encore "parametre"
+                    }
+                    else if (resultat == "aide")
+                    {
+                        do
                         {
-                            do
+                            // Affichage du Canvas pour la fenêtre controle
+                            aide fentreaide = new aide();
+                            fentreaide.ShowDialog();  // Affiche la fenêtre controle de manière modale
+
+                            // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
+                            if (fentreaide.DialogResult == false)
                             {
-                                // Affichage du Canvas pour la fenêtre controle
-                                aide fentreaide = new aide();
-                                fentreaide.ShowDialog();  // Affiche la fenêtre controle de manière modale
+                                // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
+                                fentreNiveau = new parametre();  // Nouvelle instance de parametre
+                                fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
 
-                                // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
-                                if (fentreaide.DialogResult == false)
+                                // Si l'utilisateur choisit "jouer", sortir de la boucle
+                                resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
+                                if (resultat == "jouer")
                                 {
-                                    // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
-                                    fentreNiveau = new parametre();  // Nouvelle instance de parametre
-                                    fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
+                                    break;  // Quitter la boucle et lancer le jeu
+                                }
 
-                                    // Si l'utilisateur choisit "jouer", sortir de la boucle
-                                    resultat = fentreNiveau.Resultat; // Mettre à jour le résultat
-                                    if (resultat == "jouer")
-                                    {
-                                        break;  // Quitter la boucle et lancer le jeu
-                                    }
-
-                                    // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
-                                    if (fentreNiveau.DialogResult == false)
-                                    {
-                                        Application.Current.Shutdown();
-                                        return;
-                                    }
+                                // Si la fenêtre parametre est fermée à nouveau avec DialogResult == false, fermer l'application
+                                if (fentreNiveau.DialogResult == false)
+                                {
+                                    Application.Current.Shutdown();
+                                    return;
                                 }
                             }
-                            while (resultat == "aide");  // Continue la boucle si le résultat est encore "parametre"
                         }
-                    } while (resultat != "jouer");
-                    choixDifficulte fentreDifficulte = new choixDifficulte();
-                    fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
-                    difficulte = fentreDifficulte.Resultat;
-                }
-                lab_Pause.Visibility = Visibility.Collapsed;
-            
-                InitialiserMinuterie();
-                RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
-                RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
-                //Measure(new Size(Width, Height));
-                //Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
+                        while (resultat == "aide");  // Continue la boucle si le résultat est encore "parametre"
+                    }
+                } while (resultat != "jouer");
+                choixDifficulte fentreDifficulte = new choixDifficulte();
+                fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
+                difficulte = fentreDifficulte.Resultat;
+                InitMusique(false);
+                InitMusiqueJeux(true);
             }
 
+            lab_Pause.Visibility = Visibility.Collapsed;
+            lab_Defaite.Visibility = Visibility.Collapsed;
+
+            InitialiserMinuterie();
+            RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
+            //Measure(new Size(Width, Height));
+            //Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
+        }
+
+        private void InitMusique(bool jouer)
+        {
+            if (jouer)
+            {
+                musiqueDeFond = new MediaPlayer();
+                musiqueDeFond.Open(new Uri("son/intro.mp3", UriKind.Relative));
+                musiqueDeFond.MediaEnded += RelanceMusique;
+                musiqueDeFond.Play();
+            }
+            else 
+            {
+                musiqueDeFond.Stop(); 
+            }
+            
+        }
+        private void RelanceMusique(object? sender, EventArgs e)
+        {
+            musiqueDeFond.Position = TimeSpan.Zero;
+            musiqueDeFond.Play();
+        }
+
+        private void InitMusiqueJeux(bool jouer)
+        {
+            if (jouer)
+            {
+                musiqueDeJeu = new MediaPlayer();
+                musiqueDeJeu.Open(new Uri("son/son_jeu.mp3", UriKind.Relative));
+                musiqueDeJeu.MediaEnded += RelanceMusiqueJeux;
+                musiqueDeJeu.Volume = 1.0;
+                musiqueDeJeu.Play();
+            }
+            else
+            {
+                musiqueDeJeu.Stop();
+            }
+
+        }
+        private void RelanceMusiqueJeux(object? sender, EventArgs e)
+        {
+            musiqueDeJeu.Position = TimeSpan.Zero;
+            musiqueDeJeu.Play();
+        }
+
+        void StartWave()
+        {
+            if (isTimerRunning) return;
+            isTimerRunning = true;
             void StartWave()
             {
                 if (difficulte == "facile" || difficulte=="moyen")
@@ -323,6 +394,13 @@
             imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
 
             imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
+
+            imageVie5 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health5.png")); 
+            imageVie4 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health4.png"));
+            imageVie3 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health3.png"));
+            imageVie2 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health2.png"));
+            imageVie1 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
+            imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
         }
 
         private void UpdateMousePosition()
@@ -448,6 +526,7 @@
         private void Loop(object? sender, EventArgs e) 
         {
             if (pause) return;
+
             //Stopwatch stopwatch = new Stopwatch();
             //stopwatch.Start();
 
@@ -465,66 +544,146 @@
                 StartWave();
             }
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
-            Player.UpdatePlayer();
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref nombreDeVie);
+            affichageDeVie(nombreDeVie);
             Proies.UpdateProies(proies, playerRect);
 
             CheckOutofboundsBullets();
             CheckEatingFly();
 
-            //fix direction:
-            if (deplacerBas)                         directionJoueur = Directions.down;
-            else if (deplacerHaut)                   directionJoueur = Directions.up;
-            else if (deplacerDroite)                 directionJoueur = Directions.right;
-            else if (deplacerGauche)                 directionJoueur = Directions.left;
-            else if (deplacerBas && deplacerGauche)  directionJoueur = Directions.diagDownLeft;
-            else if (deplacerBas && deplacerDroite)  directionJoueur = Directions.diagDownRight;
-            else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
-            else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
-            Player.SetPlayerImage(directionJoueur);
-            // Inverse l'image du joueur si nécessaire
-            bool doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
-            if (doitFlip) joueurFlip.ScaleX = 1;
-            else joueurFlip.ScaleX = -1;
+            if (!estEnRoulade)
+            {
+                //fix direction:
+                if (deplacerBas  && deplacerDroite)      directionJoueur = Directions.diagDownRight;
+                else if (deplacerBas  && deplacerGauche) directionJoueur = Directions.diagDownLeft;
+                else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
+                else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
+                else if (deplacerDroite)            directionJoueur = Directions.right;
+                else if (deplacerGauche)            directionJoueur = Directions.left;
+                else if (deplacerBas)               directionJoueur = Directions.down;
+                else if (deplacerHaut)              directionJoueur = Directions.up;
 
-            player.RenderTransformOrigin = new Point(0.5, 0.5);
-            player.RenderTransform = joueurFlip;
-
-            if (directionJoueur == Directions.left || directionJoueur == Directions.right) player.Source = imgFrogSide;
-            if (directionJoueur == Directions.up || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight) player.Source = imgFrogBack;
-            if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
+                // Inverse l'image du joueur si nécessaire
+                doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
+                joueurFlip.ScaleX = doitFlip ? 1 : -1;
+                
+                // Change l'image du joueur dépendament de sa direction
+                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       player.Source = imgFrogSide;
+                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   player.Source = imgFrogBack;
+                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
+            }
 
             UpdateMousePosition();
 
-            if (deplacerHaut && Canvas.GetTop(player) > 0) vitesseJoueur.Y = -vitesseDeplacement;  // bouger vers le haut
-            else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight-player.ActualHeight) vitesseJoueur.Y = vitesseDeplacement; // bouger vers le bas 
+            if (estEnRoulade)
+            {
+                // animation de la roulade 
+                tempsRoulade += 16.6666667;
+                joueurRoulade.Angle = ((tempsRoulade / dureeRoulade) * 2*Math.PI) * 180/Math.PI * (doitFlip ? 1 : -1);
+                vitesseJoueur.X = 0;
+                vitesseJoueur.Y = 0;
+
+                switch (directionJoueur)
+                {
+                    case Directions.down:
+                        vitesseJoueur.Y =  15.0f;
+                        break;
+                    case Directions.up:
+                        vitesseJoueur.Y = -15.0f;
+                        break;
+                    case Directions.right:
+                        vitesseJoueur.X =  15.0f;
+                        break;
+                    case Directions.left:
+                        vitesseJoueur.X = -15.0f;
+                        break;
+                    case Directions.diagDownLeft:
+                        vitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y =  15.0f * correctionVitesseDiagonal;
+                        break;
+                    case Directions.diagDownRight:
+                        vitesseJoueur.X =  15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y =  15.0f * correctionVitesseDiagonal;
+                        break;
+                    case Directions.diagUpLeft:
+                        vitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
+                        break;
+                    case Directions.diagUpRight:
+                        vitesseJoueur.X =  15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
+                        break;
+                }
+
+                if (tempsRoulade > dureeRoulade)
+                {
+                    estEnRoulade = false;
+                    tempsRoulade = 0;
+                }
+            }
             else
             {
-                // réduire la vitesse du joueur en fonction de la friction
-                vitesseJoueur.Y *= friction;
-                // si la vitesse (positive) est inférieure à 0.1f, arrêter le mouvement
-                if (Math.Abs(vitesseJoueur.Y) < 0.1f) vitesseJoueur.Y = 0;
+                joueurRoulade.Angle = 0;
+
+                if      (deplacerGauche && Canvas.GetLeft(player) > 0)                                   vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
+                else if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth-player.ActualWidth) vitesseJoueur.X =  vitesseDeplacement; // bouger vers la droite
+                else
+                {
+                    vitesseJoueur.X *= friction; // réduire la vitesse du joueur en fonction de la friction
+                    if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0; // si la vitesse (positive) est inférieure à 0.1, arrêter le mouvement
+                }
+
+                if      (deplacerHaut && Canvas.GetTop(player) > 0)                                    vitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
+                else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight-player.ActualHeight) vitesseJoueur.Y =  vitesseDeplacement; // bouger vers le bas 
+                else
+                {
+                    vitesseJoueur.Y *= friction; 
+                    if (Math.Abs(vitesseJoueur.Y) < 0.1f) vitesseJoueur.Y = 0;
+                }
+
+                // Corrigé la vitesse du joueur si il bouge en diagonale (car sqrt(2) = 1.4 et pas 1)
+                if (directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight ||
+                    directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) {
+                    vitesseJoueur.X *= correctionVitesseDiagonal;
+                    vitesseJoueur.Y *= correctionVitesseDiagonal;
+                }
             }
+
+            posJoueur.X += vitesseJoueur.X;
             posJoueur.Y += vitesseJoueur.Y;
 
-            if      (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth-player.ActualWidth) vitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
-            else if (deplacerGauche && Canvas.GetLeft(player) > 0)                                   vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
-            else
-            {
-                // réduire la vitesse du joueur en fonction de la friction
-                vitesseJoueur.X *= friction;
-                // si la vitesse (positive) est inférieure à 0.1f, arrêter le mouvement
-                if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0;
-            }
-                
-            posJoueur.X += vitesseJoueur.X;
+            joueurTransformGroup.Children.Clear();
+            player.RenderTransformOrigin = new Point(0.5, 0.5);
+            joueurTransformGroup.Children.Add(joueurRoulade);
+            joueurTransformGroup.Children.Add(joueurFlip);
+            player.RenderTransform = joueurTransformGroup;
+            
             Canvas.SetLeft(player, posJoueur.X);
             Canvas.SetTop(player, posJoueur.Y);
-
+            
             //stopwatch.Stop();
             //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
         }
 
+        private void affichageDeVie(int nombreDeVie)
+        {
+            if (nombreDeVie <= 0)
+            {
+                ImgvieJoueur.Source = imageVie0;
+                pause = true;
+                lab_Defaite.Visibility = Visibility.Visible;
+
+            }
+            else
+            {
+                if (nombreDeVie==4) ImgvieJoueur.Source = imageVie4;
+                else if (nombreDeVie==3) ImgvieJoueur.Source = imageVie3;
+                else if (nombreDeVie == 2) ImgvieJoueur.Source = imageVie2;
+                else if (nombreDeVie == 1) ImgvieJoueur.Source = imageVie1;
+
+            }
+
+        }
         private void CheckOutofboundsBullets()
         {
             for (int i = 0; i < Balles.Count; i++)
@@ -675,33 +834,35 @@
 
         private void ShootTung()
         {
-            //SonLangue();
+            SonLangue();
             if (tirLangue) return;
             else tirLangue = true;
             expensionLangue = true;
         }
+        
         private void SonGun()
         {
-            //// Charger le fichier audio depuis les ressources
-            //Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
-            //Stream audioStream = Application.GetResourceStream(audioUri).Stream;
-            //// Créer un objet SoundPlayer pour lire le son
-            //SoundPlayer musique = new SoundPlayer(audioStream);
-            //musique.Play();
+            // Charger le fichier audio depuis les ressources
+            Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
+            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            // Créer un objet SoundPlayer pour lire le son
+            SoundPlayer musique = new SoundPlayer(audioStream);
+            musique.Play();
         }
+        
         private void SonLangue()
         {
-            //// Charger le fichier audio depuis les ressources
-            //Uri audioUri = new Uri("/son/langue.wav", UriKind.RelativeOrAbsolute);
-            //Stream audioStream = Application.GetResourceStream(audioUri).Stream;
-            //// Créer un objet SoundPlayer pour lire le son
-            //SoundPlayer musique = new SoundPlayer(audioStream);
-            //musique.Play();
+            // Charger le fichier audio depuis les ressources
+            Uri audioUri = new Uri("/son/langue.wav", UriKind.RelativeOrAbsolute);
+            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            // Créer un objet SoundPlayer pour lire le son
+            SoundPlayer musique = new SoundPlayer(audioStream);
+            musique.Play();
         }
         
         private void ShootGun()
         {
-            //SonGun();
+            SonGun();
             Console.WriteLine("test");
             double a = currentAngle * Math.PI / 180.0;
             Balle balle = new Balle(posArme.X, posArme.Y, a, vitesseBalle, 10, canvas, imageBalle);
@@ -744,6 +905,10 @@
                 deplacerBas = false;
                 directionJoueur = Directions.up;
             }
+            if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
+            {
+                estEnRoulade = true;
+            }
             if (e.Key == Key.Escape || e.Key == Key.Space )
             {
                 pause=!pause;
@@ -778,7 +943,6 @@
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (pause) return;
-            Console.WriteLine("test");
             ShootGun();
         }
 
