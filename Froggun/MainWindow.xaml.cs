@@ -517,7 +517,7 @@ namespace Froggun
                 {
                     StartWave();
                 }
-                Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
+                Rect playerRect = new Rect(joueur.posJoueur.X, joueur.posJoueur.Y, player.Width, player.Height);
 
             Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur);
             Proies.UpdateProies(proies, playerRect);
