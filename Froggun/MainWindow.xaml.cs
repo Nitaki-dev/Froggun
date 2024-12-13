@@ -513,7 +513,7 @@ namespace Froggun
 
         private void AffichageDeVie(int nombreDeVie)
         {
-            if (nombreDeVie <= 4)
+            if (nombreDeVie <= 0)
             {
                 Console.WriteLine("Mort");
                 ImgvieJoueur.Source = imageVie0;
@@ -548,17 +548,10 @@ namespace Froggun
 
         public void recommencer(int nombreDeVie)
         {
-            joueur.nombreDeVie = nombreDeVie;
-            nombreDeVie = 5;
-            AffichageDeVie(nombreDeVie);
-            AfficheScore(0);
-            // Déplacer l'image au centre
-            joueur.posJoueur = new Vector2((float) ActualWidth/2,(float)ActualHeight/2); 
-            waveCount = 0;
-            pauseEntreVagues = 5; 
-            pauseCounter = 0;
+            Console.WriteLine(ennemis.Count);
             for (int i = 0; i < ennemis.Count; i++)
             {
+                Console.WriteLine(ennemis[i]);
                 canvas.Children.Remove(ennemis[i].Image);
                 ennemis.Remove(ennemis[i]);
             }
@@ -567,6 +560,14 @@ namespace Froggun
                 canvas.Children.Remove(proies[i].Image);
                 proies.Remove(proies[i]);
             }
+            joueur.nombreDeVie = nombreDeVie;
+            nombreDeVie = 5;
+            AffichageDeVie(nombreDeVie);
+            AfficheScore(0);
+            waveCount = 0;
+            pauseEntreVagues = 5; 
+            pauseCounter = 0;
+            
 
             pause = false;
             lab_Defaite.Visibility = Visibility.Collapsed;
