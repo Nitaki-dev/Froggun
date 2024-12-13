@@ -54,6 +54,8 @@ namespace Froggun
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
         public static int bulletOffset = 0;
+        public double score = 0;
+        public int combo = 0;
         int pauseEntreVagues = 5; // en secondes
         int pauseCounter = 0;
         int waveCount = 0;
@@ -171,6 +173,9 @@ namespace Froggun
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
             //Measure(new Size(Width, Height));
             //Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
+
+
+
         } 
 
         private void InitMusique(bool jouer)
@@ -479,7 +484,6 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             if (pause) return;
-
             //Stopwatch stopwatch = new Stopwatch();
             //stopwatch.Start();
 
@@ -495,8 +499,10 @@ namespace Froggun
             
             Rect playerRect = new Rect(joueur.posJoueur.X, joueur.posJoueur.Y, player.Width, player.Height);
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur, ref score);
             Proies.UpdateProies(canvas, proies, playerRect);
+            AfficheScore();
+            
 
             AffichageDeVie(joueur.nombreDeVie);
             CheckBallesSortieEcran();
@@ -511,19 +517,64 @@ namespace Froggun
 
         private void AffichageDeVie(int nombreDeVie)
         {
-            if (nombreDeVie <= 0)
+            if (nombreDeVie <= 4)
             {
+                Console.WriteLine("Mort");
                 ImgvieJoueur.Source = imageVie0;
                 pause = true;
                 lab_Defaite.Visibility = Visibility.Visible;
+                mort(nombreDeVie);
+                
+
             }
             else
             {
-                if (nombreDeVie == 4) ImgvieJoueur.Source = imageVie4;
+                if (nombreDeVie == 5) ImgvieJoueur.Source = imageVie5;
+                else if (nombreDeVie == 4) ImgvieJoueur.Source = imageVie4;
                 else if (nombreDeVie == 3) ImgvieJoueur.Source = imageVie3;
                 else if (nombreDeVie == 2) ImgvieJoueur.Source = imageVie2;
                 else if (nombreDeVie == 1) ImgvieJoueur.Source = imageVie1;
             }
+        }
+        public void mort(int nombreDeVie)
+        {
+            var result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            if (result == MessageBoxResult.Yes)
+            {
+                recommencer(5);
+            }
+            else
+            {
+                // Action pour quitter
+                Application.Current.Shutdown();
+            }
+        }
+
+        public void recommencer(int nombreDeVie)
+        {
+            joueur.nombreDeVie = nombreDeVie;
+            nombreDeVie = 5;
+            AffichageDeVie(nombreDeVie);
+            AfficheScore(0);
+            // Déplacer l'image au centre
+            joueur.posJoueur = new Vector2((float) ActualWidth/2,(float)ActualHeight/2); 
+            waveCount = 0;
+            pauseEntreVagues = 5; 
+            pauseCounter = 0;
+            for (int i = 0; i < ennemis.Count; i++)
+            {
+                canvas.Children.Remove(ennemis[i].Image);
+                ennemis.Remove(ennemis[i]);
+            }
+            for (int i = 0; i < proies.Count; i++)
+            {
+                canvas.Children.Remove(proies[i].Image);
+                proies.Remove(proies[i]);
+            }
+
+            pause = false;
+            lab_Defaite.Visibility = Visibility.Collapsed;
+
         }
 
         private void CheckBallesSortieEcran()
@@ -715,7 +766,7 @@ namespace Froggun
             Balles.Add(balle);
         }
 
-        public void AfficheScore(int score)
+        public void AfficheScore()
         {
             labelScore.Content = $"Score : {score} ";
         }
