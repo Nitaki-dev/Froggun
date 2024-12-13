@@ -8,9 +8,7 @@ using System.Windows.Threading;
 using System.Windows.Media.Imaging;
 using System.Media;
 using System.IO;
-using System.Diagnostics;
-using System.Diagnostics.Tracing;
-using System.Dynamic;
+using System.Net.Sockets;
 
 namespace Froggun
 {
@@ -32,7 +30,7 @@ namespace Froggun
         private static bool tirLangue, expensionLangue;
         private static readonly int expensionLangueVitesse = 60, retractionLangueVitesse = 80;
         private static Vector2 posArme = new Vector2();
-        private static int distancePisolet = 20;
+        private static int distancePisolet = 50;
 
         private static BitmapImage imageBalle;
         private static double vitesseBalle = 30.0f;
@@ -43,6 +41,7 @@ namespace Froggun
         private static BitmapImage imageVie2;
         private static BitmapImage imageVie1;
         private static BitmapImage imageVie0;
+
         private static BitmapImage imgFrogFront;
         private static BitmapImage imgFrogBack;
         private static BitmapImage imgFrogSide;
@@ -161,12 +160,11 @@ namespace Froggun
             lab_Pause.Visibility = Visibility.Collapsed;
             lab_Defaite.Visibility = Visibility.Collapsed;
 
-            Console.WriteLine(difficulte);
-
             InitImage();
             //InitMusique(true);
 
-            joueur = new Joueur(player, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
+            joueur = new Joueur(player, 640 - (int)player.Width/2, 360 - (int)player.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
+            canvas.Children.Add(test1);
 
             InitialiserMinuterie();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
@@ -291,8 +289,6 @@ namespace Froggun
                     proies.Add(fly);
                 }
             }
-            Console.WriteLine(spiderCount);
-            Console.WriteLine(ennemis.Count);
 
             pauseVagues.Stop();
             isTimerRunning = false;
@@ -334,18 +330,43 @@ namespace Froggun
 
         Vector2 directionSouris = new Vector2();
 
+        Line test1 = new Line();
         private void UpdateMousePosition()
         {
             // Get the mouse position once and calculate the direction to player center
             Point mousePos = Mouse.GetPosition(canvas);
+
             Vector2 posCentreJoueur = new Vector2(
                 (float)(joueur.posJoueur.X + player.Width / 2.0f),
                 (float)(joueur.posJoueur.Y + player.Height / 2.0f)
             );
 
-            // Calculate direction vector and angle once
-            directionSouris = Vector2.Normalize(new Vector2((float)mousePos.X, (float)mousePos.Y) - posCentreJoueur);
-            currentAngle = (float)(Math.Atan2(directionSouris.Y, directionSouris.X) * (180 / Math.PI));
+            Vector2 direction = new Vector2(
+                (float) (mousePos.X - posCentreJoueur.X),
+                (float) (mousePos.Y - posCentreJoueur.Y)
+            );
+
+            // Normalize the direction vector
+            float magnitude = (float)Math.Sqrt(direction.X * direction.X + direction.Y * direction.Y);
+            if (magnitude != 0) {
+                direction.X /= magnitude;
+                direction.Y /= magnitude;
+            }
+
+            int posGunMagnitude = 50;
+            directionSouris = new Vector2(
+                posCentreJoueur.X + direction.X * posGunMagnitude,
+                posCentreJoueur.Y + direction.Y * posGunMagnitude
+            );
+
+            currentAngle = (float) (Math.Atan2(direction.Y, direction.X) * 180 / Math.PI);
+            
+            test1.Stroke = Brushes.Red;
+            test1.StrokeThickness = 2;
+            //test1.X1 = posCentreJoueur.X; 
+            //test1.Y1 = posCentreJoueur.Y;
+            //test1.X2 = directionSouris.X;
+            //test1.Y2 = directionSouris.Y;
 
             // Update positions for both the weapon and tongue
             UpdateWeaponPosition(mousePos, posCentreJoueur, directionSouris);
@@ -356,7 +377,7 @@ namespace Froggun
         {
             // Calculate weapon position around the player
             float distanceJoueurSouris = Vector2.Distance(posCentreJoueur, new Vector2((float)mousePos.X, (float)mousePos.Y));
-            posArme = posCentreJoueur + (directionSouris * distancePisolet);
+            posArme = directionSouris;
 
             // Apply transforms for the weapon
             TransformGroup transformGroup = new TransformGroup();
@@ -364,19 +385,15 @@ namespace Froggun
             RotateTransform rotationArme = new RotateTransform(currentAngle);
 
             // Flip the weapon image if the mouse is to the left
-            inverseArme.ScaleY = directionSouris.X > 0 ? 1 : -1;
+            inverseArme.ScaleY = (Math.Abs(currentAngle) > 90) ? -1 : 1;
 
             transformGroup.Children.Add(inverseArme);
             transformGroup.Children.Add(rotationArme);
             gun.RenderTransform = transformGroup;
 
-            //TODO: Adjust the gun offset here;
-            double adjustedX = 0;
-            double adjustedY = 0;
-
             // Set the position of the weapon
-            Canvas.SetTop(gun, posArme.Y-adjustedY);
-            Canvas.SetLeft(gun, posArme.X+adjustedX);
+            Canvas.SetTop(gun, posArme.Y);
+            Canvas.SetLeft(gun, posArme.X);
         }
 
         private void UpdateTonguePosition(Point mousePos, Vector2 posCentreJoueur, Vector2 directionSouris)
@@ -461,7 +478,7 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             if (pause) return;
-
+            ShootGun();
             //Stopwatch stopwatch = new Stopwatch();
             //stopwatch.Start();
 
@@ -469,29 +486,27 @@ namespace Froggun
             if (difficulte == "facile" || difficulte == "moyen")
             {
                 if (ennemis.Count <= 0 && proies.Count <= 0)
-            {
-                StartWave();
+                {
+                    StartWave();
                 }
             }
-            else
-            {
-                StartWave();
-            }
+            else StartWave();
+            
             Rect playerRect = new Rect(joueur.posJoueur.X, joueur.posJoueur.Y, player.Width, player.Height);
 
-        Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur);
-        Proies.UpdateProies(proies, playerRect);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur);
+            Proies.UpdateProies(canvas, proies, playerRect);
 
-        AffichageDeVie(joueur.nombreDeVie);
-        CheckBallesSortieEcran();
-        CheckCollisionProie();
-        joueur.ChangeJoueurDirection();
-        UpdateMousePosition();
-        joueur.UpdatePositionJoueur();
+            AffichageDeVie(joueur.nombreDeVie);
+            CheckBallesSortieEcran();
+            CheckCollisionProie();
+            joueur.ChangeJoueurDirection();
+            UpdateMousePosition();
+            joueur.UpdatePositionJoueur();
             
-        //stopwatch.Stop();
-        //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
-    }
+            //stopwatch.Stop();
+            //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
+        }
 
         private void AffichageDeVie(int nombreDeVie)
         {
@@ -507,9 +522,7 @@ namespace Froggun
                 else if (nombreDeVie == 3) ImgvieJoueur.Source = imageVie3;
                 else if (nombreDeVie == 2) ImgvieJoueur.Source = imageVie2;
                 else if (nombreDeVie == 1) ImgvieJoueur.Source = imageVie1;
-
             }
-
         }
 
         private void CheckBallesSortieEcran()
@@ -639,6 +652,11 @@ namespace Froggun
                             line_frog_2.Stroke = Brushes.Green;
                             canvas.Children.Remove(proie.Image);
                             proies.Remove(proie);
+                            joueur.proieManger++;
+                            if (joueur.proieManger>=joueur.proiePourHeal)
+                            {
+                                joueur.heal();
+                            }
                         }
                     }
                     if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
@@ -691,8 +709,8 @@ namespace Froggun
         private void ShootGun()
         {
             SonGun();
-            double a = currentAngle * Math.PI / 180.0;
-            Balle balle = new Balle(posArme.X, posArme.Y, a, vitesseBalle, 10, canvas, imageBalle);
+            int scaleX = (Math.Abs(currentAngle) > 90) ? -1 : 1;
+            Balle balle = new Balle(posArme.X, posArme.Y, currentAngle, vitesseBalle, 10, canvas, imageBalle, scaleX);
             Balles.Add(balle);
         }
 

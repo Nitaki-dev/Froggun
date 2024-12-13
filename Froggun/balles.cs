@@ -13,8 +13,8 @@ namespace Froggun
         public double Degats { get; set; }
         public Image BalleImage { get; set; }
         public bool hasHit { get; set; }
-        
-        public Balle(double x, double y, double angle, double speed, double Degats, Canvas canvas, BitmapImage BalleImageSource)
+        public bool ScaleX { get; set; }
+        public Balle(double x, double y, double angle, double speed, double Degats, Canvas canvas, BitmapImage BalleImageSource, int ScaleX)
         {
             X = x;
             Y = y;
@@ -24,23 +24,30 @@ namespace Froggun
             BalleImage = new Image
             {
                 Source = BalleImageSource,
-                Width = 25,
-                Height = 25
+                Width = 10,
+                Height = 10
             };
 
             Canvas.SetLeft(BalleImage, X);
             Canvas.SetTop(BalleImage, Y);
 
-            RotateTransform rotationBalle = new RotateTransform(angle * 180 / Math.PI);
-            BalleImage.RenderTransform = rotationBalle;
+            RotateTransform rotationBalle = new RotateTransform(angle);
+            ScaleTransform scaleBalle = new ScaleTransform();
+            TransformGroup groupBalle = new TransformGroup();
+            
+            scaleBalle.ScaleY = ScaleX;
+            groupBalle.Children.Add(scaleBalle);
+            groupBalle.Children.Add(rotationBalle);
+
+            BalleImage.RenderTransform = groupBalle;
 
             canvas.Children.Add(BalleImage);
         }
 
         public void UpdatePositionBalles()
         {
-            X += Math.Cos(Angle) * Speed;
-            Y += Math.Sin(Angle) * Speed;
+            X += Math.Cos(Angle * Math.PI / 180.0) * Speed;
+            Y += Math.Sin(Angle * Math.PI / 180.0) * Speed;
             
             Canvas.SetLeft(BalleImage, X);
             Canvas.SetTop(BalleImage, Y);

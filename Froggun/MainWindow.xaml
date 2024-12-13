@@ -48,10 +48,11 @@
                 x:Name="gun"
                 Canvas.Left="319"
                 Canvas.Top="184"
-                Width="51"
-                Height="40"
+                Width="42.5"
+                Height="25.5"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
+                Panel.ZIndex="500"
                 Source="/img/gun.png"
                 Stretch="Fill" />
             <Label
@@ -96,6 +97,7 @@
                 Height="300"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
+                Panel.ZIndex="999"
                 Content="PAUSE"
                 FontFamily="72 Monospace"
                 FontSize="300"
@@ -127,12 +129,13 @@
                 Stretch="Fill" />
             <Label
                 x:Name="lab_Defaite"
-                Canvas.Left="31"
+                Canvas.Left="34"
                 Canvas.Top="210"
                 Width="1218"
                 Height="307"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Panel.ZIndex="1000"
                 Content="DEFAITE"
                 FontFamily="72 Monospace"
                 FontSize="280"

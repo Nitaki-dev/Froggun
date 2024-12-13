@@ -35,6 +35,7 @@
 		<None Remove="img\frog_side_hit.png" />
 		<None Remove="img\gun.png" />
 		<None Remove="img\guninversee.png" />
+		<None Remove="img\gun_2.png" />
 		<None Remove="img\health0.png" />
 		<None Remove="img\health1.png" />
 		<None Remove="img\health2.png" />
@@ -93,7 +94,6 @@
 		<Resource Include="img\explosion\img_explosion3.png" />
 		<Resource Include="img\explosion\img_explosion4.png" />
 		<Resource Include="img\explosion\img_explosion5.png" />
-		<Resource Include="img\parametre.png" />
 		<Resource Include="son\coupdefeu.wav" />
 		<Resource Include="son\langue.wav" />
 	</ItemGroup>

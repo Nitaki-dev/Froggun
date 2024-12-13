@@ -31,6 +31,7 @@ namespace Froggun
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }
         private DispatcherTimer animationTimer { get; set; }
+        public Canvas canvas { get; set; }
 
         public double targetX;
         public double targetY;
@@ -44,6 +45,7 @@ namespace Froggun
             Height = height;
             Speed = speed;
             newPosMaxDiff = newPosOffset;
+            this.canvas = canvas;
 
             switch (type)
             {
@@ -101,7 +103,7 @@ namespace Froggun
             targetY = Y + random.Next(-newPosMaxDiff, newPosMaxDiff);
         }
 
-        public static void UpdateProies(List<Proies> proies, Rect joueur)
+        public static void UpdateProies(Canvas canvas, List<Proies> proies, Rect joueur)
         {
             foreach (var proie in proies)
             {
@@ -125,11 +127,14 @@ namespace Froggun
                 proie.X = newX;
                 proie.Y = newY;
 
-                if (proie.X < -proie.Width) proie.X += 1280;
-                if (proie.Y < -proie.Height) proie.Y += 740;
+                if (proie.X < 0 || proie.X > canvas.ActualWidth) proie.X = 100;
+                if (proie.Y < 0 || proie.Y > canvas.ActualHeight) proie.Y = 100;
+                
+                //if (proie.X < -proie.Width) proie.X += 1280;
+                //if (proie.Y < -proie.Height) proie.Y += 740;
 
-                if (proie.X > 1280) proie.X -= 1280-proie.Width;
-                if (proie.Y > 720) proie.Y -= 740-proie.Height;
+                //if (proie.X > 1280) proie.X -= 1280-proie.Width;
+                //if (proie.Y > 720) proie.Y -= 740-proie.Height;
 
                 Canvas.SetLeft(proie.Image, proie.X);
                 Canvas.SetTop(proie.Image, proie.Y);

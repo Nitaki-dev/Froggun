@@ -40,6 +40,8 @@ namespace Froggun
         public float correctionVitesseDiagonal { get; set; }
         public float vitesseDeplacement { get; set; }
         public float friction { get; set; }
+        public int proiePourHeal { get; set; }
+        public int proieManger { get; set; }
 
         public Image player { get; set; }
         public Grid grid { get; set; }
@@ -69,7 +71,7 @@ namespace Froggun
 
         public Directions directionJoueur { get; set; }
 
-        public Joueur(Image player, Grid grid, BitmapImage front, BitmapImage side, BitmapImage back, BitmapImage frontHit, BitmapImage sideHit, BitmapImage backHit)
+        public Joueur(Image player, int posX, int posY, Grid grid, BitmapImage front, BitmapImage side, BitmapImage back, BitmapImage frontHit, BitmapImage sideHit, BitmapImage backHit)
         {
             this.player = player;
             this.grid = grid;
@@ -91,6 +93,9 @@ namespace Froggun
             this.friction = 0.4f;
             this.directionJoueur = Directions.right;
 
+            this.proiePourHeal = 3;
+            this.proieManger = 0;
+
             this.front = front;
             this.side = side;
             this.back = back;
@@ -101,7 +106,7 @@ namespace Froggun
             this.joueurTransformGroup = new TransformGroup();
             this.joueurRoulade = new RotateTransform();
             this.joueurFlip = new ScaleTransform();
-            this.posJoueur = new Vector2(50.0f, 50.0f);
+            this.posJoueur = new Vector2((float)posX, (float)posY);
             this.vitesseJoueur = new Vector2();
         }
 
@@ -114,7 +119,8 @@ namespace Froggun
             {
                 // animation de la roulade 
                 tempsRoulade += 16.6666667;
-                joueurRoulade.Angle = ((tempsRoulade / dureeRoulade) * 2 * Math.PI) * 180 / Math.PI * (doitFlip ? 1 : -1);
+                joueurRoulade.Angle = -((tempsRoulade / dureeRoulade) * 2 * Math.PI) * 180 / Math.PI;
+
                 nouvelleVitesseJoueur.X = 0;
                 nouvelleVitesseJoueur.Y = 0;
 
@@ -190,6 +196,10 @@ namespace Froggun
             vitesseJoueur = nouvelleVitesseJoueur;
             posJoueur = nouvellePositionJoueur;
 
+            //if (IsPointInside(nouvellePositionJoueur.X, nouvellePositionJoueur.Y)) {
+            //    posJoueur = nouvellePositionJoueur;
+            //}
+
             joueurTransformGroup.Children.Clear();
             player.RenderTransformOrigin = new Point(0.5, 0.5);
             joueurTransformGroup.Children.Add(joueurRoulade);
@@ -232,6 +242,11 @@ namespace Froggun
             }
         }
 
+        public void heal()
+        {
+            if (nombreDeVie+1<=5) nombreDeVie++;
+        }
+
         public void hit(int degats)
         {
             nombreDeVie-=degats;
@@ -242,7 +257,6 @@ namespace Froggun
         }
 
         private void BlinkPlayerEffect(object? sender, EventArgs e) {
-            Console.WriteLine(blinkFrame.ToString());
             blinkFrame++;
 
             if (blinkFrame > 10)
@@ -250,6 +264,16 @@ namespace Froggun
                 blinkTimer.Stop();
                 blinkFrame = 0;
             }
+        }
+
+        public bool IsPointInside(double px, double py)
+        {
+            double dx = px - grid.ActualWidth /2.0f;
+            double dy = py - grid.ActualHeight / 2.0f;
+         
+            double equation = (Math.Pow(dx, 2) / Math.Pow(grid.ActualWidth / 2.0f, 2)) + (Math.Pow(dy, 2) / Math.Pow(grid.ActualHeight / 2.0f, 2));
+
+            return equation <= 1;
         }
     }
 }
