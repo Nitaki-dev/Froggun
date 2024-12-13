@@ -127,14 +127,10 @@ namespace Froggun
                 proie.X = newX;
                 proie.Y = newY;
 
-                if (proie.X < 0 || proie.X > canvas.ActualWidth) proie.X = 100;
-                if (proie.Y < 0 || proie.Y > canvas.ActualHeight) proie.Y = 100;
-                
-                //if (proie.X < -proie.Width) proie.X += 1280;
-                //if (proie.Y < -proie.Height) proie.Y += 740;
-
-                //if (proie.X > 1280) proie.X -= 1280-proie.Width;
-                //if (proie.Y > 720) proie.Y -= 740-proie.Height;
+                if (proie.X <= 0) proie.X = 0;
+                if (proie.X >= canvas.ActualWidth) proie.X = canvas.ActualWidth;
+                if (proie.Y <= 0) proie.Y = 0;
+                if (proie.Y >= canvas.ActualHeight) proie.X = canvas.ActualHeight;
 
                 Canvas.SetLeft(proie.Image, proie.X);
                 Canvas.SetTop(proie.Image, proie.Y);

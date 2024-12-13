@@ -478,7 +478,7 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             if (pause) return;
-            ShootGun();
+
             //Stopwatch stopwatch = new Stopwatch();
             //stopwatch.Start();
 
