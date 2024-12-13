@@ -66,6 +66,14 @@ namespace Froggun
         private static BitmapImage imageBalle;
         private static double vitesseBalle = 30.0f;
 
+        private static BitmapImage imageVie5;
+        private static BitmapImage imageVie4;
+        private static BitmapImage imageVie3;
+        private static BitmapImage imageVie2;
+        private static BitmapImage imageVie1;
+        private static BitmapImage imageVie0;
+        public int nombreDeVie = 5;
+
         private List<Balle> Balles = new List<Balle>(); 
         private List<Ennemis> ennemis = new List<Ennemis>();
         private List<Proies> proies = new List<Proies>();
@@ -78,8 +86,8 @@ namespace Froggun
 
         public SoundPlayer musique;
         public Stream audioStream;
-        public MediaPlayer musiqueDeFond;
-        public MediaPlayer musiqueDeJeu;
+        private MediaPlayer musiqueDeFond;
+        private MediaPlayer musiqueDeJeu;
 
         public MainWindow()
         {
@@ -87,8 +95,8 @@ namespace Froggun
             InitializeComponent();
             InitMusique(true);
 
-            // Création de la fenêtre parametre avec un Canvas
-            parametre fentreNiveau = new parametre();
+             // Création de la fenêtre parametre avec un Canvas
+             parametre fentreNiveau = new parametre();
             fentreNiveau.ShowDialog();  // Affichage de la fenêtre parametre
 
             // Si la fenêtre parametre est fermée avec DialogResult == false, fermer l'application
@@ -175,7 +183,8 @@ namespace Froggun
             }
 
             lab_Pause.Visibility = Visibility.Collapsed;
-            
+            lab_Defaite.Visibility = Visibility.Collapsed;
+
             InitialiserMinuterie();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
@@ -188,9 +197,8 @@ namespace Froggun
             if (jouer)
             {
                 musiqueDeFond = new MediaPlayer();
-                musiqueDeFond.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/intro.wav"));
+                musiqueDeFond.Open(new Uri("son/intro.mp3", UriKind.Relative));
                 musiqueDeFond.MediaEnded += RelanceMusique;
-                musiqueDeFond.Volume = 1.0;
                 musiqueDeFond.Play();
             }
             else 
@@ -204,12 +212,13 @@ namespace Froggun
             musiqueDeFond.Position = TimeSpan.Zero;
             musiqueDeFond.Play();
         }
+
         private void InitMusiqueJeux(bool jouer)
         {
             if (jouer)
             {
                 musiqueDeJeu = new MediaPlayer();
-                musiqueDeJeu.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/son_jeu.wav"));
+                musiqueDeJeu.Open(new Uri("son/son_jeu.mp3", UriKind.Relative));
                 musiqueDeJeu.MediaEnded += RelanceMusiqueJeux;
                 musiqueDeJeu.Volume = 1.0;
                 musiqueDeJeu.Play();
@@ -350,6 +359,13 @@ namespace Froggun
             imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
 
             imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
+
+            imageVie5 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health5.png")); 
+            imageVie4 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health4.png"));
+            imageVie3 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health3.png"));
+            imageVie2 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health2.png"));
+            imageVie1 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
+            imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
         }
 
         private void UpdateMousePosition()
@@ -485,8 +501,8 @@ namespace Froggun
             }
 
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
-            Player.UpdatePLayer();
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref nombreDeVie);
+            affichageDeVie(nombreDeVie);
             Proies.UpdateProies(proies, playerRect);
 
             CheckOutofboundsBullets();
@@ -545,6 +561,25 @@ namespace Froggun
             //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
         }
 
+        private void affichageDeVie(int nombreDeVie)
+        {
+            if (nombreDeVie <= 0)
+            {
+                ImgvieJoueur.Source = imageVie0;
+                pause = true;
+                lab_Defaite.Visibility = Visibility.Visible;
+
+            }
+            else
+            {
+                if (nombreDeVie==4) ImgvieJoueur.Source = imageVie4;
+                else if (nombreDeVie==3) ImgvieJoueur.Source = imageVie3;
+                else if (nombreDeVie == 2) ImgvieJoueur.Source = imageVie2;
+                else if (nombreDeVie == 1) ImgvieJoueur.Source = imageVie1;
+
+            }
+
+        }
         private void CheckOutofboundsBullets()
         {
             for (int i = 0; i < Balles.Count; i++)
