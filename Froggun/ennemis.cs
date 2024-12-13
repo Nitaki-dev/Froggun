@@ -16,7 +16,7 @@ namespace Froggun
     public enum TypeEnnemis
     {
         Spider,
-        Ant
+        Squit
     }
 
     internal class Ennemis
@@ -41,6 +41,14 @@ namespace Froggun
         public bool hasCollided { get; set; }
         private Rectangle healthBarEmpty { get; set; }
         private Rectangle healthBar { get; set; }
+
+        public static int killStreak = 0;
+
+        public static double scoreMultiplier = 1;
+
+        private static DispatcherTimer killStreakTimer = new DispatcherTimer();
+
+        private static bool isTimerRunning = false;
 
 
         public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
@@ -85,32 +93,20 @@ namespace Froggun
                 case TypeEnnemis.Spider:
                     animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
                     imagePath = "img/ennemis/LL";
-                    if (difficulte == "facile")
-                    {
-                        Health = 150;
-                        maxHealth = 150;
-                    }
-                    else if (difficulte == "moyen")
-                    {
-                        Health = 200;
-                        maxHealth = 200;
-                    }
-                    else if (difficulte == "difficile")
-                    {
-                        Health = 250;
-                        maxHealth = 250;
-                    }
-                    else if (difficulte == "extreme")
-                    {
-                        Health = 300;
-                        maxHealth = 300;
-                    }
+                    if (difficulte == "facile") Health = 150;
+                    else if (difficulte == "moyen") Health = 200;
+                    else if (difficulte == "difficile") Health = 250;
+                    else if (difficulte == "extreme") Health = 300;
+                    maxHealth = Health;
                     break;
-                case TypeEnnemis.Ant:
-                    animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
-                    imagePath = "img/ennemis/LL";
-                    Health = 100;
-                    maxHealth = 100;
+                case TypeEnnemis.Squit:
+                    animationIndex = new int[] { 1, 2, 3, 4 };
+                    imagePath = "img/ennemis/Squit";
+                    if (difficulte == "facile") Health = 300;
+                    else if (difficulte == "moyen") Health = 400;
+                    else if (difficulte == "difficile") Health = 450;
+                    else if (difficulte == "extreme") Health = 550;
+                    maxHealth = Health;
                     break;
             }
           
@@ -127,6 +123,19 @@ namespace Froggun
             animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             animationTimer.Tick += AnimationTimer_Tick;
             animationTimer.Start();
+            InitializeKillStreakTimer();
+        }
+        void InitializeKillStreakTimer()
+        {
+            killStreakTimer.Interval = TimeSpan.FromSeconds(5);
+            killStreakTimer.Tick += (sender, e) =>
+            {
+                Console.WriteLine("Kill streak expired.");
+                killStreak = 0;
+                scoreMultiplier = 1;
+                isTimerRunning = false;
+                killStreakTimer.Stop();
+            };
         }
 
         private void AnimationTimer_Tick(object sender, EventArgs e)
@@ -145,11 +154,11 @@ namespace Froggun
             return bitmapImage;
         }
 
-        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueurr, List<Balle> balles, Canvas canvas, ref Joueur joueur)
+        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueurr, List<Balle> balles, Canvas canvas, ref Joueur joueur, ref double score, ref double combo)
         {
             // Cache bounding box and other frequently used values
             Rect rJoueur = joueurr;
-
+            combo = scoreMultiplier;
             for (int i = 0; i < ennemis.Count; i++)
             {
                 Ennemis ennemi = ennemis[i];
@@ -169,7 +178,7 @@ namespace Froggun
                     {
                         ennemi.Health -= 50;
                         if (ennemi.Health <= 0)
-                            ennemi.Die(ennemis, ennemi, canvas);
+                            ennemi.Die(ennemis, ennemi, canvas, ref score);
 
                         if (ennemi.Health > 0)
                         {
@@ -281,7 +290,7 @@ namespace Froggun
             musique.Play();
         }
 
-        public void Die(List<Ennemis> ennemis, Ennemis e, Canvas canvas)
+        public void Die(List<Ennemis> ennemis, Ennemis e, Canvas canvas, ref double score)
         {
             //SonMortEnnemie();
             IsAlive = false;
@@ -290,8 +299,20 @@ namespace Froggun
             canvas.Children.Remove(healthBarEmpty);
             canvas.Children.Remove(healthBar);
             ennemis.Remove(e);
+            AddKillToStreak();
+            score += 100 * scoreMultiplier;
         }
-        
+        public static void AddKillToStreak()
+        {
+            if (!isTimerRunning)
+            {
+                killStreakTimer.Start();
+                isTimerRunning = true;
+            }
+            killStreak++;
+            scoreMultiplier = 1 + (killStreak - 1) * 0.5;
+        }
+
         public void SlowDown(int durationInSeconds)
         {
             isSlowed = true;

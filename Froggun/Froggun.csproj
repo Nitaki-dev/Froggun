@@ -21,6 +21,10 @@
 		<None Remove="img\ennemis\LL\3.png" />
 		<None Remove="img\ennemis\LL\4.png" />
 		<None Remove="img\ennemis\LL\5.png" />
+		<None Remove="img\ennemis\Squit\1.png" />
+		<None Remove="img\ennemis\Squit\2.png" />
+		<None Remove="img\ennemis\Squit\3.png" />
+		<None Remove="img\ennemis\Squit\4.png" />
 		<None Remove="img\extreme.jpg" />
 		<None Remove="img\facile.jpg" />
 		<None Remove="img\firefly.png" />
@@ -70,6 +74,10 @@
 		<Resource Include="img\ennemis\LL\3.png" />
 		<Resource Include="img\ennemis\LL\4.png" />
 		<Resource Include="img\ennemis\LL\5.png" />
+		<Resource Include="img\ennemis\Squit\1.png" />
+		<Resource Include="img\ennemis\Squit\2.png" />
+		<Resource Include="img\ennemis\Squit\3.png" />
+		<Resource Include="img\ennemis\Squit\4.png" />
 		<Resource Include="img\extreme.jpg" />
 		<Resource Include="img\facile.jpg" />
 		<Resource Include="img\fond_accueil.jpg" />

@@ -54,6 +54,8 @@ namespace Froggun
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
         public static int bulletOffset = 0;
+        public double score = 0;
+        public double combo = 0;
         int pauseEntreVagues = 5; // en secondes
         int pauseCounter = 0;
         int waveCount = 0;
@@ -213,6 +215,7 @@ namespace Froggun
             }
 
         }
+        
         private void RelanceMusiqueJeux(object? sender, EventArgs e)
         {
             musiqueDeJeu.Position = TimeSpan.Zero;
@@ -248,49 +251,43 @@ namespace Froggun
             waveCount++;
             int spiderCount = (int)Math.Ceiling(Math.Pow(Math.Sqrt(waveCount), 3.0)) % 10;
             // \operatorname{ceil}\left(\sqrt{\left(x\right)}^{3}\right) // LaTeX !!
+
+            int squitCount = (int)Math.Ceiling(Math.Pow(Math.Sqrt(waveCount), 3.0)/8.0) % 10;
+            //\operatorname{ceil}\left(\frac{\sqrt{\left(x\right)}^{3}}{8}\right)
+
             if (difficulte == "extreme")
             {
-                spiderCount = spiderCount + 3;
+                spiderCount += 3;
+                squitCount += 2;
             }
 
-            labelWave.Content = $"Wave {waveCount}";
+            labelWave.Content = $"Vague {waveCount}";
+
+            int hautBasGaucheDroite = alea.Next(0, 4);
+            int xMin = 0, xMax = 1200, yMin = 0, yMax = 600;
+            if (hautBasGaucheDroite == 0) {
+                xMax = 100;
+                yMax = 600;
+            } else if (hautBasGaucheDroite == 1) {
+                yMin = 50;
+                yMax = 150;
+            } else if (hautBasGaucheDroite == 2) {
+                xMin = 1100;
+                xMax = 1200;
+            } else {
+                yMin = 500;
+                yMax = 600;
+            }
 
             for (int i = 0; i < spiderCount; i++)
             {
-                int hautBasGaucheDroite = alea.Next(0, 3);
-                if (hautBasGaucheDroite == 0)
-                {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 100), alea.Next(0, 600), 100, 100, 8, canvas);
-                    ennemis.Add(spider);
+                ennemis.Add(new Ennemis(TypeEnnemis.Spider, alea.Next(xMin, xMax), alea.Next(yMin, yMax), 100, 100, 8, canvas));
+                proies.Add(new Proies(TypeProies.Fly, alea.Next(xMin, xMax), alea.Next(yMin, yMax), 50, 50, 3, 500, 200, canvas));
+            }
 
-                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 100), alea.Next(0, 600), 50, 50, 3, 500, 200, canvas);
-                    proies.Add(fly);
-                }
-                else if (hautBasGaucheDroite == 1)
-                {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 1200), alea.Next(50, 150), 100, 100, 8, canvas);
-                    ennemis.Add(spider);
-
-                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 1200), alea.Next(50, 150), 50, 50, 3, 500, 200, canvas);
-                    proies.Add(fly);
-                }
-
-                else if (hautBasGaucheDroite == 2)
-                {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(1100, 1200), alea.Next(0, 600), 100, 100, 8, canvas);
-                    ennemis.Add(spider);
-
-                    Proies fly = new Proies(TypeProies.Fly, alea.Next(1100, 1200), alea.Next(0, 600), 50, 50, 3, 500, 200, canvas);
-                    proies.Add(fly);
-                }
-                else
-                {
-                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 1200), alea.Next(500, 600), 100, 100, 8, canvas);
-                    ennemis.Add(spider);
-
-                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 1200), alea.Next(500, 600), 50, 50, 3, 500, 200, canvas);
-                    proies.Add(fly);
-                }
+            for (int i = 0; i < squitCount; i++)
+            {
+                ennemis.Add(new Ennemis(TypeEnnemis.Squit, alea.Next(xMin, xMax), alea.Next(yMin, yMax), 200, 200, 8, canvas));
             }
 
             pauseVagues.Stop();
@@ -481,7 +478,6 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             if (pause) return;
-
             //Stopwatch stopwatch = new Stopwatch();
             //stopwatch.Start();
 
@@ -497,9 +493,10 @@ namespace Froggun
             
             Rect playerRect = new Rect(joueur.posJoueur.X, joueur.posJoueur.Y, player.Width, player.Height);
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur, ref score, ref combo);
             Proies.UpdateProies(canvas, proies, playerRect);
-
+            AfficheScore();
+            AfficheCombo();
             AffichageDeVie(joueur.nombreDeVie);
             CheckBallesSortieEcran();
             CheckCollisionProie();
@@ -763,14 +760,14 @@ namespace Froggun
             Balles.Add(balle);
         }
 
-        public void AfficheScore(int score)
+        public void AfficheScore()
         {
             labelScore.Content = $"Score : {score} ";
         }
 
-        public void AfficheCombo(double combo)
+        public void AfficheCombo()
         {
-            labelScore.Content = $"Combo : {Math.Round(combo, 2)} ";
+            labelCombo.Content = $"Combo : {combo} ";
         }
 
         private void keydown(object sender, KeyEventArgs e)
@@ -803,6 +800,22 @@ namespace Froggun
             {
                 joueur.estEnRoulade = true;
             }
+
+            if (e.Key == Key.K && !pause)
+            {
+                ennemis.Add(new Ennemis(TypeEnnemis.Spider, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 100, 100, 3, canvas));
+            }
+
+            if (e.Key == Key.L && !pause)
+            {
+                ennemis.Add(new Ennemis(TypeEnnemis.Squit, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 150, 150, 3, canvas));
+            }
+
+            if (e.Key == Key.P && !pause)
+            {
+                proies.Add(new Proies(TypeProies.Fly, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 50, 50, 3, 500, 200, canvas));
+            }
+
             if (e.Key == Key.Escape || e.Key == Key.Space )
             {
                 pause=!pause;
