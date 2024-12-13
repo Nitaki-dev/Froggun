@@ -76,13 +76,16 @@ namespace Froggun
         int waveCount = 0;
         private bool isTimerRunning = false;
 
-        //public SoundPlayer musique;
-        //public Stream audioStream;
-        
+        public SoundPlayer musique;
+        public Stream audioStream;
+        public MediaPlayer musiqueDeFond;
+        public MediaPlayer musiqueDeJeu;
+
         public MainWindow()
         {
             InitImage();
-            InitializeComponent(); 
+            InitializeComponent();
+            InitMusique(true);
 
             // Création de la fenêtre parametre avec un Canvas
             parametre fentreNiveau = new parametre();
@@ -167,7 +170,10 @@ namespace Froggun
                 choixDifficulte fentreDifficulte = new choixDifficulte();
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
+                InitMusique(false);
+                InitMusiqueJeux(true);
             }
+
             lab_Pause.Visibility = Visibility.Collapsed;
             
             InitialiserMinuterie();
@@ -175,6 +181,49 @@ namespace Froggun
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
             //Measure(new Size(Width, Height));
             //Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
+        }
+
+        private void InitMusique(bool jouer)
+        {
+            if (jouer)
+            {
+                musiqueDeFond = new MediaPlayer();
+                musiqueDeFond.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/intro.wav"));
+                musiqueDeFond.MediaEnded += RelanceMusique;
+                musiqueDeFond.Volume = 1.0;
+                musiqueDeFond.Play();
+            }
+            else 
+            {
+                musiqueDeFond.Stop(); 
+            }
+            
+        }
+        private void RelanceMusique(object? sender, EventArgs e)
+        {
+            musiqueDeFond.Position = TimeSpan.Zero;
+            musiqueDeFond.Play();
+        }
+        private void InitMusiqueJeux(bool jouer)
+        {
+            if (jouer)
+            {
+                musiqueDeJeu = new MediaPlayer();
+                musiqueDeJeu.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/son_jeu.wav"));
+                musiqueDeJeu.MediaEnded += RelanceMusiqueJeux;
+                musiqueDeJeu.Volume = 1.0;
+                musiqueDeJeu.Play();
+            }
+            else
+            {
+                musiqueDeJeu.Stop();
+            }
+
+        }
+        private void RelanceMusiqueJeux(object? sender, EventArgs e)
+        {
+            musiqueDeJeu.Position = TimeSpan.Zero;
+            musiqueDeJeu.Play();
         }
 
         void StartWave()
@@ -646,33 +695,33 @@ namespace Froggun
 
         private void ShootTung()
         {
-            //SonLangue();
+            SonLangue();
             if (tirLangue) return;
             else tirLangue = true;
             expensionLangue = true;
         }
         private void SonGun()
         {
-            //// Charger le fichier audio depuis les ressources
-            //Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
-            //Stream audioStream = Application.GetResourceStream(audioUri).Stream;
-            //// Créer un objet SoundPlayer pour lire le son
-            //SoundPlayer musique = new SoundPlayer(audioStream);
-            //musique.Play();
+            // Charger le fichier audio depuis les ressources
+            Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
+            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            // Créer un objet SoundPlayer pour lire le son
+            SoundPlayer musique = new SoundPlayer(audioStream);
+            musique.Play();
         }
         private void SonLangue()
         {
-            //// Charger le fichier audio depuis les ressources
-            //Uri audioUri = new Uri("/son/langue.wav", UriKind.RelativeOrAbsolute);
-            //Stream audioStream = Application.GetResourceStream(audioUri).Stream;
-            //// Créer un objet SoundPlayer pour lire le son
-            //SoundPlayer musique = new SoundPlayer(audioStream);
-            //musique.Play();
+            // Charger le fichier audio depuis les ressources
+            Uri audioUri = new Uri("/son/langue.wav", UriKind.RelativeOrAbsolute);
+            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            // Créer un objet SoundPlayer pour lire le son
+            SoundPlayer musique = new SoundPlayer(audioStream);
+            musique.Play();
         }
         
         private void ShootGun()
         {
-            //SonGun();
+            SonGun();
             Console.WriteLine("test");
             double a = currentAngle * Math.PI / 180.0;
             Balle balle = new Balle(posArme.X, posArme.Y, a, vitesseBalle, 10, canvas, imageBalle);
