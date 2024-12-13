@@ -161,6 +161,8 @@ namespace Froggun
             lab_Pause.Visibility = Visibility.Collapsed;
             lab_Defaite.Visibility = Visibility.Collapsed;
 
+            Console.WriteLine(difficulte);
+
             InitImage();
             //InitMusique(true);
 
@@ -218,147 +220,102 @@ namespace Froggun
 
         void StartWave()
         {
+            Console.WriteLine("test1");
             if (isTimerRunning) return;
             isTimerRunning = true;
-            void StartWave()
+            Console.WriteLine("test2");
+            
+            if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
+            else pauseEntreVagues = 10;
+
+            pauseVagues = new DispatcherTimer();
+            pauseVagues.Interval = TimeSpan.FromSeconds(1);
+            pauseVagues.Tick += NouvelleVague;
+            pauseCounter = 0;
+            pauseVagues.Start();
+        }
+        
+        private void NouvelleVague(object? sender, EventArgs e)
+        {
+            labelWave.Content = $"Prochainne vague dans {pauseEntreVagues - pauseCounter}!";
+
+            pauseCounter++;
+            if (pauseCounter < pauseEntreVagues) return;
+
+            if (difficulte == "facile" && !AreAllEnemiesDestroyed())
             {
-                if (difficulte == "facile" || difficulte == "moyen")
+                return;
+            }
+            waveCount++;
+            int spiderCount = (int)Math.Ceiling(Math.Pow(Math.Sqrt(waveCount), 3.0)) % 10;
+            // \operatorname{ceil}\left(\sqrt{\left(x\right)}^{3}\right) // LaTeX !!
+            if (difficulte == "extreme")
+            {
+                spiderCount = spiderCount + 3;
+            }
+
+            labelWave.Content = $"Wave {waveCount}";
+
+            for (int i = 0; i < spiderCount; i++)
+            {
+                int hautBasGaucheDroite = alea.Next(0, 3);
+                if (hautBasGaucheDroite == 0)
                 {
-                    pauseEntreVagues = 5;
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 100), alea.Next(0, 600), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 100), alea.Next(0, 600), 50, 50, 3, 500, 200, canvas);
+                    proies.Add(fly);
+                }
+                else if (hautBasGaucheDroite == 1)
+                {
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 1200), alea.Next(50, 150), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 1200), alea.Next(50, 150), 50, 50, 3, 500, 200, canvas);
+                    proies.Add(fly);
+                }
+
+                else if (hautBasGaucheDroite == 2)
+                {
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(1100, 1200), alea.Next(0, 600), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
+
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(1100, 1200), alea.Next(0, 600), 50, 50, 3, 500, 200, canvas);
+                    proies.Add(fly);
                 }
                 else
                 {
-                    pauseEntreVagues = 10;
-                }
-                if (isTimerRunning) return;
-                isTimerRunning = true;
+                    Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 1200), alea.Next(500, 600), 100, 100, 8, canvas);
+                    ennemis.Add(spider);
 
-                pauseVagues = new DispatcherTimer();
-                pauseVagues.Interval = TimeSpan.FromSeconds(1);
-                pauseVagues.Tick += NouvelleVague;
-                pauseCounter = 0;
-                pauseVagues.Start();
+                    Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 1200), alea.Next(500, 600), 50, 50, 3, 500, 200, canvas);
+                    proies.Add(fly);
+                }
             }
+            Console.WriteLine(spiderCount);
+            Console.WriteLine(ennemis.Count);
+
+            pauseVagues.Stop();
+            isTimerRunning = false;
         }
-            private void NouvelleVague(object? sender, EventArgs e)
-            {
-                labelWave.Content = $"New wave in {pauseEntreVagues - pauseCounter}!";
 
-                pauseCounter++;
-                if (pauseCounter < pauseEntreVagues) return;
+        private bool AreAllEnemiesDestroyed()
+        {
+            return ennemis.Count == 0 && proies.Count == 0;
+        }
+        void InitialiserMinuterie()
+        {
+            minuterie = new DispatcherTimer();
+            minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
+            minuterie.Tick += Loop;
+            minuterie.Start();
+        }
 
-                if (difficulte == "facile" && !AreAllEnemiesDestroyed())
-                {
-                    return;
-                }
-                waveCount++;
-                int spiderCount = (int)Math.Ceiling(Math.Pow(Math.Sqrt(waveCount), 3.0)) % 10;
-                // \operatorname{ceil}\left(\sqrt{\left(x\right)}^{3}\right) // LaTeX !!
-                if (difficulte == "extreme")
-                {
-                    spiderCount = spiderCount + 3;
-                }
-
-
-
-
-                labelWave.Content = $"Wave {waveCount}";
-
-                for (int i = 0; i < spiderCount; i++)
-                {
-                    int hautBasGaucheDroite = alea.Next(0, 3);
-                    if (hautBasGaucheDroite == 0)
-                    {
-                        Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 100), alea.Next(0, 600), 100, 100, 8, canvas);
-                        ennemis.Add(spider);
-
-                        Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 100), alea.Next(0, 600), 50, 50, 3, 500, 200, canvas);
-                        proies.Add(fly);
-                    }
-                    else if (hautBasGaucheDroite == 1)
-                    {
-                        Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 1200), alea.Next(50, 150), 100, 100, 8, canvas);
-                        ennemis.Add(spider);
-
-                        Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 1200), alea.Next(50, 150), 50, 50, 3, 500, 200, canvas);
-                        proies.Add(fly);
-                    }
-
-                    else if (hautBasGaucheDroite == 2)
-                    {
-                        Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(1100, 1200), alea.Next(0, 600), 100, 100, 8, canvas);
-                        ennemis.Add(spider);
-
-                        Proies fly = new Proies(TypeProies.Fly, alea.Next(1100, 1200), alea.Next(0, 600), 50, 50, 3, 500, 200, canvas);
-                        proies.Add(fly);
-                    }
-                    else
-                    {
-                        Ennemis spider = new Ennemis(TypeEnnemis.Spider, alea.Next(0, 1200), alea.Next(500, 600), 100, 100, 8, canvas);
-                        ennemis.Add(spider);
-
-                        Proies fly = new Proies(TypeProies.Fly, alea.Next(0, 1200), alea.Next(500, 600), 50, 50, 3, 500, 200, canvas);
-                        proies.Add(fly);
-                    }
-                }
-                Console.WriteLine(spiderCount);
-                Console.WriteLine(ennemis.Count);
-                /*
-                //do
-                //{
-                //    trier = true;
-                //    for (int i = 0; i < spiderCount - 1; i++)
-                //    {
-                //        for (int j = spiderCount - 1; j > i; j--)
-                //        {
-                //            if (ennemis[i].BoundingBox.IntersectsWith(ennemis[j].BoundingBox))
-                //            {
-                //                trier=false;
-                //                int hautBasGaucheDroite2 = alea.Next(0, 3);
-                //                if (hautBasGaucheDroite2 == 0)
-                //                {
-                //                    ennemis[i].X = alea.Next(0, 100);
-                //                    ennemis[i].Y = alea.Next(0, 600);
-                //                }
-                //                else if (hautBasGaucheDroite2 == 1)
-                //                {
-                //                    ennemis[i].X = alea.Next(0, 1200);
-                //                    ennemis[i].Y = alea.Next(50, 150);
-                //                }
-                //                else if (hautBasGaucheDroite2 == 2)
-                //                {
-                //                    ennemis[i].X = alea.Next(1100, 1200);
-                //                    ennemis[i].Y = alea.Next(0, 600);
-                //                }
-                //                else
-                //                {
-                //                    ennemis[i].X = alea.Next(0, 1200);
-                //                    ennemis[i].Y = alea.Next(500, 600);
-                //                }
-                //            }
-                //        }
-                //    }
-                //} while (trier == false);
-                */
-                pauseVagues.Stop();
-                isTimerRunning = false;
-            }
-            private bool AreAllEnemiesDestroyed()
-            {
-                return ennemis.Count == 0 && proies.Count == 0;
-            }
-            void InitialiserMinuterie()
-            {
-                minuterie = new DispatcherTimer();
-                minuterie.Interval = TimeSpan.FromMilliseconds(16.6666667);
-                minuterie.Tick += Loop;
-                minuterie.Start();
-            }
-
-            private void InitImage()
-            {
-                imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
-                imgFly = new BitmapImage(new Uri("pack://application:,,,/img/ennemis/LL/1.png"));
+        private void InitImage()
+        {
+            imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
+            imgFly = new BitmapImage(new Uri("pack://application:,,,/img/ennemis/LL/1.png"));
 
             imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
             imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
@@ -367,15 +324,15 @@ namespace Froggun
             imgFrogBackHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_back_hit.png"));
             imgFrogSideHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_side_hit.png"));
 
-                imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
+            imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
 
-                imageVie5 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health5.png"));
-                imageVie4 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health4.png"));
-                imageVie3 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health3.png"));
-                imageVie2 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health2.png"));
-                imageVie1 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
-                imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
-            }
+            imageVie5 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health5.png"));
+            imageVie4 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health4.png"));
+            imageVie3 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health3.png"));
+            imageVie2 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health2.png"));
+            imageVie1 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
+            imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
+        }
 
         private void UpdateMousePosition()
         {
@@ -505,12 +462,12 @@ namespace Froggun
                 //stopwatch.Start();
 
                 // if no enemies start a wave
-
                 if (difficulte == "facile" || difficulte == "moyen")
                 {
                     if (ennemis.Count <= 0 && proies.Count <= 0)
-                    {
-                        StartWave();
+                {
+                    Console.WriteLine("test1");
+                    StartWave();
                     }
                 }
                 else
