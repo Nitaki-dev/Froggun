@@ -555,7 +555,8 @@ namespace Froggun
             joueur.nombreDeVie = nombreDeVie;
             nombreDeVie = 5;
             AffichageDeVie(nombreDeVie);
-            AfficheScore(0);
+            AfficheScore();
+            
             // Déplacer l'image au centre
             joueur.posJoueur = new Vector2((float) ActualWidth/2,(float)ActualHeight/2); 
             waveCount = 0;
