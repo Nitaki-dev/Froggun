@@ -43,7 +43,7 @@ namespace Froggun
             Y = y;
             Width = width;
             Height = height;
-            Image = imgFrogFront;
+            
         }
         public static void UpdatePlayer()
         {
@@ -51,12 +51,12 @@ namespace Froggun
         }
         public static void SetPlayerImage(Directions direction)
         {
-            if (direction == Directions.left || direction == Directions.diagUpLeft || direction == Directions.diagDownLeft)
-                Image = imgFrogSide; // Изображение для левого направления
-            if (direction == Directions.up || direction == Directions.diagUpLeft || direction == Directions.diagUpRight)
-                Source = imgFrogBack; // Изображение для верхнего направления
-            if (direction == Directions.down || direction == Directions.diagDownLeft || direction == Directions.diagDownRight)
-                Source = imgFrogFront; // Изображение для нижнего направления
+            //if (direction == Directions.left || direction == Directions.diagUpLeft || direction == Directions.diagDownLeft)
+            //    Image = imgFrogSide; // Изображение для левого направления
+          //  if (direction == Directions.up || direction == Directions.diagUpLeft || direction == Directions.diagUpRight)
+          //      Source = imgFrogBack; // Изображение для верхнего направления
+          //  if (direction == Directions.down || direction == Directions.diagDownLeft || direction == Directions.diagDownRight)
+          //      Source = imgFrogFront; // Изображение для нижнего направления
         }
 
     }

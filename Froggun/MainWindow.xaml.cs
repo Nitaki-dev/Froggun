@@ -69,7 +69,7 @@ namespace Froggun
         private List<Balle> Balles = new List<Balle>(); 
         private List<Ennemis> ennemis = new List<Ennemis>();
         private List<Proies> proies = new List<Proies>();
-        private Player player;
+        //private Player player;
         public static string difficulte;
 
         int pauseEntreVagues = 5; // en secondes
@@ -437,7 +437,7 @@ namespace Froggun
             }
 
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
-            Player.UpdatePlayer(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
+            Player.UpdatePlayer();
             Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
             Proies.UpdateProies(proies, playerRect);
 
