@@ -510,7 +510,7 @@ namespace Froggun
 
         private void AffichageDeVie(int nombreDeVie)
         {
-            if (nombreDeVie <= 4)
+            if (nombreDeVie <= 0)
             {
                 Console.WriteLine("Mort");
                 ImgvieJoueur.Source = imageVie0;
