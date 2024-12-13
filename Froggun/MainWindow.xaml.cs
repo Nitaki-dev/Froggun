@@ -55,7 +55,7 @@ namespace Froggun
         public static string difficulte;
         public static int bulletOffset = 0;
         public double score = 0;
-        public int combo = 0;
+        public double combo = 0;
         int pauseEntreVagues = 5; // en secondes
         int pauseCounter = 0;
         int waveCount = 0;
@@ -493,11 +493,10 @@ namespace Froggun
             
             Rect playerRect = new Rect(joueur.posJoueur.X, joueur.posJoueur.Y, player.Width, player.Height);
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur, ref score);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur, ref score, ref combo);
             Proies.UpdateProies(canvas, proies, playerRect);
             AfficheScore();
-            
-
+            AfficheCombo();
             AffichageDeVie(joueur.nombreDeVie);
             CheckBallesSortieEcran();
             CheckCollisionProie();
@@ -766,9 +765,9 @@ namespace Froggun
             labelScore.Content = $"Score : {score} ";
         }
 
-        public void AfficheCombo(double combo)
+        public void AfficheCombo()
         {
-            labelScore.Content = $"Combo : {Math.Round(combo, 2)} ";
+            labelScore.Content = $"Combo : {combo} ";
         }
 
         private void keydown(object sender, KeyEventArgs e)
