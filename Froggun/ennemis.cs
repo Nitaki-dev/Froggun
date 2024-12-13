@@ -31,8 +31,6 @@ namespace Froggun
         public bool isSlowed { get; set; }
         private string imagePath { get; set; }
         public int[] animationIndex { get; set; }
-
-
         public Rect BoundingBox { get; set; }
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }

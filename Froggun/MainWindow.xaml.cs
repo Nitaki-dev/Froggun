@@ -34,6 +34,9 @@ namespace Froggun
         private static BitmapImage imgFrogFront;
         private static BitmapImage imgFrogBack;
         private static BitmapImage imgFrogSide;
+        private static BitmapImage imgFrogFrontHit;
+        private static BitmapImage imgFrogBackHit;
+        private static BitmapImage imgFrogSideHit;
 
         public enum Directions
         {
@@ -67,14 +70,13 @@ namespace Froggun
         private static BitmapImage imgFly;
 
         private float currentAngle;
+        private static bool tirLangue, expensionLangue;
+        private static readonly int expensionLangueVitesse = 60, retractionLangueVitesse = 80;
+        private static Vector2 posArme = new Vector2();
+        private static int distancePisolet = 20;
 
-            private static bool tirLangue, expensionLangue;
-            private static readonly int expensionLangueVitesse = 60, retractionLangueVitesse = 80;
-            private static Vector2 posArme = new Vector2();
-            private static int distancePisolet = 20;
-
-            private static BitmapImage imageBalle;
-            private static double vitesseBalle = 30.0f;
+        private static BitmapImage imageBalle;
+        private static double vitesseBalle = 30.0f;
 
         private static BitmapImage imageVie5;
         private static BitmapImage imageVie4;
@@ -393,6 +395,10 @@ namespace Froggun
             imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
             imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
 
+            imgFrogFrontHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_front_hit.png"));
+            imgFrogBackHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_back_hit.png"));
+            imgFrogSideHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_side_hit.png"));
+
             imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
 
             imageVie5 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health5.png")); 
@@ -544,73 +550,59 @@ namespace Froggun
                 StartWave();
             }
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
+
             Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref nombreDeVie);
-            affichageDeVie(nombreDeVie);
             Proies.UpdateProies(proies, playerRect);
 
-            CheckOutofboundsBullets();
-            CheckEatingFly();
-
-            if (!estEnRoulade)
-            {
-                //fix direction:
-                if (deplacerBas  && deplacerDroite)      directionJoueur = Directions.diagDownRight;
-                else if (deplacerBas  && deplacerGauche) directionJoueur = Directions.diagDownLeft;
-                else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
-                else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
-                else if (deplacerDroite)            directionJoueur = Directions.right;
-                else if (deplacerGauche)            directionJoueur = Directions.left;
-                else if (deplacerBas)               directionJoueur = Directions.down;
-                else if (deplacerHaut)              directionJoueur = Directions.up;
-
-                // Inverse l'image du joueur si nécessaire
-                doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
-                joueurFlip.ScaleX = doitFlip ? 1 : -1;
-                
-                // Change l'image du joueur dépendament de sa direction
-                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       player.Source = imgFrogSide;
-                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   player.Source = imgFrogBack;
-                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
-            }
-
+            AffichageDeVie(nombreDeVie);
+            CheckBallesSortieEcran();
+            CheckCollisionProie();
+            ChangeJoueurDirection();
             UpdateMousePosition();
+            UpdatePositionJoueur();
+            
+            //stopwatch.Stop();
+            //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
+        }
 
+        private void UpdatePositionJoueur()
+        {
             if (estEnRoulade)
             {
                 // animation de la roulade 
                 tempsRoulade += 16.6666667;
-                joueurRoulade.Angle = ((tempsRoulade / dureeRoulade) * 2*Math.PI) * 180/Math.PI * (doitFlip ? 1 : -1);
+                joueurRoulade.Angle = ((tempsRoulade / dureeRoulade) * 2 * Math.PI) * 180 / Math.PI * (doitFlip ? 1 : -1);
                 vitesseJoueur.X = 0;
                 vitesseJoueur.Y = 0;
 
                 switch (directionJoueur)
                 {
                     case Directions.down:
-                        vitesseJoueur.Y =  15.0f;
+                        vitesseJoueur.Y = 15.0f;
                         break;
                     case Directions.up:
                         vitesseJoueur.Y = -15.0f;
                         break;
                     case Directions.right:
-                        vitesseJoueur.X =  15.0f;
+                        vitesseJoueur.X = 15.0f;
                         break;
                     case Directions.left:
                         vitesseJoueur.X = -15.0f;
                         break;
                     case Directions.diagDownLeft:
                         vitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
-                        vitesseJoueur.Y =  15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y = 15.0f * correctionVitesseDiagonal;
                         break;
                     case Directions.diagDownRight:
-                        vitesseJoueur.X =  15.0f * correctionVitesseDiagonal;
-                        vitesseJoueur.Y =  15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.X = 15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.Y = 15.0f * correctionVitesseDiagonal;
                         break;
                     case Directions.diagUpLeft:
                         vitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
                         vitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
                         break;
                     case Directions.diagUpRight:
-                        vitesseJoueur.X =  15.0f * correctionVitesseDiagonal;
+                        vitesseJoueur.X = 15.0f * correctionVitesseDiagonal;
                         vitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
                         break;
                 }
@@ -625,25 +617,26 @@ namespace Froggun
             {
                 joueurRoulade.Angle = 0;
 
-                if      (deplacerGauche && Canvas.GetLeft(player) > 0)                                   vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
-                else if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth-player.ActualWidth) vitesseJoueur.X =  vitesseDeplacement; // bouger vers la droite
+                if (deplacerGauche && Canvas.GetLeft(player) > 0) vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
+                else if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth - player.ActualWidth) vitesseJoueur.X = vitesseDeplacement; // bouger vers la droite
                 else
                 {
                     vitesseJoueur.X *= friction; // réduire la vitesse du joueur en fonction de la friction
                     if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0; // si la vitesse (positive) est inférieure à 0.1, arrêter le mouvement
                 }
 
-                if      (deplacerHaut && Canvas.GetTop(player) > 0)                                    vitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
-                else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight-player.ActualHeight) vitesseJoueur.Y =  vitesseDeplacement; // bouger vers le bas 
+                if (deplacerHaut && Canvas.GetTop(player) > 0) vitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
+                else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight - player.ActualHeight) vitesseJoueur.Y = vitesseDeplacement; // bouger vers le bas 
                 else
                 {
-                    vitesseJoueur.Y *= friction; 
+                    vitesseJoueur.Y *= friction;
                     if (Math.Abs(vitesseJoueur.Y) < 0.1f) vitesseJoueur.Y = 0;
                 }
 
                 // Corrigé la vitesse du joueur si il bouge en diagonale (car sqrt(2) = 1.4 et pas 1)
-                if (directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight ||
-                    directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) {
+                if (directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight ||
+                    directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight)
+                {
                     vitesseJoueur.X *= correctionVitesseDiagonal;
                     vitesseJoueur.Y *= correctionVitesseDiagonal;
                 }
@@ -657,15 +650,35 @@ namespace Froggun
             joueurTransformGroup.Children.Add(joueurRoulade);
             joueurTransformGroup.Children.Add(joueurFlip);
             player.RenderTransform = joueurTransformGroup;
-            
+
             Canvas.SetLeft(player, posJoueur.X);
             Canvas.SetTop(player, posJoueur.Y);
-            
-            //stopwatch.Stop();
-            //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
         }
 
-        private void affichageDeVie(int nombreDeVie)
+        private void ChangeJoueurDirection()
+        {
+            if (estEnRoulade) return;
+            // Corrige la direction du joueur
+            if (deplacerBas && deplacerDroite) directionJoueur = Directions.diagDownRight;
+            else if (deplacerBas && deplacerGauche) directionJoueur = Directions.diagDownLeft;
+            else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
+            else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
+            else if (deplacerDroite) directionJoueur = Directions.right;
+            else if (deplacerGauche) directionJoueur = Directions.left;
+            else if (deplacerBas) directionJoueur = Directions.down;
+            else if (deplacerHaut) directionJoueur = Directions.up;
+
+            // Inverse l'image du joueur si nécessaire
+            doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
+            joueurFlip.ScaleX = doitFlip ? 1 : -1;
+
+            // Change l'image du joueur dépendament de sa direction
+            if (directionJoueur == Directions.left || directionJoueur == Directions.right) player.Source = imgFrogSide;
+            if (directionJoueur == Directions.up || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight) player.Source = imgFrogBack;
+            if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
+        }
+
+        private void AffichageDeVie(int nombreDeVie)
         {
             if (nombreDeVie <= 0)
             {
@@ -684,7 +697,8 @@ namespace Froggun
             }
 
         }
-        private void CheckOutofboundsBullets()
+        
+        private void CheckBallesSortieEcran()
         {
             for (int i = 0; i < Balles.Count; i++)
             {
@@ -699,7 +713,7 @@ namespace Froggun
             }
         }
 
-        private void CheckEatingFly()
+        private void CheckCollisionProie()
         {
             if (expensionLangue)
             {
@@ -863,7 +877,6 @@ namespace Froggun
         private void ShootGun()
         {
             SonGun();
-            Console.WriteLine("test");
             double a = currentAngle * Math.PI / 180.0;
             Balle balle = new Balle(posArme.X, posArme.Y, a, vitesseBalle, 10, canvas, imageBalle);
             Balles.Add(balle);
