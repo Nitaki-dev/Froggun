@@ -210,6 +210,7 @@ namespace Froggun
             }
 
         }
+        
         private void RelanceMusiqueJeux(object? sender, EventArgs e)
         {
             musiqueDeJeu.Position = TimeSpan.Zero;
@@ -250,7 +251,7 @@ namespace Froggun
                 spiderCount = spiderCount + 3;
             }
 
-            labelWave.Content = $"Wave {waveCount}";
+            labelWave.Content = $"Vague {waveCount}";
 
             for (int i = 0; i < spiderCount; i++)
             {
@@ -754,6 +755,22 @@ namespace Froggun
             {
                 joueur.estEnRoulade = true;
             }
+
+            if (e.Key == Key.K && !pause)
+            {
+                ennemis.Add(new Ennemis(TypeEnnemis.Spider, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 100, 100, 3, canvas));
+            }
+
+            if (e.Key == Key.L && !pause)
+            {
+                ennemis.Add(new Ennemis(TypeEnnemis.Squit, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 150, 150, 3, canvas));
+            }
+
+            if (e.Key == Key.P && !pause)
+            {
+                proies.Add(new Proies(TypeProies.Fly, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 50, 50, 3, 500, 200, canvas));
+            }
+
             if (e.Key == Key.Escape || e.Key == Key.Space )
             {
                 pause=!pause;

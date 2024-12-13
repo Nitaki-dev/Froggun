@@ -16,7 +16,7 @@ namespace Froggun
     public enum TypeEnnemis
     {
         Spider,
-        Ant
+        Squit
     }
 
     internal class Ennemis
@@ -85,32 +85,20 @@ namespace Froggun
                 case TypeEnnemis.Spider:
                     animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
                     imagePath = "img/ennemis/LL";
-                    if (difficulte == "facile")
-                    {
-                        Health = 150;
-                        maxHealth = 150;
-                    }
-                    else if (difficulte == "moyen")
-                    {
-                        Health = 200;
-                        maxHealth = 200;
-                    }
-                    else if (difficulte == "difficile")
-                    {
-                        Health = 250;
-                        maxHealth = 250;
-                    }
-                    else if (difficulte == "extreme")
-                    {
-                        Health = 300;
-                        maxHealth = 300;
-                    }
+                    if (difficulte == "facile") Health = 150;
+                    else if (difficulte == "moyen") Health = 200;
+                    else if (difficulte == "difficile") Health = 250;
+                    else if (difficulte == "extreme") Health = 300;
+                    maxHealth = Health;
                     break;
-                case TypeEnnemis.Ant:
-                    animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
-                    imagePath = "img/ennemis/LL";
-                    Health = 100;
-                    maxHealth = 100;
+                case TypeEnnemis.Squit:
+                    animationIndex = new int[] { 1, 2, 3, 4 };
+                    imagePath = "img/ennemis/Squit";
+                    if (difficulte == "facile") Health = 300;
+                    else if (difficulte == "moyen") Health = 400;
+                    else if (difficulte == "difficile") Health = 450;
+                    else if (difficulte == "extreme") Health = 550;
+                    maxHealth = Health;
                     break;
             }
           
