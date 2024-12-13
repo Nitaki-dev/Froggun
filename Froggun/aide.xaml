@@ -66,19 +66,24 @@
             <TextBlock
                 Margin="20,0,0,5"
                 Foreground="#FFD4D4D4"
-                Text="     - 'Z' pour déplacer la grenouille en haut."
+                Text="     - 'Z' pour déplacer la grenouille vers le haut."
                 TextWrapping="Wrap" />
+
             <TextBlock
                 Margin="20,0,0,5"
                 Foreground="#FFD4D4D4"
-                Text="     - 'S' pour déplacer la grenouille en bas."
+                Text="     - 'S' pour déplacer la grenouille vers le bas."
                 TextWrapping="Wrap" />
             <TextBlock
                 Margin="20,0,0,5"
                 Foreground="#FFD4D4D4"
                 Text="     - 'Ctrl' pour rouler / esquiver et aller plus vite."
                 TextWrapping="Wrap" />
-
+            <TextBlock
+                Margin="20,0,0,5"
+                Foreground="#FFD4D4D4"
+                Text="     - 'Espace' pour mettre le jeu en pause."
+                TextWrapping="Wrap" />
             <TextBlock Margin="20,0,0,5" TextWrapping="Wrap"><Run Foreground="#FFD4D4D4" Text="   o Tirer avec le pistolet : Appuyez sur la touche 'Clique Gauche' pour tirer avec le pistolet" /><Run Language="fr-fr" Text="." /></TextBlock>
             <TextBlock
                 Margin="20,0,0,5"

@@ -34,6 +34,9 @@ namespace Froggun
         private static BitmapImage imgFrogFront;
         private static BitmapImage imgFrogBack;
         private static BitmapImage imgFrogSide;
+        private static BitmapImage imgFrogFrontHit;
+        private static BitmapImage imgFrogBackHit;
+        private static BitmapImage imgFrogSideHit;
 
         public enum Directions
         {
@@ -366,6 +369,10 @@ namespace Froggun
             imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
             imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
             imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
+
+            imgFrogFrontHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_front_hit.png"));
+            imgFrogBackHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_back_hit.png"));
+            imgFrogSideHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_side_hit.png"));
 
             imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
 
