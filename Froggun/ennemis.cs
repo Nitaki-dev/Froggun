@@ -87,8 +87,26 @@ namespace Froggun
                 case TypeEnnemis.Spider:
                     animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
                     imagePath = "img/ennemis/LL";
-                    Health = 200;
-                    maxHealth = 200;
+                    if (difficulte == "facile")
+                    {
+                        Health = 150;
+                        maxHealth = 150;
+                    }
+                    else if (difficulte == "moyen")
+                    {
+                        Health = 200;
+                        maxHealth = 200;
+                    }
+                    else if (difficulte == "difficile")
+                    {
+                        Health = 250;
+                        maxHealth = 250;
+                    }
+                    else if (difficulte == "extreme")
+                    {
+                        Health = 300;
+                        maxHealth = 300;
+                    }
                     break;
                 case TypeEnnemis.Ant:
                     animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
@@ -173,10 +191,23 @@ namespace Froggun
 
                 // Adjust movement speed based on status (isSlowed)
                 ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.5 : 0.25;
-
-                // Update the bounding box (optimized for reuse)
-                ennemi.BoundingBox = new Rect(ennemi.X, ennemi.Y, ennemi.Width, ennemi.Height);
-
+                if (difficulte == "facile")
+                {
+                    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.5 : 0.25;
+                }
+                else if (difficulte == "moyen")
+                {
+                    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.6 : 0.3;
+                }
+                else if (difficulte == "difficile")
+                {
+                    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.7 : 0.35;
+                }
+                else if (difficulte == "extreme")
+                {
+                    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.8 : 0.4;
+                }
+                ennemi.BoundingBox = new Rect(ennemi.X, ennemi.Y, ennemi.Width, ennemi.Height);  // Update the bounding box (optimized for reuse)
                 // Calculate direction towards the player (only do this if necessary)
                 Vector2 direction = new Vector2((float)(rJoueur.X - ennemi.X), (float)(rJoueur.Y - ennemi.Y));
                 direction = Vector2.Normalize(direction);
