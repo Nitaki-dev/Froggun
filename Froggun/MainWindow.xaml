@@ -129,25 +129,20 @@
                 Stretch="Fill" />
             <Label
                 x:Name="lab_Defaite"
-                Canvas.Left="34"
-                Canvas.Top="210"
-                Width="1218"
-                Height="307"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center"
+                Canvas.Top="-50"
+                Width="1280"
+                Height="841"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                HorizontalContentAlignment="Center"
+                VerticalContentAlignment="Center"
                 Panel.ZIndex="1000"
+                Background="#50FF0000"
                 Content="DEFAITE"
                 FontFamily="72 Monospace"
                 FontSize="280"
                 FontWeight="Bold"
-                Foreground="White">
-                <Label.Background>
-                    <LinearGradientBrush StartPoint="0.5,0" EndPoint="0.5,1">
-                        <GradientStop Color="Black" />
-                        <GradientStop Offset="1" Color="#FFDC4646" />
-                    </LinearGradientBrush>
-                </Label.Background>
-            </Label>
+                Foreground="White" />
         </Canvas>
     </Grid>
 </Window>

@@ -39,8 +39,8 @@ namespace Froggun
         public double maxHealth{ get; set; }
         public bool IsAlive { get; private set; }
         public bool hasCollided { get; set; }
-        private Rectangle healthBarEmpty { get; set; }
-        private Rectangle healthBar { get; set; }
+        public Rectangle healthBarEmpty { get; set; }
+        public Rectangle healthBar { get; set; }
 
         public static int killStreak = 0;
 

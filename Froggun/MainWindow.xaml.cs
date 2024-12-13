@@ -287,6 +287,7 @@ namespace Froggun
 
             for (int i = 0; i < squitCount; i++)
             {
+                if (waveCount>=5)
                 ennemis.Add(new Ennemis(TypeEnnemis.Squit, alea.Next(xMin, xMax), alea.Next(yMin, yMax), 200, 200, 8, canvas));
             }
 
@@ -803,17 +804,7 @@ namespace Froggun
 
             if (e.Key == Key.K && !pause)
             {
-                ennemis.Add(new Ennemis(TypeEnnemis.Spider, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 100, 100, 3, canvas));
-            }
-
-            if (e.Key == Key.L && !pause)
-            {
-                ennemis.Add(new Ennemis(TypeEnnemis.Squit, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 150, 150, 3, canvas));
-            }
-
-            if (e.Key == Key.P && !pause)
-            {
-                proies.Add(new Proies(TypeProies.Fly, joueur.posJoueur.X + 100, joueur.posJoueur.Y, 50, 50, 3, 500, 200, canvas));
+                KillEverything();
             }
 
             if (e.Key == Key.Escape || e.Key == Key.Space )
@@ -847,18 +838,18 @@ namespace Froggun
 
             }
 
-            private void leftButtonDown(object sender, MouseButtonEventArgs e)
-            {
-                if (pause) return;
-                ShootGun();
-            }
+        private void leftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (pause) return;
+            ShootGun();
+        }
 
-            private void rightButtonDown(object sender, MouseButtonEventArgs e)
-            {
-                if (pause) return;
-                ShootTung();
-            }
+        private void rightButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (pause) return;
+            ShootTung();
         }
     }
+}
 
 
