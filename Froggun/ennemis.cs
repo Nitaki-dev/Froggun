@@ -145,10 +145,10 @@ namespace Froggun
             return bitmapImage;
         }
 
-        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueur, List<Balle> balles, Canvas canvas, ref int nombreDeVie)
+        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueurr, List<Balle> balles, Canvas canvas, ref Joueur joueur)
         {
             // Cache bounding box and other frequently used values
-            Rect rJoueur = joueur;
+            Rect rJoueur = joueurr;
 
             for (int i = 0; i < ennemis.Count; i++)
             {
@@ -235,7 +235,7 @@ namespace Froggun
                 if (rJoueur.IntersectsWith(ennemi.BoundingBox) && !ennemi.isSlowed)
                 {
                     ennemi.SlowDown(3); // Slow down effect
-                    nombreDeVie--;
+                    joueur.hit(1);
                 }
 
                 // Efficiently update canvas positions

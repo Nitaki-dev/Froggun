@@ -25,47 +25,6 @@ namespace Froggun
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer pauseVagues = new DispatcherTimer();
 
-        private static TransformGroup joueurTransformGroup = new TransformGroup();
-        private static RotateTransform joueurRoulade = new RotateTransform();
-        private static ScaleTransform joueurFlip = new ScaleTransform();
-        private static Vector2 posJoueur = new Vector2(50.0f, 50.0f);
-        private static Vector2 vitesseJoueur = new Vector2();
-
-        private static BitmapImage imgFrogFront;
-        private static BitmapImage imgFrogBack;
-        private static BitmapImage imgFrogSide;
-        private static BitmapImage imgFrogFrontHit;
-        private static BitmapImage imgFrogBackHit;
-        private static BitmapImage imgFrogSideHit;
-
-        public enum Directions
-        {
-            left, //0
-            right, //1
-            up, //2
-            down, //3
-            diagUpLeft, //4
-            diagUpRight, //5
-            diagDownLeft, //6
-            diagDownRight //7
-        }
-        Directions directionJoueur = Directions.right;
-
-        private float correctionVitesseDiagonal = (float)(1.0f / Math.Sqrt(2.0f)); //pythagore
-        private const float vitesseDeplacement = 8.0f;
-        private const float friction = 0.4f;
-        //private const float friction = 0.8f;
-
-        private bool deplacerGauche = false;
-        private bool deplacerDroite = false;
-        private bool deplacerHaut = false;
-        private bool deplacerBas = false;
-
-        bool doitFlip = false;
-        bool estEnRoulade = false;
-        double tempsRoulade = 0;
-        double dureeRoulade = 300; // 5 secondes
-
         private static BitmapImage imgAnt;
         private static BitmapImage imgFly;
 
@@ -84,7 +43,12 @@ namespace Froggun
         private static BitmapImage imageVie2;
         private static BitmapImage imageVie1;
         private static BitmapImage imageVie0;
-        public int nombreDeVie = 5;
+        private static BitmapImage imgFrogFront;
+        private static BitmapImage imgFrogBack;
+        private static BitmapImage imgFrogSide;
+        private static BitmapImage imgFrogFrontHit; 
+        private static BitmapImage imgFrogBackHit;
+        private static BitmapImage imgFrogSideHit;
 
         private List<Balle> Balles = new List<Balle>();
         private List<Ennemis> ennemis = new List<Ennemis>();
@@ -101,11 +65,11 @@ namespace Froggun
         private MediaPlayer musiqueDeFond;
         private MediaPlayer musiqueDeJeu;
 
+        private Joueur joueur;
+
         public MainWindow()
         {
-            InitImage();
             InitializeComponent();
-            InitMusique(true);
 
             // Création de la fenêtre parametre avec un Canvas
             parametre fentreNiveau = new parametre();
@@ -190,12 +154,17 @@ namespace Froggun
                 choixDifficulte fentreDifficulte = new choixDifficulte();
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
-                InitMusique(false);
-                InitMusiqueJeux(true);
+                //InitMusique(false);
+                //InitMusiqueJeux(true);
             }
 
             lab_Pause.Visibility = Visibility.Collapsed;
             lab_Defaite.Visibility = Visibility.Collapsed;
+
+            InitImage();
+            //InitMusique(true);
+
+            joueur = new Joueur(player, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
 
             InitialiserMinuterie();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
@@ -391,13 +360,12 @@ namespace Froggun
                 imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
                 imgFly = new BitmapImage(new Uri("pack://application:,,,/img/ennemis/LL/1.png"));
 
-                imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
-                imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
-                imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
-
-                imgFrogFrontHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_front_hit.png"));
-                imgFrogBackHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_back_hit.png"));
-                imgFrogSideHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_side_hit.png"));
+            imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
+            imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
+            imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
+            imgFrogFrontHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_front_hit.png"));
+            imgFrogBackHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_back_hit.png"));
+            imgFrogSideHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_side_hit.png"));
 
                 imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
 
@@ -409,14 +377,14 @@ namespace Froggun
                 imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
             }
 
-            private void UpdateMousePosition()
-            {
-                // Get the mouse position once and calculate the direction to player center
-                Point mousePos = Mouse.GetPosition(canvas);
-                Vector2 posCentreJoueur = new Vector2(
-                    (float)(posJoueur.X + player.Width / 2.0f),
-                    (float)(posJoueur.Y + player.Height / 2.0f)
-                );
+        private void UpdateMousePosition()
+        {
+            // Get the mouse position once and calculate the direction to player center
+            Point mousePos = Mouse.GetPosition(canvas);
+            Vector2 posCentreJoueur = new Vector2(
+                (float)(joueur.posJoueur.X + player.Width / 2.0f),
+                (float)(joueur.posJoueur.Y + player.Height / 2.0f)
+            );
 
                 // Calculate direction vector and angle once
                 Vector2 directionSouris = Vector2.Normalize(new Vector2((float)mousePos.X, (float)mousePos.Y) - posCentreJoueur);
@@ -549,142 +517,29 @@ namespace Froggun
                 {
                     StartWave();
                 }
-                Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
+                Rect playerRect = new Rect(joueur.posJoueur.X, joueur.posJoueur.Y, player.Width, player.Height);
 
-                Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas, ref nombreDeVie);
-                Proies.UpdateProies(proies, playerRect);
+            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur);
+            Proies.UpdateProies(proies, playerRect);
 
-                AffichageDeVie(nombreDeVie);
-                CheckBallesSortieEcran();
-                CheckCollisionProie();
-                ChangeJoueurDirection();
-                UpdateMousePosition();
-                UpdatePositionJoueur();
+            AffichageDeVie(joueur.nombreDeVie);
+            CheckBallesSortieEcran();
+            CheckCollisionProie();
+            joueur.ChangeJoueurDirection();
+            UpdateMousePosition();
+            joueur.UpdatePositionJoueur();
+            
+            //stopwatch.Stop();
+            //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
+        }
 
-                //stopwatch.Stop();
-                //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
-            }
-
-            private void UpdatePositionJoueur()
+        private void AffichageDeVie(int nombreDeVie)
+        {
+            if (nombreDeVie <= 0)
             {
-                if (estEnRoulade)
-                {
-                    // animation de la roulade 
-                    tempsRoulade += 16.6666667;
-                    joueurRoulade.Angle = ((tempsRoulade / dureeRoulade) * 2 * Math.PI) * 180 / Math.PI * (doitFlip ? 1 : -1);
-                    vitesseJoueur.X = 0;
-                    vitesseJoueur.Y = 0;
-
-                    switch (directionJoueur)
-                    {
-                        case Directions.down:
-                            vitesseJoueur.Y = 15.0f;
-                            break;
-                        case Directions.up:
-                            vitesseJoueur.Y = -15.0f;
-                            break;
-                        case Directions.right:
-                            vitesseJoueur.X = 15.0f;
-                            break;
-                        case Directions.left:
-                            vitesseJoueur.X = -15.0f;
-                            break;
-                        case Directions.diagDownLeft:
-                            vitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
-                            vitesseJoueur.Y = 15.0f * correctionVitesseDiagonal;
-                            break;
-                        case Directions.diagDownRight:
-                            vitesseJoueur.X = 15.0f * correctionVitesseDiagonal;
-                            vitesseJoueur.Y = 15.0f * correctionVitesseDiagonal;
-                            break;
-                        case Directions.diagUpLeft:
-                            vitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
-                            vitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
-                            break;
-                        case Directions.diagUpRight:
-                            vitesseJoueur.X = 15.0f * correctionVitesseDiagonal;
-                            vitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
-                            break;
-                    }
-
-                    if (tempsRoulade > dureeRoulade)
-                    {
-                        estEnRoulade = false;
-                        tempsRoulade = 0;
-                    }
-                }
-                else
-                {
-                    joueurRoulade.Angle = 0;
-
-                    if (deplacerGauche && Canvas.GetLeft(player) > 0) vitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
-                    else if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth - player.ActualWidth) vitesseJoueur.X = vitesseDeplacement; // bouger vers la droite
-                    else
-                    {
-                        vitesseJoueur.X *= friction; // réduire la vitesse du joueur en fonction de la friction
-                        if (Math.Abs(vitesseJoueur.X) < 0.1f) vitesseJoueur.X = 0; // si la vitesse (positive) est inférieure à 0.1, arrêter le mouvement
-                    }
-
-                    if (deplacerHaut && Canvas.GetTop(player) > 0) vitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
-                    else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight - player.ActualHeight) vitesseJoueur.Y = vitesseDeplacement; // bouger vers le bas 
-                    else
-                    {
-                        vitesseJoueur.Y *= friction;
-                        if (Math.Abs(vitesseJoueur.Y) < 0.1f) vitesseJoueur.Y = 0;
-                    }
-
-                    // Corrigé la vitesse du joueur si il bouge en diagonale (car sqrt(2) = 1.4 et pas 1)
-                    if (directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight ||
-                        directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight)
-                    {
-                        vitesseJoueur.X *= correctionVitesseDiagonal;
-                        vitesseJoueur.Y *= correctionVitesseDiagonal;
-                    }
-                }
-
-                posJoueur.X += vitesseJoueur.X;
-                posJoueur.Y += vitesseJoueur.Y;
-
-                joueurTransformGroup.Children.Clear();
-                player.RenderTransformOrigin = new Point(0.5, 0.5);
-                joueurTransformGroup.Children.Add(joueurRoulade);
-                joueurTransformGroup.Children.Add(joueurFlip);
-                player.RenderTransform = joueurTransformGroup;
-
-                Canvas.SetLeft(player, posJoueur.X);
-                Canvas.SetTop(player, posJoueur.Y);
-            }
-
-            private void ChangeJoueurDirection()
-            {
-                if (estEnRoulade) return;
-                // Corrige la direction du joueur
-                if (deplacerBas && deplacerDroite) directionJoueur = Directions.diagDownRight;
-                else if (deplacerBas && deplacerGauche) directionJoueur = Directions.diagDownLeft;
-                else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
-                else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
-                else if (deplacerDroite) directionJoueur = Directions.right;
-                else if (deplacerGauche) directionJoueur = Directions.left;
-                else if (deplacerBas) directionJoueur = Directions.down;
-                else if (deplacerHaut) directionJoueur = Directions.up;
-
-                // Inverse l'image du joueur si nécessaire
-                doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
-                joueurFlip.ScaleX = doitFlip ? 1 : -1;
-
-                // Change l'image du joueur dépendament de sa direction
-                if (directionJoueur == Directions.left || directionJoueur == Directions.right) player.Source = imgFrogSide;
-                if (directionJoueur == Directions.up || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight) player.Source = imgFrogBack;
-                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = imgFrogFront;
-            }
-
-            private void AffichageDeVie(int nombreDeVie)
-            {
-                if (nombreDeVie <= 0)
-                {
-                    ImgvieJoueur.Source = imageVie0;
-                    pause = true;
-                    lab_Defaite.Visibility = Visibility.Visible;
+                ImgvieJoueur.Source = imageVie0;
+                pause = true;
+                lab_Defaite.Visibility = Visibility.Visible;
 
                 }
                 else
@@ -892,64 +747,64 @@ namespace Froggun
                 labelScore.Content = $"Combo : {Math.Round(combo, 2)} ";
             }
 
-            private void keydown(object sender, KeyEventArgs e)
+        private void keydown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.D && !pause)
             {
-                if (e.Key == Key.D && !pause)
-                {
-                    deplacerDroite = true;
-                    deplacerGauche = false;
-                    directionJoueur = Directions.right;
-                }
-                if ((e.Key == Key.Q || e.Key == Key.A) && !pause)
-                {
-                    deplacerGauche = true;
-                    deplacerDroite = false;
-                    directionJoueur = Directions.left;
-                }
-                if (e.Key == Key.S && !pause)
-                {
-                    deplacerBas = true;
-                    deplacerHaut = false;
-                    directionJoueur = Directions.down;
-                }
-                if ((e.Key == Key.Z || e.Key == Key.W) && !pause)
-                {
-                    deplacerHaut = true;
-                    deplacerBas = false;
-                    directionJoueur = Directions.up;
-                }
-                if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
-                {
-                    estEnRoulade = true;
-                }
-                if (e.Key == Key.Escape || e.Key == Key.Space)
-                {
-                    pause = !pause;
-                    if (pause)
-                        lab_Pause.Visibility = Visibility.Visible;
-                    else
-                        lab_Pause.Visibility = Visibility.Collapsed;
-                }
+                joueur.deplacerDroite = true;
+                joueur.deplacerGauche = false;
+                joueur.directionJoueur = Joueur.Directions.right;
             }
-
-            private void keyup(object sender, KeyEventArgs e)
+            if ((e.Key == Key.Q || e.Key == Key.A) && !pause)
             {
-                if (e.Key == Key.D)
-                {
-                    deplacerDroite = false;
-                }
-                if (e.Key == Key.Q || e.Key == Key.A)
-                {
-                    deplacerGauche = false;
-                }
-                if (e.Key == Key.S)
-                {
-                    deplacerBas = false;
-                }
-                if (e.Key == Key.Z || e.Key == Key.W)
-                {
-                    deplacerHaut = false;
-                }
+                joueur.deplacerGauche = true;
+                joueur.deplacerDroite = false;
+                joueur.directionJoueur = Joueur.Directions.left;
+            }
+            if (e.Key == Key.S && !pause)
+            {
+                joueur.deplacerBas = true;
+                joueur.deplacerHaut = false;
+                joueur.directionJoueur = Joueur.Directions.down;
+            }
+            if ((e.Key == Key.Z || e.Key == Key.W) && !pause)
+            {
+                joueur.deplacerHaut = true;
+                joueur.deplacerBas = false;
+                joueur.directionJoueur = Joueur.Directions.up;
+            }
+            if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
+            {
+                joueur.estEnRoulade = true;
+            }
+            if (e.Key == Key.Escape || e.Key == Key.Space )
+            {
+                pause=!pause;
+                if (pause)
+                    lab_Pause.Visibility = Visibility.Visible;
+                else
+                    lab_Pause.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        private void keyup(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.D)
+            {
+                joueur.deplacerDroite = false;
+            }
+            if (e.Key == Key.Q || e.Key == Key.A)
+            {
+                joueur.deplacerGauche = false;
+            }
+            if (e.Key == Key.S)
+            {
+                joueur.deplacerBas = false;
+            }
+            if (e.Key == Key.Z || e.Key == Key.W)
+            {
+                joueur.deplacerHaut = false;
+            }
 
             }
 
