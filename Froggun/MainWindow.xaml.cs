@@ -69,6 +69,7 @@ namespace Froggun
         private List<Balle> Balles = new List<Balle>(); 
         private List<Ennemis> ennemis = new List<Ennemis>();
         private List<Proies> proies = new List<Proies>();
+        private Player player;
         public static string difficulte;
 
         int pauseEntreVagues = 5; // en secondes
@@ -436,7 +437,7 @@ namespace Froggun
             }
 
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
-            Player.UpdatePLayer();
+            Player.UpdatePlayer(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
             Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
             Proies.UpdateProies(proies, playerRect);
 
@@ -452,7 +453,7 @@ namespace Froggun
             else if (deplacerBas && deplacerDroite)  directionJoueur = Directions.diagDownRight;
             else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
             else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
-
+            Player.SetPlayerImage(directionJoueur);
             // Inverse l'image du joueur si nécessaire
             bool doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
             if (doitFlip) joueurFlip.ScaleX = 1;
