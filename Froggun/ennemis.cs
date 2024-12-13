@@ -9,6 +9,7 @@ using System.Windows.Media;
 using static Froggun.MainWindow;
 using System.Windows.Shapes;
 using System.Windows.Automation;
+using System.Media;
 
 namespace Froggun
 {
@@ -240,9 +241,19 @@ namespace Froggun
                 }
             }
         }
+        private void SonMortEnnemie()
+        {
+            // Charger le fichier audio depuis les ressources
+            Uri audioUri = new Uri("/son/mortEnnemie.wav", UriKind.RelativeOrAbsolute);
+            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
+            // Créer un objet SoundPlayer pour lire le son
+            SoundPlayer musique = new SoundPlayer(audioStream);
+            musique.Play();
+        }
 
         public void Die(List<Ennemis> ennemis, Ennemis e, Canvas canvas)
         {
+            //SonMortEnnemie();
             IsAlive = false;
             Image.Visibility = Visibility.Hidden;
             canvas.Children.Remove(Image);
