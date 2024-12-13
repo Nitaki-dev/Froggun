@@ -485,7 +485,7 @@ namespace Froggun
             }
 
             Rect playerRect = new Rect(posJoueur.X, posJoueur.Y, player.Width, player.Height);
-
+            Player.UpdatePLayer();
             Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas);
             Proies.UpdateProies(proies, playerRect);
 
