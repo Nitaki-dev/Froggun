@@ -9,6 +9,8 @@ using System.Windows.Media.Imaging;
 using System.Media;
 using System.IO;
 using System.Net.Sockets;
+using System.Security.Authentication;
+using System.Diagnostics;
 
 namespace Froggun
 {
@@ -17,14 +19,13 @@ namespace Froggun
     /// </summary>
     public partial class MainWindow : Window
     {
+        public const int WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 720;
+
         private static Random alea = new Random();
 
         private bool pause = false;
         private static DispatcherTimer minuterie = new DispatcherTimer();
         private static DispatcherTimer pauseVagues = new DispatcherTimer();
-
-        private static BitmapImage imgAnt;
-        private static BitmapImage imgFly;
 
         private float currentAngle;
         private static bool tirLangue, expensionLangue;
@@ -49,17 +50,22 @@ namespace Froggun
         private static BitmapImage imgFrogBackHit;
         private static BitmapImage imgFrogSideHit;
 
+        private static BitmapImage[] imgExplosion = new BitmapImage[6];
+
+        private static BitmapImage imgMantis;
+
         private List<Balle> Balles = new List<Balle>();
         private List<Ennemis> ennemis = new List<Ennemis>();
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
         public static int bulletOffset = 0;
-        public double score = 0;
-        public double combo = 0;
-        int pauseEntreVagues = 5; // en secondes
+        int pauseEntreVagues = 1; // en secondes
         int pauseCounter = 0;
         int waveCount = 0;
         private bool isTimerRunning = false;
+
+        public bool fightingBoss = false;
+        public bool bossSpawned = false;
 
         public SoundPlayer musique;
         public Stream audioStream;
@@ -68,6 +74,7 @@ namespace Froggun
 
         private Joueur joueur;
 
+        private MantisBosses mantis;
         public MainWindow()
         {
             InitializeComponent();
@@ -165,18 +172,17 @@ namespace Froggun
             InitImage();
             //InitMusique(true);
 
-            joueur = new Joueur(player, 640 - (int)player.Width/2, 360 - (int)player.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
-            canvas.Children.Add(test1);
+            Rect playerRect = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
+            joueur = new Joueur(player, playerRect, 640 - (int)player.Width/2, 360 - (int)player.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
 
             InitialiserMinuterie();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
-            //Measure(new Size(Width, Height));
-            //Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
+            Measure(new Size(WINDOW_WIDTH, WINDOW_HEIGHT));
+            Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
 
-
-
-        } 
+            ChangeBackground("img/arena/arena_unaltered.png");
+        }
 
         private void InitMusique(bool jouer)
         {
@@ -193,6 +199,7 @@ namespace Froggun
             }
 
         }
+        
         private void RelanceMusique(object? sender, EventArgs e)
         {
             musiqueDeFond.Position = TimeSpan.Zero;
@@ -222,74 +229,80 @@ namespace Froggun
             musiqueDeJeu.Play();
         }
 
-        void StartWave()
+        void NouvelleVague()
         {
-            if (isTimerRunning) return;
+            if (isTimerRunning || fightingBoss) return;
             isTimerRunning = true;
             
-            if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
-            else pauseEntreVagues = 10;
+            //if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
+            //else pauseEntreVagues = 10;
 
             pauseVagues = new DispatcherTimer();
             pauseVagues.Interval = TimeSpan.FromSeconds(1);
-            pauseVagues.Tick += NouvelleVague;
+            pauseVagues.Tick += Vague;
             pauseCounter = 0;
             pauseVagues.Start();
         }
         
-        private void NouvelleVague(object? sender, EventArgs e)
+        private void Vague(object? sender, EventArgs e)
         {
-            labelWave.Content = $"Prochainne vague dans {pauseEntreVagues - pauseCounter}!";
-
-            pauseCounter++;
-            if (pauseCounter < pauseEntreVagues) return;
-
-            if (difficulte == "facile" && !AreAllEnemiesDestroyed())
+            if (pause || fightingBoss)
             {
+                pauseVagues.Stop();
                 return;
             }
+
+            pauseCounter++;
+            labelWave.Content = $"Prochainne vague dans {pauseEntreVagues - pauseCounter}!";
+            if (pauseCounter < pauseEntreVagues) return;
+
+            labelWave.Content = $"Vague {waveCount+1}";
+            if (difficulte == "facile" && !AreAllEnemiesDestroyed()) return;
             waveCount++;
-            int spiderCount = (int)Math.Ceiling(Math.Pow(Math.Sqrt(waveCount), 3.0)) % 10;
-            // \operatorname{ceil}\left(\sqrt{\left(x\right)}^{3}\right) // LaTeX !!
+            
+            int nbrPetitEnnemis;
+            int nbrMoyenEnnemis;
+            int nbrGrandEnnemis;
 
-            int squitCount = (int)Math.Ceiling(Math.Pow(Math.Sqrt(waveCount), 3.0)/8.0) % 10;
-            //\operatorname{ceil}\left(\frac{\sqrt{\left(x\right)}^{3}}{8}\right)
-
-            if (difficulte == "extreme")
+            // TODO: make this not terrible (redo difficulty spawnrates for the 6th time)
+            if (waveCount <= 5)
             {
-                spiderCount += 3;
-                squitCount += 2;
+                nbrPetitEnnemis = waveCount * 3;
+                nbrMoyenEnnemis = 0;
+                nbrGrandEnnemis = 0;
             }
-
-            labelWave.Content = $"Vague {waveCount}";
-
-            int hautBasGaucheDroite = alea.Next(0, 4);
-            int xMin = 0, xMax = 1200, yMin = 0, yMax = 600;
-            if (hautBasGaucheDroite == 0) {
-                xMax = 100;
-                yMax = 600;
-            } else if (hautBasGaucheDroite == 1) {
-                yMin = 50;
-                yMax = 150;
-            } else if (hautBasGaucheDroite == 2) {
-                xMin = 1100;
-                xMax = 1200;
-            } else {
-                yMin = 500;
-                yMax = 600;
-            }
-
-            for (int i = 0; i < spiderCount; i++)
+            else if (waveCount <= 8)
             {
-                ennemis.Add(new Ennemis(TypeEnnemis.Spider, alea.Next(xMin, xMax), alea.Next(yMin, yMax), 100, 100, 8, canvas));
-                proies.Add(new Proies(TypeProies.Fly, alea.Next(xMin, xMax), alea.Next(yMin, yMax), 50, 50, 3, 500, 200, canvas));
+                nbrPetitEnnemis = (waveCount-3)*2;
+                nbrMoyenEnnemis = (waveCount - 7) * 2;
+                nbrGrandEnnemis = 0;
+            }
+            else
+            {
+                nbrPetitEnnemis = waveCount;
+                nbrMoyenEnnemis = (waveCount - 5);
+                nbrGrandEnnemis = (waveCount - 8) * 1;
             }
 
-            for (int i = 0; i < squitCount; i++)
-            {
-                if (waveCount>=5)
-                ennemis.Add(new Ennemis(TypeEnnemis.Squit, alea.Next(xMin, xMax), alea.Next(yMin, yMax), 200, 200, 8, canvas));
-            }
+            // poisson disk sampling (voir Sampling.cs)
+            Sampler sampler = new Sampler(1260, 680, 50);
+            List<Point> allPoints = sampler.GeneratePoints();
+
+            // https://stackoverflow.com/questions/273313/randomize-a-listt
+            alea = new Random();
+            allPoints = allPoints.OrderBy(_ => alea.Next()).ToList();
+
+            // creations de nouvelles listes pour chaques type d'ennemis
+            List<Point> petits = allPoints.Take(nbrPetitEnnemis).ToList();
+            List<Point> moyens = allPoints.Skip(nbrPetitEnnemis).Take(nbrMoyenEnnemis).ToList(); //skip les petits ennemis
+            List<Point> grands = allPoints.Skip(nbrPetitEnnemis + nbrMoyenEnnemis).Take(nbrGrandEnnemis).ToList(); //skip les petits et moyens ennemis
+
+            // creation des ennemis
+            foreach (Point point in petits) ennemis.Add(new Ennemis(TypeEnnemis.Firefly, point.X, point.Y, 50, 50, 12, canvas));
+            foreach (Point point in moyens) ennemis.Add(new Ennemis(TypeEnnemis.Spider, point.X, point.Y, 100, 100, 8, canvas));
+            foreach (Point point in grands) ennemis.Add(new Ennemis(TypeEnnemis.Squit, point.X, point.Y, 150, 150, 13, canvas));
+
+            //proies.Add(new Proies(TypeProies.Fly, point.X, point.Y, 50, 50, 3, 500, 200, canvas));
 
             pauseVagues.Stop();
             isTimerRunning = false;
@@ -299,6 +312,7 @@ namespace Froggun
         {
             return ennemis.Count == 0 && proies.Count == 0;
         }
+
         void InitialiserMinuterie()
         {
             minuterie = new DispatcherTimer();
@@ -309,12 +323,10 @@ namespace Froggun
 
         private void InitImage()
         {
-            imgAnt = new BitmapImage(new Uri("pack://application:,,/img/ant.png"));
-            imgFly = new BitmapImage(new Uri("pack://application:,,,/img/ennemis/LL/1.png"));
-
             imgFrogFront = new BitmapImage(new Uri("pack://application:,,,/img/frog_front.png"));
             imgFrogBack = new BitmapImage(new Uri("pack://application:,,,/img/frog_back.png"));
             imgFrogSide = new BitmapImage(new Uri("pack://application:,,,/img/frog_side.png"));
+
             imgFrogFrontHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_front_hit.png"));
             imgFrogBackHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_back_hit.png"));
             imgFrogSideHit = new BitmapImage(new Uri("pack://application:,,,/img/frog_side_hit.png"));
@@ -327,11 +339,17 @@ namespace Froggun
             imageVie2 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health2.png"));
             imageVie1 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
             imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
+
+            imgExplosion[0] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion0.png"));
+            imgExplosion[1] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion1.png"));
+            imgExplosion[2] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion2.png"));
+            imgExplosion[3] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion3.png"));
+            imgExplosion[4] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion4.png"));
+            imgExplosion[5] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion5.png"));
+
+            imgMantis = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/mantis.png"));
         }
 
-        Vector2 directionSouris = new Vector2();
-
-        Line test1 = new Line();
         private void UpdateMousePosition()
         {
             // Get the mouse position once and calculate the direction to player center
@@ -347,7 +365,6 @@ namespace Froggun
                 (float) (mousePos.Y - posCentreJoueur.Y)
             );
 
-            // Normalize the direction vector
             float magnitude = (float)Math.Sqrt(direction.X * direction.X + direction.Y * direction.Y);
             if (magnitude != 0) {
                 direction.X /= magnitude;
@@ -355,19 +372,13 @@ namespace Froggun
             }
 
             int posGunMagnitude = 50;
-            directionSouris = new Vector2(
+            Vector2 directionSouris = new Vector2(
                 posCentreJoueur.X + direction.X * posGunMagnitude,
                 posCentreJoueur.Y + direction.Y * posGunMagnitude
             );
 
             currentAngle = (float) (Math.Atan2(direction.Y, direction.X) * 180 / Math.PI);
             
-            test1.Stroke = Brushes.Red;
-            test1.StrokeThickness = 2;
-            //test1.X1 = posCentreJoueur.X; 
-            //test1.Y1 = posCentreJoueur.Y;
-            //test1.X2 = directionSouris.X;
-            //test1.Y2 = directionSouris.Y;
 
             // Update positions for both the weapon and tongue
             UpdateWeaponPosition(mousePos, posCentreJoueur, directionSouris);
@@ -479,34 +490,115 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             if (pause) return;
-            //Stopwatch stopwatch = new Stopwatch();
+            //Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
             //stopwatch.Start();
 
-            // if no enemies start a wave
-            if (difficulte == "facile" || difficulte == "moyen")
+            if (waveCount == 10)
             {
-                if (ennemis.Count <= 0 && proies.Count <= 0)
+                // bossfight
+                if (!fightingBoss && AreAllEnemiesDestroyed()) startBoss();
+            }
+            else
+            {
+                if (!fightingBoss)
                 {
-                    StartWave();
+                    // if no enemies start a wave
+                    if (difficulte == "facile" || difficulte == "moyen")
+                    {
+                        if (ennemis.Count <= 0 && proies.Count <= 0) NouvelleVague();
+                    }
+                    else NouvelleVague();
                 }
             }
-            else StartWave();
-            
-            Rect playerRect = new Rect(joueur.posJoueur.X, joueur.posJoueur.Y, player.Width, player.Height);
 
-            Ennemis.UpdateEnnemis(ennemis, playerRect, Balles, canvas , ref joueur, ref score, ref combo);
-            Proies.UpdateProies(canvas, proies, playerRect);
+
+            Ennemis.UpdateEnnemis(ennemis, joueur.hitbox, Balles, canvas , ref joueur);
+            Proies.UpdateProies(canvas, proies, joueur.hitbox);
+            if (this.fightingBoss && this.bossSpawned)
+            {
+                mantis.UpdateMantisBoss();
+
+                if (!mantis.isAlive)
+                {
+                    this.fightingBoss = false;
+                    this.bossSpawned = false;
+                    waveCount++;
+                }
+            }
             AfficheScore();
             AfficheCombo();
+
             AffichageDeVie(joueur.nombreDeVie);
             CheckBallesSortieEcran();
             CheckCollisionProie();
-            joueur.ChangeJoueurDirection();
+            if (!joueur.estEnRoulade) joueur.ChangeJoueurDirection();
             UpdateMousePosition();
             joueur.UpdatePositionJoueur();
-            
+
             //stopwatch.Stop();
-            //Console.WriteLine($"Loop execution time: {stopwatch.Elapsed} ");
+            //Console.WriteLine($"{stopwatch.Elapsed}");
+        }
+
+        private async Task startBoss()
+        {
+            this.fightingBoss = true;
+            this.bossSpawned = false;
+
+            await Task.Delay(500);
+            Explostions(100, 100, 500); 
+            Explostions(300, 100, 500); 
+            Explostions(500, 100, 500);
+            Explostions(700, 100, 500);
+            Explostions(900, 100, 500);
+            Explostions(1100, 100, 500);
+            ChangeBackground("img/arena/arena_broken_top.png");
+            await Task.Delay(300);
+            mantis = new MantisBosses(canvas, imgMantis, joueur, 300, 200, 200); //todo: change the 200x200 when the art is arting.
+            await Task.Delay(400);
+
+            // todo: restrict players movement
+            
+            this.bossSpawned = true;
+        }
+
+        private void ChangeBackground(string path)
+        {
+            var imageBrush = new ImageBrush
+            {
+                ImageSource = new BitmapImage(new Uri($"pack://application:,,,/{path}")),
+                Stretch = Stretch.UniformToFill,
+                TileMode = TileMode.FlipXY                
+            }; 
+            
+            RenderOptions.SetBitmapScalingMode(imageBrush, BitmapScalingMode.NearestNeighbor);
+            canvas.Background = imageBrush;
+        }
+
+        private void Explostions(int x, int y, int size)
+        {
+            Image boom = new Image();
+            boom.Width = size;
+            boom.Height = size;
+            Canvas.SetLeft(boom, x - size / 2);
+            Canvas.SetTop(boom, y - size / 2); 
+            RenderOptions.SetBitmapScalingMode(boom, BitmapScalingMode.NearestNeighbor);
+            canvas.Children.Add(boom);
+
+            DispatcherTimer animationTimer = new DispatcherTimer();
+            animationTimer.Interval = TimeSpan.FromMilliseconds(100);
+            int frame=0, maxFrames = 5;
+
+            animationTimer.Tick += (e,s) =>
+            {
+                frame++;
+                if (frame >= maxFrames)
+                {
+                    animationTimer.Stop();
+                    canvas.Children.Remove(boom);
+                }
+                boom.Source = imgExplosion[frame];
+            };
+            animationTimer.Start();
         }
 
         private void AffichageDeVie(int nombreDeVie)
@@ -518,8 +610,6 @@ namespace Froggun
                 pause = true;
                 lab_Defaite.Visibility = Visibility.Visible;
                 mort(nombreDeVie);
-                
-
             }
             else
             {
@@ -530,9 +620,10 @@ namespace Froggun
                 else if (nombreDeVie == 1) ImgvieJoueur.Source = imageVie1;
             }
         }
+        
         public void mort(int nombreDeVie)
         {
-            var result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            MessageBoxResult result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.Yes)
             {
                 recommencer(5);
@@ -561,15 +652,13 @@ namespace Froggun
             joueur.nombreDeVie = nombreDeVie;
             nombreDeVie = 5;
             AffichageDeVie(nombreDeVie);
-            AfficheScore(0);
+            AfficheScore();
             waveCount = 0;
             pauseEntreVagues = 5; 
             pauseCounter = 0;
-            
 
             pause = false;
             lab_Defaite.Visibility = Visibility.Collapsed;
-
         }
 
         private void CheckBallesSortieEcran()
@@ -583,6 +672,10 @@ namespace Froggun
                 {
                     Balles.RemoveAt(i);
                     canvas.Children.Remove(balle.BalleImage);
+
+
+                    // TODO: REMOVE THIS
+                    if (this.bossSpawned && this.fightingBoss) mantis.DamageMantis(5);
                 }
             }
         }
@@ -594,7 +687,7 @@ namespace Froggun
                 if (playerTongue.Width < 300)
                 {
                     // create two lines from start to end of tongue
-                    var rotation = (RotateTransform)playerTongue.RenderTransform;
+                    RotateTransform rotation = (RotateTransform)playerTongue.RenderTransform;
                     Point tcentre = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height / 2.0f);
 
                     Point t11 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue));
@@ -603,6 +696,7 @@ namespace Froggun
                     Point t21 = new Point(Canvas.GetLeft(playerTongue), Canvas.GetTop(playerTongue) + playerTongue.Height);
                     Point t22 = new Point(Canvas.GetLeft(playerTongue) + playerTongue.Width, Canvas.GetTop(playerTongue) + playerTongue.Height);
 
+                    // rotate points based on the tongues angle
                     Point point_start_1 = RotatePoint(t11, tcentre, rotation.Angle);
                     Point point_start_2 = RotatePoint(t21, tcentre, rotation.Angle);
                     Point point_end_1 = RotatePoint(t22, tcentre, rotation.Angle);
@@ -631,57 +725,50 @@ namespace Froggun
                     //canvas.Children.Add(line_frog_1);
                     //canvas.Children.Add(line_frog_2);
 
-                    foreach (var proie in proies.ToList())
+                    foreach (Proies proie in proies.ToList())
                     {
+                        int x = (int)Canvas.GetLeft(proie.BoundingBox);
+                        int y = (int)Canvas.GetTop(proie.BoundingBox);
+
                         /*
-                            *   A--------B 
-                            *   |        |
-                            *   |        |
-                            *   C--------D
-                            */
+                        *   A--------B 
+                        *   |        |
+                        *   |        |
+                        *   C--------D
+                        */
 
                         Point intersection;
                         Line line_AB = new Line
                         {
-                            X1 = proie.BoundingBox.X,
-                            Y1 = proie.BoundingBox.Y,
-                            X2 = proie.BoundingBox.X + proie.BoundingBox.Width,
-                            Y2 = proie.BoundingBox.Y,
-                            StrokeThickness = 2,
-                            Stroke = Brushes.Red
-                        };
-                        Line line_BD = new Line
-                        {
-                            X1 = proie.BoundingBox.X + proie.BoundingBox.Width,
-                            Y1 = proie.BoundingBox.Y,
-                            X2 = proie.BoundingBox.X + proie.BoundingBox.Width,
-                            Y2 = proie.BoundingBox.Y + proie.BoundingBox.Height,
-                            StrokeThickness = 2,
-                            Stroke = Brushes.Red
-                        };
-                        Line line_DC = new Line
-                        {
-                            X1 = proie.BoundingBox.X + proie.BoundingBox.Width,
-                            Y1 = proie.BoundingBox.Y + proie.BoundingBox.Height,
-                            X2 = proie.BoundingBox.X,
-                            Y2 = proie.BoundingBox.Y + proie.BoundingBox.Height,
-                            StrokeThickness = 2,
-                            Stroke = Brushes.Red
-                        };
-                        Line line_CA = new Line
-                        {
-                            X1 = proie.BoundingBox.X,
-                            Y1 = proie.BoundingBox.Y + proie.BoundingBox.Height,
-                            X2 = proie.BoundingBox.X,
-                            Y2 = proie.BoundingBox.Y,
-                            StrokeThickness = 2,
-                            Stroke = Brushes.Red
+                            X1 = x,
+                            Y1 = y,
+                            X2 = x + proie.BoundingBox.Width,
+                            Y2 = y,
                         };
 
-                        //canvas.Children.Add(line_AB);
-                        //canvas.Children.Add(line_BD);
-                        //canvas.Children.Add(line_DC);
-                        //canvas.Children.Add(line_CA);
+                        Line line_BD = new Line
+                        {
+                            X1 = x + proie.BoundingBox.Width,
+                            Y1 = y,
+                            X2 = x + proie.BoundingBox.Width,
+                            Y2 = y + proie.BoundingBox.Height,
+                        };
+
+                        Line line_DC = new Line
+                        {
+                            X1 = x + proie.BoundingBox.Width,
+                            Y1 = y + proie.BoundingBox.Height,
+                            X2 = x,
+                            Y2 = y + proie.BoundingBox.Height,
+                        };
+
+                        Line line_CA = new Line
+                        {
+                            X1 = x,
+                            Y1 = y + proie.BoundingBox.Height,
+                            X2 = x,
+                            Y2 = y,
+                        };
 
                         if (TryGetIntersection(line_frog_1, line_AB, out intersection)
                             || TryGetIntersection(line_frog_1, line_BD, out intersection)
@@ -693,16 +780,17 @@ namespace Froggun
                             || TryGetIntersection(line_frog_2, line_DC, out intersection)
                             || TryGetIntersection(line_frog_2, line_CA, out intersection))
                         {
-                            Console.WriteLine($"ate a {proie.type}");
                             expensionLangue = false;
-                            line_frog_1.Stroke = Brushes.Green;
-                            line_frog_2.Stroke = Brushes.Green;
-                            canvas.Children.Remove(proie.Image);
-                            proies.Remove(proie);
+
+                            if (canvas.Children.Contains(proie.Image)) canvas.Children.Remove(proie.Image);
+                            if (canvas.Children.Contains(proie.BoundingBox)) canvas.Children.Remove(proie.BoundingBox);
+                            if (proies.Contains(proie)) proies.Remove(proie);
+
                             joueur.proieManger++;
-                            if (joueur.proieManger>=joueur.proiePourHeal)
+                            if (joueur.proieManger >= joueur.proiePourHeal)
                             {
                                 joueur.heal();
+                                joueur.proieManger = 0;
                             }
                         }
                     }
@@ -723,14 +811,6 @@ namespace Froggun
                 else tirLangue = false;
             }
 
-        }
-
-        private void ShootTung()
-        {
-            SonLangue();
-            if (tirLangue) return;
-            else tirLangue = true;
-            expensionLangue = true;
         }
 
         private void SonGun()
@@ -755,20 +835,28 @@ namespace Froggun
 
         private void ShootGun()
         {
-            SonGun();
+            //SonGun();
             int scaleX = (Math.Abs(currentAngle) > 90) ? -1 : 1;
             Balle balle = new Balle(posArme.X, posArme.Y, currentAngle, vitesseBalle, 10, canvas, imageBalle, scaleX);
             Balles.Add(balle);
         }
-
+        
+        private void ShootTung()
+        {
+            //SonLangue();
+            if (tirLangue) return;
+            else tirLangue = true;
+            expensionLangue = true;
+        }
+        
         public void AfficheScore()
         {
-            labelScore.Content = $"Score : {score} ";
+            labelScore.Content = $"Score : {joueur.score} ";
         }
 
         public void AfficheCombo()
         {
-            labelCombo.Content = $"Combo : {combo} ";
+            labelCombo.Content = $"x{joueur.scoreMultiplier} ";
         }
 
         private void keydown(object sender, KeyEventArgs e)
@@ -804,11 +892,14 @@ namespace Froggun
 
             if (e.Key == Key.K && !pause)
             {
-                KillEverything();
+                ennemis.Add(new Ennemis(TypeEnnemis.Spider, joueur.posJoueur.X + 60, joueur.posJoueur.Y + 60, 100, 100, 8, canvas));
             }
 
             if (e.Key == Key.Escape || e.Key == Key.Space )
             {
+                // dont let the player pause during a bossfight
+                if (fightingBoss) return;
+
                 pause=!pause;
                 if (pause)
                     lab_Pause.Visibility = Visibility.Visible;
@@ -851,5 +942,3 @@ namespace Froggun
         }
     }
 }
-
-

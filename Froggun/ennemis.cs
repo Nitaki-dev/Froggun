@@ -15,6 +15,7 @@ namespace Froggun
 {
     public enum TypeEnnemis
     {
+        Firefly,
         Spider,
         Squit
     }
@@ -41,15 +42,7 @@ namespace Froggun
         public bool hasCollided { get; set; }
         public Rectangle healthBarEmpty { get; set; }
         public Rectangle healthBar { get; set; }
-
-        public static int killStreak = 0;
-
-        public static double scoreMultiplier = 1;
-
-        private static DispatcherTimer killStreakTimer = new DispatcherTimer();
-
-        private static bool isTimerRunning = false;
-
+        private static int healthBarWidth = 100;
 
         public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
         {
@@ -62,7 +55,7 @@ namespace Froggun
             healthBarEmpty = new Rectangle
             {
                 Fill = Brushes.Gray,
-                Width = width,
+                Width = healthBarWidth,
                 Height = 10,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top
@@ -76,7 +69,7 @@ namespace Froggun
             healthBar = new Rectangle
             {
                 Fill = Brushes.Green,
-                Width = width,
+                Width = healthBarWidth,
                 Height = 10,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top
@@ -90,22 +83,37 @@ namespace Froggun
             IsAlive = true;
             switch (type)
             {
+                case TypeEnnemis.Firefly:
+                    imagePath = "img/ennemis/Firefly";
+                    animationIndex = new int[] { 1, 2 };
+
+                    if      (difficulte == "facile")    Health = 25;
+                    else if (difficulte == "moyen")     Health = 50;
+                    else if (difficulte == "difficile") Health = 100;
+                    else if (difficulte == "extreme")   Health = 150;
+
+                    maxHealth = Health;
+                    break;
                 case TypeEnnemis.Spider:
-                    animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
                     imagePath = "img/ennemis/LL";
-                    if (difficulte == "facile") Health = 150;
-                    else if (difficulte == "moyen") Health = 200;
+                    animationIndex = new int[] { 1, 2, 3, 1, 4, 5 };
+
+                    if      (difficulte == "facile")    Health = 150;
+                    else if (difficulte == "moyen")     Health = 200;
                     else if (difficulte == "difficile") Health = 250;
-                    else if (difficulte == "extreme") Health = 300;
+                    else if (difficulte == "extreme")   Health = 300;
+
                     maxHealth = Health;
                     break;
                 case TypeEnnemis.Squit:
-                    animationIndex = new int[] { 1, 2, 3, 4 };
                     imagePath = "img/ennemis/Squit";
-                    if (difficulte == "facile") Health = 300;
-                    else if (difficulte == "moyen") Health = 400;
+                    animationIndex = new int[] { 1, 2, 3, 4 };
+
+                    if      (difficulte == "facile")    Health = 300;
+                    else if (difficulte == "moyen")     Health = 400;
                     else if (difficulte == "difficile") Health = 450;
-                    else if (difficulte == "extreme") Health = 550;
+                    else if (difficulte == "extreme")   Health = 550;
+
                     maxHealth = Health;
                     break;
             }
@@ -123,21 +131,8 @@ namespace Froggun
             animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             animationTimer.Tick += AnimationTimer_Tick;
             animationTimer.Start();
-            InitializeKillStreakTimer();
         }
-        void InitializeKillStreakTimer()
-        {
-            killStreakTimer.Interval = TimeSpan.FromSeconds(5);
-            killStreakTimer.Tick += (sender, e) =>
-            {
-                Console.WriteLine("Kill streak expired.");
-                killStreak = 0;
-                scoreMultiplier = 1;
-                isTimerRunning = false;
-                killStreakTimer.Stop();
-            };
-        }
-
+        
         private void AnimationTimer_Tick(object sender, EventArgs e)
         {
             currentFrameIndex++;
@@ -154,11 +149,10 @@ namespace Froggun
             return bitmapImage;
         }
 
-        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueurr, List<Balle> balles, Canvas canvas, ref Joueur joueur, ref double score, ref double combo)
+        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueurr, List<Balle> balles, Canvas canvas, ref Joueur joueur)
         {
             // Cache bounding box and other frequently used values
             Rect rJoueur = joueurr;
-            combo = scoreMultiplier;
             for (int i = 0; i < ennemis.Count; i++)
             {
                 Ennemis ennemi = ennemis[i];
@@ -177,12 +171,11 @@ namespace Froggun
                     if (ennemi.BoundingBox.IntersectsWith(rImgBalle) && !ennemi.hasCollided)
                     {
                         ennemi.Health -= 50;
-                        if (ennemi.Health <= 0)
-                            ennemi.Die(ennemis, ennemi, canvas, ref score);
+                        if (ennemi.Health <= 0) ennemi.Die(ennemis, ennemi, canvas, ref joueur);
 
                         if (ennemi.Health > 0)
                         {
-                            ennemi.healthBar.Width = ennemi.healthBar.ActualWidth * (ennemi.Health / ennemi.maxHealth);
+                            ennemi.healthBar.Width = healthBarWidth * ((double)ennemi.Health / ennemi.maxHealth);
                         }
 
                         balle.hasHit = true;
@@ -197,24 +190,13 @@ namespace Froggun
                 if (ennemi.Health <= 0) continue;
 
                 // Adjust movement speed based on status (isSlowed)
-                ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.5 : 0.25;
-                if (difficulte == "facile")
-                {
-                    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.5 : 0.25;
-                }
-                else if (difficulte == "moyen")
-                {
-                    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.6 : 0.3;
-                }
-                else if (difficulte == "difficile")
-                {
-                    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.7 : 0.35;
-                }
-                else if (difficulte == "extreme")
-                {
-                    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.8 : 0.4;
-                }
+                if      (difficulte == "facile")    ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.5 : 0.25;
+                else if (difficulte == "moyen")     ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.6 : 0.3;
+                else if (difficulte == "difficile") ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.7 : 0.35;
+                else if (difficulte == "extreme")   ennemi.SpeedMultiplier = ennemi.isSlowed ? 0.8 : 0.4;
+                
                 ennemi.BoundingBox = new Rect(ennemi.X, ennemi.Y, ennemi.Width, ennemi.Height);  // Update the bounding box (optimized for reuse)
+                
                 // Calculate direction towards the player (only do this if necessary)
                 Vector2 direction = new Vector2((float)(rJoueur.X - ennemi.X), (float)(rJoueur.Y - ennemi.Y));
                 direction = Vector2.Normalize(direction);
@@ -280,6 +262,7 @@ namespace Froggun
                 }
             }
         }
+        
         private void SonMortEnnemie()
         {
             // Charger le fichier audio depuis les ressources
@@ -290,27 +273,25 @@ namespace Froggun
             musique.Play();
         }
 
-        public void Die(List<Ennemis> ennemis, Ennemis e, Canvas canvas, ref double score)
+        public void Die(List<Ennemis> ennemis, Ennemis e, Canvas canvas, ref Joueur joueur)
         {
-            //SonMortEnnemie();
             IsAlive = false;
             Image.Visibility = Visibility.Hidden;
             canvas.Children.Remove(Image);
             canvas.Children.Remove(healthBarEmpty);
             canvas.Children.Remove(healthBar);
             ennemis.Remove(e);
-            AddKillToStreak();
-            score += 100 * scoreMultiplier;
+            joueur.score += Math.Round(100 * joueur.scoreMultiplier);
+            AddKillToStreak(ref joueur, e);
         }
-        public static void AddKillToStreak()
+
+        public static void AddKillToStreak(ref Joueur joueur, Ennemis e)
         {
-            if (!isTimerRunning)
-            {
-                killStreakTimer.Start();
-                isTimerRunning = true;
-            }
-            killStreak++;
-            scoreMultiplier = 1 + (killStreak - 1) * 0.5;
+            joueur.killStreak++;
+            joueur.killStreakTimer = 5; // you got 5 seconds to get a new kill before it resets 
+            joueur.scoreMultiplier += (e.type == TypeEnnemis.Firefly) ? 0.1 : ((e.type == TypeEnnemis.Spider) ? 0.5 : 1.0);
+            if (joueur.scoreMultiplier<=1) joueur.scoreMultiplier += 1;
+            joueur.scoreMultiplier = Math.Round(joueur.scoreMultiplier, 1);
         }
 
         public void SlowDown(int durationInSeconds)
@@ -318,8 +299,7 @@ namespace Froggun
             isSlowed = true;
             DispatcherTimer timer = new DispatcherTimer();
             timer.Interval = TimeSpan.FromSeconds(durationInSeconds);
-            timer.Tick += (s,e) =>
-            {
+            timer.Tick += (s,e) => {
                 isSlowed = false;
                 timer.Stop();
             };

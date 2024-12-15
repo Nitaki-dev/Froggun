@@ -6,6 +6,8 @@ using System.Numerics;
 using System.Windows.Media;
 using static Froggun.MainWindow;
 using System.Windows.Controls.Ribbon.Primitives;
+using System.Windows.Shapes;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace Froggun
 {
@@ -27,7 +29,7 @@ namespace Froggun
         private string imagePath { get; set; }
         public int[] AnimationIndex { get; set; }
 
-        public Rect BoundingBox { get; set; }
+        public Rectangle BoundingBox { get; set; }
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }
         private DispatcherTimer animationTimer { get; set; }
@@ -37,7 +39,7 @@ namespace Froggun
         public double targetY;
         private DispatcherTimer movementTimer;
 
-        public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Canvas canvas, Rect BoundingBox = new Rect())
+        public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Canvas canvas)
         {
             X = x;
             Y = y;
@@ -69,7 +71,15 @@ namespace Froggun
             Canvas.SetTop(Image, Y);
             canvas.Children.Add(Image);
 
-            BoundingBox = new Rect(X+15, Y+15, Width-30, Height-30);
+            this.BoundingBox = new Rectangle {
+                Width = width-10,
+                Height = height-10,
+                Stroke = Brushes.Red,
+                StrokeThickness = 1
+            };
+
+            Canvas.SetLeft(BoundingBox, x + 5);
+            Canvas.SetTop(BoundingBox, y + 5);
 
             animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             animationTimer.Tick += AnimationTimer_Tick;
@@ -105,14 +115,11 @@ namespace Froggun
 
         public static void UpdateProies(Canvas canvas, List<Proies> proies, Rect joueur)
         {
-            foreach (var proie in proies)
+            foreach (Proies proie in proies)
             {
-                proie.BoundingBox = new Rect(
-                    (int)proie.X-15,
-                    (int)proie.Y-15,
-                    (int)proie.Width+30,
-                    (int)proie.Height+30
-                );
+                // Update bounding box
+                Canvas.SetLeft(proie.BoundingBox, proie.X + 5);
+                Canvas.SetTop(proie.BoundingBox, proie.Y + 5);
 
                 // Move the enemy
                 Vector2 direction = new Vector2(
@@ -124,14 +131,14 @@ namespace Froggun
                 double newX = proie.X + direction.X * proie.Speed;
                 double newY = proie.Y + direction.Y * proie.Speed;
 
+                // Prevent moving off-screen (adjust position if out of bounds)
+                newX = Math.Max(0, Math.Min(newX, canvas.ActualWidth - proie.Width - 20));
+                newY = Math.Max(0, Math.Min(newY, canvas.ActualHeight - proie.Height - 20));
+
                 proie.X = newX;
                 proie.Y = newY;
 
-                if (proie.X <= 0) proie.X = 0;
-                if (proie.X >= canvas.ActualWidth) proie.X = canvas.ActualWidth;
-                if (proie.Y <= 0) proie.Y = 0;
-                if (proie.Y >= canvas.ActualHeight) proie.X = canvas.ActualHeight;
-
+                // Update image position
                 Canvas.SetLeft(proie.Image, proie.X);
                 Canvas.SetTop(proie.Image, proie.Y);
             }

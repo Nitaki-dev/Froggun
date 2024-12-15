@@ -13,6 +13,10 @@
 		<None Remove="img\ant.png" />
 		<None Remove="img\balle.png" />
 		<None Remove="img\bg.png" />
+		<None Remove="img\boss\mantis\acide_droplet.png" />
+		<None Remove="img\boss\mantis\boss_idle.png" />
+		<None Remove="img\boss\mantis\mantis.png" />
+		<None Remove="img\boss\mantis\poke_attack.png" />
 		<None Remove="img\difficile.jpg" />
 		<None Remove="img\ennemis\Food1\1.png" />
 		<None Remove="img\ennemis\Food1\2.png" />
@@ -51,6 +55,9 @@
 		<None Remove="img\img_explosion3.png" />
 		<None Remove="img\img_explosion4.png" />
 		<None Remove="img\img_explosion5.png" />
+		<None Remove="img\joueur\frog_back.png" />
+		<None Remove="img\joueur\frog_front.png" />
+		<None Remove="img\joueur\frog_side.png" />
 		<None Remove="img\moyen.jpg" />
 		<None Remove="img\pagechoixtouche_aide.PNG" />
 		<None Remove="img\parametre.png" />
@@ -60,13 +67,18 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Resource Include="img\arena\arena_unaltered.png" />
+	  <Resource Include="img\arena\arena_broken_top.png" />
 	  <Resource Include="img\balle.png" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<Resource Include="img\ant.png" />
-		<Resource Include="img\bg.png" />
+		<Resource Include="img\boss\mantis\acide_droplet.png" />
+		<Resource Include="img\boss\mantis\mantis.png" />
+		<Resource Include="img\boss\mantis\poke_attack.png" />
 		<Resource Include="img\difficile.jpg" />
+		<Resource Include="img\ennemis\Firefly\1.png" />
+		<Resource Include="img\ennemis\Firefly\2.png" />
 		<Resource Include="img\ennemis\Food1\1.png" />
 		<Resource Include="img\ennemis\Food1\2.png" />
 		<Resource Include="img\ennemis\LL\1.png" />
@@ -88,6 +100,9 @@
 		<Resource Include="img\frog_side.png" />
 		<Resource Include="img\frog_side_hit.png" />
 		<Resource Include="img\gun.png" />
+		<Resource Include="img\joueur\frog_back.png" />
+		<Resource Include="img\joueur\frog_front.png" />
+		<Resource Include="img\joueur\frog_side.png" />
 		<Resource Include="img\moyen.jpg" />
 		<Resource Include="img\pagechoixtouche_aide.PNG" />
 		<Resource Include="img\vie\health0.png" />

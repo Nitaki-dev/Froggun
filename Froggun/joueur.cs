@@ -16,7 +16,6 @@ namespace Froggun
 {
     internal class Joueur
     {
-
         public TransformGroup joueurTransformGroup { get; set; }
         public RotateTransform joueurRoulade { get; set; }
         public ScaleTransform joueurFlip { get; set; }
@@ -24,10 +23,9 @@ namespace Froggun
         public Vector2 vitesseJoueur { get; set; }
 
         public int nombreDeVie { get; set; }
-
         public bool estInvinsible { get; set; }
-        public bool deplacerGauche { get; set; }
 
+        public bool deplacerGauche { get; set; }
         public bool deplacerDroite { get; set; }
         public bool deplacerHaut { get; set; }
         public bool deplacerBas { get; set; }
@@ -44,6 +42,7 @@ namespace Froggun
         public int proieManger { get; set; }
 
         public Image player { get; set; }
+        public Rect hitbox { get; set; }
         public Grid grid { get; set; }
 
         public BitmapImage front { get; set; }
@@ -71,9 +70,17 @@ namespace Froggun
 
         public Directions directionJoueur { get; set; }
 
-        public Joueur(Image player, int posX, int posY, Grid grid, BitmapImage front, BitmapImage side, BitmapImage back, BitmapImage frontHit, BitmapImage sideHit, BitmapImage backHit)
+        public double score {  get; set; }
+        public int killStreak { get; set; }
+        public int killStreakTimer { get; set; }
+        public double scoreMultiplier { get; set; }
+        public DispatcherTimer StreakTimerUpdate { get; set; }
+
+        public Joueur(Image player, Rect hitbox, int posX, int posY, Grid grid, BitmapImage front, BitmapImage side, BitmapImage back, BitmapImage frontHit, BitmapImage sideHit, BitmapImage backHit)
         {
+            RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
             this.player = player;
+            this.hitbox = hitbox;
             this.grid = grid;
 
             this.nombreDeVie = 5;
@@ -108,12 +115,41 @@ namespace Froggun
             this.joueurFlip = new ScaleTransform();
             this.posJoueur = new Vector2((float)posX, (float)posY);
             this.vitesseJoueur = new Vector2();
+
+            this.score = 0;
+            this.killStreak = 0;
+            this.killStreakTimer = 0;
+            this.scoreMultiplier = 0;
+
+            this.StreakTimerUpdate = new DispatcherTimer();
+            this.StreakTimerUpdate.Interval = TimeSpan.FromSeconds(1);
+            this.StreakTimerUpdate.Tick += (s, e) =>
+            {
+                if (this.killStreakTimer > 0) this.killStreakTimer--;
+                if (this.killStreakTimer <= 0)
+                {
+                    this.killStreak = 0;
+                    this.scoreMultiplier = 0;
+                }
+                //Console.WriteLine("Timer: " + this.killStreakTimer + "  |  Streak: " + this.killStreak);
+            };
+            this.StreakTimerUpdate.Start();
+
+            blinkTimer = new DispatcherTimer(); 
+            blinkTimer.Interval = TimeSpan.FromMilliseconds(100);
+            blinkTimer.Tick += BlinkPlayerEffect;
+            blinkTimer.Start();
         }
 
         public void UpdatePositionJoueur()
         {
+            // ~12 frames, very generous
+            if (tempsRoulade > 50 && tempsRoulade < 250 || blinkFrame>0) estInvinsible = true;
+            else estInvinsible = false;
+
             Vector2 nouvelleVitesseJoueur = vitesseJoueur;
             Vector2 nouvellePositionJoueur = posJoueur;
+            Rect newHitbox = hitbox;
 
             if (estEnRoulade)
             {
@@ -140,7 +176,7 @@ namespace Froggun
                         break;
                     case Directions.diagDownLeft:
                         nouvelleVitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
-                        nouvelleVitesseJoueur.Y = 15.0f * correctionVitesseDiagonal;
+                        nouvelleVitesseJoueur.Y =  15.0f * correctionVitesseDiagonal;
                         break;
                     case Directions.diagDownRight:
                         nouvelleVitesseJoueur.X = 15.0f * correctionVitesseDiagonal;
@@ -151,7 +187,7 @@ namespace Froggun
                         nouvelleVitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
                         break;
                     case Directions.diagUpRight:
-                        nouvelleVitesseJoueur.X = 15.0f * correctionVitesseDiagonal;
+                        nouvelleVitesseJoueur.X =  15.0f * correctionVitesseDiagonal;
                         nouvelleVitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
                         break;
                 }
@@ -165,23 +201,23 @@ namespace Froggun
             else
             {
                 joueurRoulade.Angle = 0;
-                if (deplacerGauche && Canvas.GetLeft(player) > 0) nouvelleVitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
-                else if (deplacerDroite && Canvas.GetLeft(player) < grid.ActualWidth - player.ActualWidth*2) nouvelleVitesseJoueur.X = vitesseDeplacement; // bouger vers la droite
+                if      (deplacerGauche && Canvas.GetLeft(player) > 0)                         nouvelleVitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
+                else if (deplacerDroite && Canvas.GetLeft(player) < grid.Width - player.Width) nouvelleVitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
                 else
                 {
                     nouvelleVitesseJoueur.X *= friction; // réduire la vitesse du joueur en fonction de la friction
                     if (Math.Abs(nouvelleVitesseJoueur.X) < 0.1f) nouvelleVitesseJoueur.X = 0; // si la vitesse (positive) est inférieure à 0.1, arrêter le mouvement
                 }
 
-                if (deplacerHaut && Canvas.GetTop(player) > 0) nouvelleVitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
-                else if (deplacerBas && Canvas.GetTop(player) < grid.ActualHeight - player.ActualHeight*2) nouvelleVitesseJoueur.Y = vitesseDeplacement; // bouger vers le bas 
+                if      (deplacerHaut && Canvas.GetTop(player) > 0)                          nouvelleVitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
+                else if (deplacerBas && Canvas.GetTop(player) < grid.Height - player.Height) nouvelleVitesseJoueur.Y = vitesseDeplacement;  // bouger vers le bas 
                 else
                 {
                     nouvelleVitesseJoueur.Y *= friction;
                     if (Math.Abs(nouvelleVitesseJoueur.Y) < 0.1f) nouvelleVitesseJoueur.Y = 0;
                 }
 
-                // Corrigé la vitesse du joueur si il bouge en diagonale (car sqrt(2) = 1.4 et pas 1)
+                // Corrige la vitesse du joueur si il bouge en diagonale (car sqrt(2) = 1.4 et pas 1)
                 if (directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight ||
                     directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight)
                 {
@@ -192,13 +228,11 @@ namespace Froggun
 
             nouvellePositionJoueur.X += nouvelleVitesseJoueur.X;
             nouvellePositionJoueur.Y += nouvelleVitesseJoueur.Y;
+            newHitbox = new Rect { X=posJoueur.X, Y=posJoueur.Y, Width=player.Width, Height=player.Height };
 
             vitesseJoueur = nouvelleVitesseJoueur;
             posJoueur = nouvellePositionJoueur;
-
-            //if (IsPointInside(nouvellePositionJoueur.X, nouvellePositionJoueur.Y)) {
-            //    posJoueur = nouvellePositionJoueur;
-            //}
+            hitbox = newHitbox;
 
             joueurTransformGroup.Children.Clear();
             player.RenderTransformOrigin = new Point(0.5, 0.5);
@@ -213,6 +247,7 @@ namespace Froggun
         public void ChangeJoueurDirection()
         {
             if (estEnRoulade) return;
+
             // Corrige la direction du joueur
             if (deplacerBas && deplacerDroite)       directionJoueur = Directions.diagDownRight;
             else if (deplacerBas && deplacerGauche)  directionJoueur = Directions.diagDownLeft;
@@ -249,31 +284,14 @@ namespace Froggun
 
         public void hit(int degats)
         {
+            if (estInvinsible) return;
+         
             nombreDeVie-=degats;
-            blinkTimer = new DispatcherTimer();
-            blinkTimer.Interval = TimeSpan.FromMilliseconds(50);
-            blinkTimer.Tick += BlinkPlayerEffect;
-            blinkTimer.Start();
+            blinkFrame += 7;
         }
 
         private void BlinkPlayerEffect(object? sender, EventArgs e) {
-            blinkFrame++;
-
-            if (blinkFrame > 10)
-            {
-                blinkTimer.Stop();
-                blinkFrame = 0;
-            }
-        }
-
-        public bool IsPointInside(double px, double py)
-        {
-            double dx = px - grid.ActualWidth /2.0f;
-            double dy = py - grid.ActualHeight / 2.0f;
-         
-            double equation = (Math.Pow(dx, 2) / Math.Pow(grid.ActualWidth / 2.0f, 2)) + (Math.Pow(dy, 2) / Math.Pow(grid.ActualHeight / 2.0f, 2));
-
-            return equation <= 1;
+            if (blinkFrame-1>=0) blinkFrame--;
         }
     }
 }

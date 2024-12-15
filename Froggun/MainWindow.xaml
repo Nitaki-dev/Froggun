@@ -9,6 +9,7 @@
     Width="1280"
     Height="720"
     KeyDown="keydown"
+    SizeToContent="WidthAndHeight"
     KeyUp="keyup"
     MouseLeftButtonDown="leftButtonDown"
     MouseRightButtonDown="rightButtonDown"
@@ -21,7 +22,7 @@
         <Canvas x:Name="canvas">
             <Canvas.Background>
                 <ImageBrush
-                    ImageSource="/img/bg.PNG"
+                    ImageSource="/img/arena/arena_unaltered.png"
                     Stretch="UniformToFill"
                     TileMode="FlipXY" />
             </Canvas.Background>
@@ -42,7 +43,7 @@
                 Height="40"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
-                Source="/img/frog_side.png"
+                Source="/img/frog_front.png"
                 Stretch="Fill" />
             <Image
                 x:Name="gun"
@@ -102,7 +103,7 @@
                 FontFamily="72 Monospace"
                 FontSize="300"
                 FontWeight="Bold"
-                Foreground="White">
+                Foreground="Black">
                 <Label.Background>
                     <ImageBrush />
                 </Label.Background>
@@ -142,7 +143,7 @@
                 FontFamily="72 Monospace"
                 FontSize="280"
                 FontWeight="Bold"
-                Foreground="White" />
+                Foreground="Black" />
         </Canvas>
     </Grid>
 </Window>
