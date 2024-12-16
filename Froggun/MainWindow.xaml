@@ -15,6 +15,7 @@
     MouseRightButtonDown="rightButtonDown"
     ResizeMode="NoResize"
     mc:Ignorable="d">
+    
     <Grid
         x:Name="grid"
         Width="1280"
