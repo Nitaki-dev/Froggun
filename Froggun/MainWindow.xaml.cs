@@ -639,6 +639,8 @@ namespace Froggun
         
         public void mort(int nombreDeVie)
         {
+            minuterie.Stop();
+            pauseVagues.Stop();
             MessageBoxResult result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.Yes)
             {
@@ -653,13 +655,6 @@ namespace Froggun
 
         public void Recommencer(int nombreDeVie)
         {
-            Console.WriteLine(ennemis.Count);
-            //for (int i = 0; i < ennemis.Count; i++)
-            //{
-            //    Console.WriteLine(ennemis[i]);
-            //    canvas.Children.Remove(ennemis[i].Image);
-            //    ennemis.Remove(ennemis[i]);
-            //}
             for (int i = 0; i < proies.Count; i++)
             {
                 canvas.Children.Remove(proies[i].Image);
@@ -668,15 +663,18 @@ namespace Froggun
             Ennemis.ReccomencerEnnemis(ennemis, canvas);
             Proies.ReccomencerProies(proies, canvas);
             joueur.nombreDeVie = nombreDeVie;
+            joueur.score = 0;
             nombreDeVie = 5;
             AffichageDeVie(nombreDeVie);
             AfficheScore();
             waveCount = 0;
-            pauseEntreVagues = 5; 
+            pauseEntreVagues = 5;
+            pauseVagues.Stop();
             pauseCounter = 0;
-
             pause = false;
             lab_Defaite.Visibility = Visibility.Collapsed;
+            minuterie.Start();
+            pauseVagues.Start();
         }
 
         private void CheckBallesSortieEcran()

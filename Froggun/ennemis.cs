@@ -287,7 +287,7 @@ namespace Froggun
 
         public static void ReccomencerEnnemis(List<Ennemis> ennemis, Canvas canvas)
         {
-            for (int i = 0; i < ennemis.Count; i++)
+            for (int i = ennemis.Count-1; i >=0; i--)
             {
                 ennemis[i].IsAlive = false;
                 ennemis[i].Image.Visibility = Visibility.Hidden;
