@@ -37,7 +37,7 @@
                 VerticalAlignment="Top"
                 Fill="HotPink" />
             <Image
-                x:Name="player"
+                x:Name="joueurImage"
                 Canvas.Left="375"
                 Canvas.Top="187"
                 Width="51"

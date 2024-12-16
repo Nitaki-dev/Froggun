@@ -187,12 +187,12 @@ namespace Froggun
             InitImage();
             //InitMusique(true);
 
-            Rect playerRect = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
-            joueur = new Joueur(player, playerRect, 640 - (int)player.Width/2, 360 - (int)player.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
+            Rect playerRect = new Rect(Canvas.GetLeft(joueurImage), Canvas.GetTop(joueurImage), joueurImage.Width, joueurImage.Height);
+            joueur = new Joueur(joueurImage, playerRect, 640 - (int)joueurImage.Width/2, 360 - (int)joueurImage.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
 
             InitialiserMinuterie();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
-            RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(joueurImage, BitmapScalingMode.NearestNeighbor);
             Measure(new Size(WINDOW_WIDTH, WINDOW_HEIGHT));
             Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
 
@@ -429,8 +429,8 @@ namespace Froggun
             Point mousePos = Mouse.GetPosition(canvas);
 
             Vector2 posCentreJoueur = new Vector2(
-                (float)(joueur.posJoueur.X + player.Width / 2.0f),
-                (float)(joueur.posJoueur.Y + player.Height / 2.0f)
+                (float)(joueur.posJoueur.X + joueurImage.Width / 2.0f),
+                (float)(joueur.posJoueur.Y + joueurImage.Height / 2.0f)
             );
 
             Vector2 direction = new Vector2(

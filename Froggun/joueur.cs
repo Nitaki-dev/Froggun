@@ -47,7 +47,7 @@ namespace Froggun
         public int proiePourHeal { get; set; }
         public int proieManger { get; set; }
 
-        public Image player { get; set; }
+        public Image joueurImage { get; set; }
         public Rect hitbox { get; set; }
         public Grid grid { get; set; }
 
@@ -87,7 +87,7 @@ namespace Froggun
         public Joueur(Image player, Rect hitbox, int posX, int posY, Grid grid, BitmapImage front, BitmapImage side, BitmapImage back, BitmapImage frontHit, BitmapImage sideHit, BitmapImage backHit)
         {
             RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
-            this.player = player;
+            this.joueurImage = player;
             this.hitbox = hitbox;
             this.grid = grid;
 
@@ -276,16 +276,16 @@ namespace Froggun
             else
             {
                 joueurRoulade.Angle = 0;
-                if      (deplacerGauche && Canvas.GetLeft(player) > 0)                         nouvelleVitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
-                else if (deplacerDroite && Canvas.GetLeft(player) < grid.Width - player.Width) nouvelleVitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
+                if      (deplacerGauche && Canvas.GetLeft(joueurImage) > 0)                         nouvelleVitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
+                else if (deplacerDroite && Canvas.GetLeft(joueurImage) < grid.Width - joueurImage.Width) nouvelleVitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
                 else
                 {
                     nouvelleVitesseJoueur.X *= friction; // réduire la vitesse du joueur en fonction de la friction
                     if (Math.Abs(nouvelleVitesseJoueur.X) < 0.1f) nouvelleVitesseJoueur.X = 0; // si la vitesse (positive) est inférieure à 0.1, arrêter le mouvement
                 }
 
-                if      (deplacerHaut && Canvas.GetTop(player) > 0)                          nouvelleVitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
-                else if (deplacerBas && Canvas.GetTop(player) < grid.Height - player.Height) nouvelleVitesseJoueur.Y = vitesseDeplacement;  // bouger vers le bas 
+                if      (deplacerHaut && Canvas.GetTop(joueurImage) > 0)                          nouvelleVitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
+                else if (deplacerBas && Canvas.GetTop(joueurImage) < grid.Height - joueurImage.Height) nouvelleVitesseJoueur.Y = vitesseDeplacement;  // bouger vers le bas 
                 else
                 {
                     nouvelleVitesseJoueur.Y *= friction;
@@ -303,9 +303,9 @@ namespace Froggun
 
             nouvellePositionJoueur.X += nouvelleVitesseJoueur.X;
             nouvellePositionJoueur.Y += nouvelleVitesseJoueur.Y;
-            newHitbox = new Rect { X=posJoueur.X, Y=posJoueur.Y, Width=player.Width, Height=player.Height };
+            newHitbox = new Rect { X=posJoueur.X, Y=posJoueur.Y, Width=joueurImage.Width, Height=joueurImage.Height };
             
-            Vector2 nouveauxCentreJoueur = new Vector2((float) (nouvellePositionJoueur.X + player.Width/2), (float)(nouvellePositionJoueur.Y + player.Height / 2));
+            Vector2 nouveauxCentreJoueur = new Vector2((float) (nouvellePositionJoueur.X + joueurImage.Width/2), (float)(nouvellePositionJoueur.Y + joueurImage.Height / 2));
             Ellipse e = new Ellipse { Width = 1280, Height = 720 };
             
             Canvas.SetTop(e, 0);
@@ -322,13 +322,13 @@ namespace Froggun
             hitbox = newHitbox;
 
             joueurTransformGroup.Children.Clear();
-            player.RenderTransformOrigin = new Point(0.5, 0.5);
+            joueurImage.RenderTransformOrigin = new Point(0.5, 0.5);
             joueurTransformGroup.Children.Add(joueurRoulade);
             joueurTransformGroup.Children.Add(joueurFlip);
-            player.RenderTransform = joueurTransformGroup;
+            joueurImage.RenderTransform = joueurTransformGroup;
 
-            Canvas.SetLeft(player, posJoueur.X);
-            Canvas.SetTop(player, posJoueur.Y);
+            Canvas.SetLeft(joueurImage, posJoueur.X);
+            Canvas.SetTop(joueurImage, posJoueur.Y);
         }
 
         public void ChangeJoueurDirection()
@@ -352,15 +352,15 @@ namespace Froggun
             // Change l'image du joueur dépendament de sa direction
             if (blinkFrame % 2 == 0)
             {
-                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       player.Source = side;
-                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   player.Source = back;
-                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = front;
+                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       joueurImage.Source = side;
+                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   joueurImage.Source = back;
+                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) joueurImage.Source = front;
             }
             else
             {
-                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       player.Source = sideHit;
-                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   player.Source = backHit;
-                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) player.Source = frontHit;
+                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       joueurImage.Source = sideHit;
+                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   joueurImage.Source = backHit;
+                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) joueurImage.Source = frontHit;
             }
         }
 
