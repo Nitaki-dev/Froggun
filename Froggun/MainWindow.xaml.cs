@@ -19,6 +19,8 @@ namespace Froggun
     /// </summary>
     public partial class MainWindow : Window
     {
+        public static int fenetreGauche = 100;
+        public static int fenetreHaut = 100;
         public const int WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 720;
 
         private static Random alea = new Random();
@@ -81,6 +83,8 @@ namespace Froggun
 
             // Création de la fenêtre parametre avec un Canvas
             parametre fentreNiveau = new parametre();
+            fentreNiveau.Left = fenetreGauche;
+            fentreNiveau.Top = fenetreHaut;
             fentreNiveau.ShowDialog();  // Affichage de la fenêtre parametre
 
             // Si la fenêtre parametre est fermée avec DialogResult == false, fermer l'application
@@ -100,6 +104,8 @@ namespace Froggun
                         {
                             // Affichage du Canvas pour la fenêtre controle
                             choixTouche fentrechoixTouche = new choixTouche();
+                            fentrechoixTouche.Left = fenetreGauche;
+                            fentrechoixTouche.Top = fenetreHaut;
                             fentrechoixTouche.ShowDialog();  // Affiche la fenêtre controle de manière modale
 
                             // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
@@ -107,6 +113,8 @@ namespace Froggun
                             {
                                 // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
                                 fentreNiveau = new parametre();  // Nouvelle instance de parametre
+                                fentreNiveau.Left = fenetreGauche;
+                                fentreNiveau.Top = fenetreHaut;
                                 fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
 
                                 // Si l'utilisateur choisit "jouer", sortir de la boucle
@@ -132,6 +140,8 @@ namespace Froggun
                         {
                             // Affichage du Canvas pour la fenêtre controle
                             aide fentreaide = new aide();
+                            fentreaide.Left = fenetreGauche;
+                            fentreaide.Top = fenetreHaut;
                             fentreaide.ShowDialog();  // Affiche la fenêtre controle de manière modale
 
                             // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
@@ -139,6 +149,8 @@ namespace Froggun
                             {
                                 // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
                                 fentreNiveau = new parametre();  // Nouvelle instance de parametre
+                                fentreNiveau.Left = fenetreGauche;
+                                fentreNiveau.Top = fenetreHaut;
                                 fentreNiveau.ShowDialog();  // Réaffiche la fenêtre parametre
 
                                 // Si l'utilisateur choisit "jouer", sortir de la boucle
@@ -160,10 +172,14 @@ namespace Froggun
                     }
                 } while (resultat != "jouer");
                 choixDifficulte fentreDifficulte = new choixDifficulte();
+                fentreDifficulte.Left = fenetreGauche;
+                fentreDifficulte.Top = fenetreHaut;
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
                 //InitMusique(false);
                 //InitMusiqueJeux(true);
+                this.Left = fenetreGauche;
+                this.Top = fenetreHaut;
             }
 
             lab_Pause.Visibility = Visibility.Collapsed;
@@ -623,10 +639,12 @@ namespace Froggun
         
         public void mort(int nombreDeVie)
         {
+            minuterie.Stop();
+            pauseVagues.Stop();
             MessageBoxResult result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.Yes)
             {
-                recommencer(5);
+                Recommencer(5);
             }
             else
             {
@@ -635,30 +653,28 @@ namespace Froggun
             }
         }
 
-        public void recommencer(int nombreDeVie)
+        public void Recommencer(int nombreDeVie)
         {
-            Console.WriteLine(ennemis.Count);
-            for (int i = 0; i < ennemis.Count; i++)
-            {
-                Console.WriteLine(ennemis[i]);
-                canvas.Children.Remove(ennemis[i].Image);
-                ennemis.Remove(ennemis[i]);
-            }
             for (int i = 0; i < proies.Count; i++)
             {
                 canvas.Children.Remove(proies[i].Image);
                 proies.Remove(proies[i]);
             }
+            Ennemis.ReccomencerEnnemis(ennemis, canvas);
+            Proies.ReccomencerProies(proies, canvas);
             joueur.nombreDeVie = nombreDeVie;
+            joueur.score = 0;
             nombreDeVie = 5;
             AffichageDeVie(nombreDeVie);
             AfficheScore();
             waveCount = 0;
-            pauseEntreVagues = 5; 
+            pauseEntreVagues = 5;
+            pauseVagues.Stop();
             pauseCounter = 0;
-
             pause = false;
             lab_Defaite.Visibility = Visibility.Collapsed;
+            minuterie.Start();
+            pauseVagues.Start();
         }
 
         private void CheckBallesSortieEcran()
