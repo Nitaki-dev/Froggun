@@ -528,11 +528,11 @@ namespace Froggun
             }
 
 
-            Ennemis.UpdateEnnemis(ennemis, joueur.hitbox, Balles, canvas , ref joueur);
+            Ennemis.UpdateEnnemis(ennemis, Balles, canvas , ref joueur);
             Proies.UpdateProies(canvas, proies, joueur.hitbox);
             if (this.fightingBoss && this.bossSpawned)
             {
-                mantis.UpdateMantisBoss();
+                mantis.UpdateMantisBoss(Balles, joueur);
 
                 if (!mantis.isAlive)
                 {
@@ -569,7 +569,7 @@ namespace Froggun
             Explostions(1100, 100, 500);
             ChangeBackground("img/arena/arena_broken_top.png");
             await Task.Delay(300);
-            mantis = new MantisBosses(canvas, imgMantis, joueur, 300, 200, 200); //todo: change the 200x200 when the art is arting.
+            mantis = new MantisBosses(canvas, imgMantis, joueur, 4000, 215, 266);
             await Task.Delay(400);
 
             // todo: restrict players movement
@@ -688,10 +688,6 @@ namespace Froggun
                 {
                     Balles.RemoveAt(i);
                     canvas.Children.Remove(balle.BalleImage);
-
-
-                    // TODO: REMOVE THIS
-                    if (this.bossSpawned && this.fightingBoss) mantis.DamageMantis(5);
                 }
             }
         }
@@ -864,6 +860,7 @@ namespace Froggun
             else tirLangue = true;
             expensionLangue = true;
         }
+
         public void AfficheScore()
         {
             labelScore.Content = $"Score : {joueur.score} ";

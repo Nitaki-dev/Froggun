@@ -149,10 +149,10 @@ namespace Froggun
             return bitmapImage;
         }
 
-        public static void UpdateEnnemis(List<Ennemis> ennemis, Rect joueurr, List<Balle> balles, Canvas canvas, ref Joueur joueur)
+        public static void UpdateEnnemis(List<Ennemis> ennemis, List<Balle> balles, Canvas canvas, ref Joueur joueur)
         {
             // Cache bounding box and other frequently used values
-            Rect rJoueur = joueurr;
+            Rect rJoueur = joueur.hitbox;
             for (int i = 0; i < ennemis.Count; i++)
             {
                 Ennemis ennemi = ennemis[i];
@@ -172,11 +172,7 @@ namespace Froggun
                     {
                         ennemi.Health -= 50;
                         if (ennemi.Health <= 0) ennemi.Die(ennemis, ennemi, canvas, ref joueur);
-
-                        if (ennemi.Health > 0)
-                        {
-                            ennemi.healthBar.Width = healthBarWidth * ((double)ennemi.Health / ennemi.maxHealth);
-                        }
+                        if (ennemi.Health > 0) ennemi.healthBar.Width = healthBarWidth * ((double)ennemi.Health / ennemi.maxHealth);
 
                         balle.hasHit = true;
                         canvas.Children.Remove(balle.BalleImage);

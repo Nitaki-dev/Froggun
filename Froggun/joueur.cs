@@ -11,6 +11,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows;
 using System.Windows.Threading;
+using System.Windows.Shapes;
 
 namespace Froggun
 {
@@ -52,8 +53,10 @@ namespace Froggun
         public BitmapImage frontHit { get; set; }
         public BitmapImage sideHit { get; set; }
         public BitmapImage backHit { get; set; }
+        public int degats { get; set; }
         
         private DispatcherTimer blinkTimer = new DispatcherTimer();
+        
         private int blinkFrame=0;
 
         public enum Directions
@@ -134,6 +137,9 @@ namespace Froggun
                 //Console.WriteLine("Timer: " + this.killStreakTimer + "  |  Streak: " + this.killStreak);
             };
             this.StreakTimerUpdate.Start();
+
+            //combien de degats fait le joueur
+            this.degats = 50;
 
             blinkTimer = new DispatcherTimer(); 
             blinkTimer.Interval = TimeSpan.FromMilliseconds(100);
@@ -230,18 +236,24 @@ namespace Froggun
             nouvellePositionJoueur.Y += nouvelleVitesseJoueur.Y;
             newHitbox = new Rect { X=posJoueur.X, Y=posJoueur.Y, Width=player.Width, Height=player.Height };
 
-            vitesseJoueur = nouvelleVitesseJoueur;
-            posJoueur = nouvellePositionJoueur;
-            hitbox = newHitbox;
+            Ellipse e = new Ellipse { Width = 1280, Height = 720, Fill = Brushes.Red };
+            Canvas.SetTop(e, 0);
+            Canvas.SetLeft(e, 0);
+            if (EllipseContains(e, nouvellePositionJoueur))
+            {
+                vitesseJoueur = nouvelleVitesseJoueur;
+                posJoueur = nouvellePositionJoueur;
+                hitbox = newHitbox;
+                
+                joueurTransformGroup.Children.Clear();
+                player.RenderTransformOrigin = new Point(0.5, 0.5);
+                joueurTransformGroup.Children.Add(joueurRoulade);
+                joueurTransformGroup.Children.Add(joueurFlip);
+                player.RenderTransform = joueurTransformGroup;
 
-            joueurTransformGroup.Children.Clear();
-            player.RenderTransformOrigin = new Point(0.5, 0.5);
-            joueurTransformGroup.Children.Add(joueurRoulade);
-            joueurTransformGroup.Children.Add(joueurFlip);
-            player.RenderTransform = joueurTransformGroup;
-
-            Canvas.SetLeft(player, posJoueur.X);
-            Canvas.SetTop(player, posJoueur.Y);
+                Canvas.SetLeft(player, posJoueur.X);
+                Canvas.SetTop(player, posJoueur.Y);
+            }
         }
 
         public void ChangeJoueurDirection()
@@ -292,6 +304,32 @@ namespace Froggun
 
         private void BlinkPlayerEffect(object? sender, EventArgs e) {
             if (blinkFrame-1>=0) blinkFrame--;
+        }
+
+        // https://stackoverflow.com/questions/13285007/how-to-determine-if-a-point-is-within-an-ellipse
+        public bool EllipseContains(Ellipse Ellipse, Vector2 point)
+        {
+            Point center = new Point(
+                  Canvas.GetLeft(Ellipse) + (Ellipse.Width / 2),
+                  Canvas.GetTop(Ellipse) + (Ellipse.Height / 2));
+
+            double _xRadius = Ellipse.Width / 2;
+            double _yRadius = Ellipse.Height / 2;
+
+
+            if (_xRadius <= 0.0 || _yRadius <= 0.0)
+                return false;
+            /* This is a more general form of the circle equation
+             *
+             * X^2/a^2 + Y^2/b^2 <= 1
+             */
+
+            Point normalized = new Point(point.X - center.X,
+                                         point.Y - center.Y);
+
+            return ((double)(normalized.X * normalized.X)
+                     / (_xRadius * _xRadius)) + ((double)(normalized.Y * normalized.Y) / (_yRadius * _yRadius))
+                <= 1.0;
         }
     }
 }

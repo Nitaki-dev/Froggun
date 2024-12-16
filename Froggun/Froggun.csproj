@@ -41,6 +41,8 @@
 		<None Remove="img\frog_front_hit.png" />
 		<None Remove="img\frog_side.png" />
 		<None Remove="img\frog_side_hit.png" />
+		<None Remove="img\grass_1.png" />
+		<None Remove="img\grass_2.png" />
 		<None Remove="img\gun.png" />
 		<None Remove="img\guninversee.png" />
 		<None Remove="img\gun_2.png" />
@@ -99,6 +101,8 @@
 		<Resource Include="img\frog_front_hit.png" />
 		<Resource Include="img\frog_side.png" />
 		<Resource Include="img\frog_side_hit.png" />
+		<Resource Include="img\grass_1.png" />
+		<Resource Include="img\grass_2.png" />
 		<Resource Include="img\gun.png" />
 		<Resource Include="img\joueur\frog_back.png" />
 		<Resource Include="img\joueur\frog_front.png" />

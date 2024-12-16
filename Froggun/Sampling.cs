@@ -14,7 +14,7 @@ namespace Froggun
         private readonly double minDistance;
         private readonly Random random;
 
-        // https://bost.ocks.org/mike/algorithms/
+        // Poisson Disk Sampling https://bost.ocks.org/mike/algorithms/
         public Sampler(double width, double height, double minDistance, int? seed = null)
         {
             this.width = width;
@@ -27,14 +27,11 @@ namespace Froggun
         {
             var points = new List<Point>();
 
-            // sample points along the top edge
-            AddEdgePoints(0, 0, width, 0, points);
-            // sample points along the bottom edge
-            AddEdgePoints(0, height, width, height, points);
-            // sample points along the left edge
-            AddEdgePoints(0, 0, 0, height, points);
-            // sample points along the right edge
-            AddEdgePoints(width, 0, width, height, points);
+            // sample points
+            AddEdgePoints(0, 0, width, 0, points); // top
+            AddEdgePoints(0, height, width, height, points); // bottom
+            AddEdgePoints(0, 0, 0, height, points); // left
+            AddEdgePoints(width, 0, width, height, points); // right
 
             return points;
         }

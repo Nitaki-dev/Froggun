@@ -21,6 +21,7 @@ namespace Froggun
         public int CurrentPhase { get; set; }
         public BitmapImage ImageBoss { get; set; }
         private Image Image { get; set; }
+        private Rect Hitbox { get; set; }
         private Canvas canvas { get; set; }
         public int Width { get; set; }
         public int Height { get; set; }
@@ -57,9 +58,11 @@ namespace Froggun
             this.Image = new Image { Width = width, Height = height, Source = ImageBoss };
             Canvas.SetLeft(this.Image, canvas.ActualWidth/2-this.Width/2);
             Canvas.SetTop(this.Image, 0); 
+
             RenderOptions.SetBitmapScalingMode(this.Image, BitmapScalingMode.NearestNeighbor);
             canvas.Children.Add(this.Image);
 
+            this.Hitbox = new Rect { X = Canvas.GetLeft(this.Image), Y = Canvas.GetTop(this.Image), Width = width, Height = height };
             InitBossbar();
         }
 
@@ -78,13 +81,15 @@ namespace Froggun
             BitmapImage sourceRain = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/acide_droplet.png"));
             BitmapImage imgSwingAttack = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/poke_attack.png"));
 
+            // create list of all the boss attacks images 
             List<Image> toRemove = canvas.Children.OfType<Image>()
                 .Where(img => img.Source is BitmapImage bitmap &&
                              (bitmap.UriSource == imgPokeAttack.UriSource ||
-                              bitmap.UriSource == sourceRain.UriSource ||
+                              bitmap.UriSource == sourceRain.UriSource    ||
                               bitmap.UriSource == imgSwingAttack.UriSource))
                 .ToList();
 
+            // remove them, as well as the areas where the player will get damaged
             foreach (Image img in toRemove) canvas.Children.Remove(img);
             foreach (KeyValuePair<Guid, Rect> r in DamageAreas) DamageAreas.Remove(r.Key);
             
@@ -95,13 +100,38 @@ namespace Froggun
             this.isAlive = false;
         }
 
-        public async void UpdateMantisBoss()
+        public void UpdateMantisBoss(List<Balle> balles, Joueur joueur)
         {
             if (HP <= 0) DefeatMantis();
+            Rect newHitbox = new Rect { X = Canvas.GetLeft(this.Image), Y = Canvas.GetTop(this.Image), Width = this.Width, Height = this.Height };
+            this.Hitbox = newHitbox;
+
+            // if the boss is not attacking, check if bullet hits it
+            for (int j = 0; j < balles.Count; j++)
+            {
+                Balle balle = balles[j];
+                if (balle.hasHit) continue;
+
+                Rect rImgBalle = new Rect(balle.X, balle.Y, 25, 25);
+
+                if (this.Hitbox.IntersectsWith(rImgBalle))
+                {
+                    // damage the boss
+                    DamageMantis(joueur.degats);
+                    balles.RemoveAt(j);
+                    balle.hasHit = true;
+                    canvas.Children.Remove(balle.BalleImage);
+
+                    break;
+                }
+            }
+
+            // 3 phases
             if (between(HP, MaxHP, (int)(MaxHP / 3) * 2)) //100/3 = 33.3*2 = 66.6
             {
                 if (!this.isAttacking)
                 {
+                    // pick one of two attacks
                     int nextAttack = Random.Next(2); // 0 or 1
                     Console.WriteLine("Next attack: " + nextAttack);
                     switch (nextAttack)
@@ -120,6 +150,7 @@ namespace Froggun
             {
                 if (!this.isAttacking)
                 {
+                    // pick one of three attacks
                     int nextAttack = Random.Next(3);
                     Console.WriteLine("Next attack: " + nextAttack);
                     switch (nextAttack)
@@ -138,6 +169,7 @@ namespace Froggun
             }
             else
             {
+                // doesnt matter if an other attack is active, still try to attack again.
                 int nextAttack = Random.Next(3);
                 Console.WriteLine("Next attack: " + nextAttack);
                 switch (nextAttack)
@@ -237,6 +269,7 @@ namespace Froggun
             double stepDelay = 300.0 / steps; // time per step in ms
             double stepSize = targetY / steps;
 
+            // animate image and hitbox to move from top to bottom of the screen
             for (int i = 0; i < steps; i++)
             {
                 if (!isAlive) return;
@@ -364,7 +397,6 @@ namespace Froggun
                 currentX += stepSize;
                 Canvas.SetLeft(imgSwing, currentX);
 
-                // todo: safely update the dmgArea
                 DamageAreas[id] = new Rect { X = currentX, Y = dmg.Y, Width = dmg.Width, Height = dmg.Height };
 
                 await Task.Delay((int) stepDelay);
@@ -379,6 +411,13 @@ namespace Froggun
             isSwinging = false;
         }
 
+        public Guid AddDmgArea(Rect area)
+        {
+            Guid uniqueId = Guid.NewGuid();
+            DamageAreas[uniqueId] = area;
+            return uniqueId;
+        }
+        
         private Rectangle DebugRect(Rect rect)
         {
             return new Rectangle
@@ -390,13 +429,6 @@ namespace Froggun
                 StrokeThickness = 1,
                 RenderTransform = new TranslateTransform(rect.X, rect.Y)
             };
-        }
-
-        public Guid AddDmgArea(Rect area)
-        {
-            Guid uniqueId = Guid.NewGuid();
-            DamageAreas[uniqueId] = area;
-            return uniqueId;
         }
     }
 }
