@@ -642,6 +642,7 @@ namespace Froggun
             minuterie.Stop();
             pauseVagues.Stop();
             MessageBoxResult result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            
             if (result == MessageBoxResult.Yes)
             {
                 Recommencer(5);
@@ -832,6 +833,7 @@ namespace Froggun
             Stream audioStream = Application.GetResourceStream(audioUri).Stream;
             // Créer un objet SoundPlayer pour lire le son
             SoundPlayer musique = new SoundPlayer(audioStream);
+
             musique.Play();
         }
 
@@ -842,12 +844,16 @@ namespace Froggun
             Stream audioStream = Application.GetResourceStream(audioUri).Stream;
             // Créer un objet SoundPlayer pour lire le son
             SoundPlayer musique = new SoundPlayer(audioStream);
+
             musique.Play();
         }
 
+
+
+
         private void ShootGun()
         {
-            //SonGun();
+            SonGun();
             int scaleX = (Math.Abs(currentAngle) > 90) ? -1 : 1;
             Balle balle = new Balle(posArme.X, posArme.Y, currentAngle, vitesseBalle, 10, canvas, imageBalle, scaleX);
             Balles.Add(balle);
@@ -855,7 +861,7 @@ namespace Froggun
         
         private void ShootTung()
         {
-            //SonLangue();
+            SonLangue();
             if (tirLangue) return;
             else tirLangue = true;
             expensionLangue = true;
@@ -875,27 +881,47 @@ namespace Froggun
         {
             if (e.Key == Key.D && !pause)
             {
-                joueur.deplacerDroite = true;
-                joueur.deplacerGauche = false;
-                joueur.directionJoueur = Joueur.Directions.right;
+                joueur.keyBufferDroite = true;
+                joueur.keyBufferGauche = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerDroite = true;
+                    joueur.deplacerGauche = false;
+                    joueur.directionJoueur = Joueur.Directions.right;
+                }
             }
             if ((e.Key == Key.Q || e.Key == Key.A) && !pause)
             {
-                joueur.deplacerGauche = true;
-                joueur.deplacerDroite = false;
-                joueur.directionJoueur = Joueur.Directions.left;
+                joueur.keyBufferGauche = true;
+                joueur.keyBufferDroite = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerGauche = true;
+                    joueur.deplacerDroite = false;
+                    joueur.directionJoueur = Joueur.Directions.left;
+                }
             }
             if (e.Key == Key.S && !pause)
             {
-                joueur.deplacerBas = true;
-                joueur.deplacerHaut = false;
-                joueur.directionJoueur = Joueur.Directions.down;
+                joueur.keyBufferBas = true;
+                joueur.keyBufferHaut = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerBas = true;
+                    joueur.deplacerHaut = false;
+                    joueur.directionJoueur = Joueur.Directions.down;
+                }
             }
             if ((e.Key == Key.Z || e.Key == Key.W) && !pause)
             {
-                joueur.deplacerHaut = true;
-                joueur.deplacerBas = false;
-                joueur.directionJoueur = Joueur.Directions.up;
+                joueur.keyBufferHaut = true;
+                joueur.keyBufferBas = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerHaut = true;
+                    joueur.deplacerBas = false;
+                    joueur.directionJoueur = Joueur.Directions.up;
+                }
             }
             if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
             {
@@ -925,21 +951,25 @@ namespace Froggun
             if (e.Key == Key.D)
             {
                 joueur.deplacerDroite = false;
+                joueur.keyBufferDroite = false;
             }
             if (e.Key == Key.Q || e.Key == Key.A)
             {
+                joueur.keyBufferGauche = false;
                 joueur.deplacerGauche = false;
             }
             if (e.Key == Key.S)
             {
                 joueur.deplacerBas = false;
+                joueur.keyBufferBas = false;
             }
             if (e.Key == Key.Z || e.Key == Key.W)
             {
                 joueur.deplacerHaut = false;
+                joueur.keyBufferHaut = false;
             }
 
-            }
+        }
 
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {

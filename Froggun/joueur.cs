@@ -31,6 +31,11 @@ namespace Froggun
         public bool deplacerHaut { get; set; }
         public bool deplacerBas { get; set; }
 
+        public bool keyBufferGauche { get; set; }
+        public bool keyBufferDroite { get; set; }
+        public bool keyBufferHaut { get; set; }
+        public bool keyBufferBas { get; set; }
+
         public bool doitFlip { get; set; }
         public bool estEnRoulade { get; set; }
         public double tempsRoulade { get; set; }
@@ -202,6 +207,70 @@ namespace Froggun
                 {
                     estEnRoulade = false;
                     tempsRoulade = 0;
+                    if (this.keyBufferHaut && this.keyBufferDroite)
+                    {
+                        this.deplacerHaut = true;
+                        this.deplacerDroite = true;
+                        this.deplacerBas = false;
+                        this.deplacerGauche = false;
+                        this.directionJoueur = Joueur.Directions.diagUpRight;
+                    }
+                    else if (this.keyBufferHaut && this.keyBufferGauche)
+                    {
+                        this.deplacerHaut = true;
+                        this.deplacerGauche = true;
+                        this.deplacerBas = false;
+                        this.deplacerDroite = false;
+                        this.directionJoueur = Joueur.Directions.diagUpLeft;
+                    }
+                    else if (this.keyBufferBas && this.keyBufferDroite)
+                    {
+                        this.deplacerBas = true;
+                        this.deplacerDroite = true;
+                        this.deplacerHaut = false;
+                        this.deplacerGauche = false;
+                        this.directionJoueur = Joueur.Directions.diagDownRight;
+                    }
+                    else if (this.keyBufferBas && this.keyBufferGauche)
+                    {
+                        this.deplacerBas = true;
+                        this.deplacerGauche = true;
+                        this.deplacerHaut = false;
+                        this.deplacerDroite = false;
+                        this.directionJoueur = Joueur.Directions.diagDownLeft;
+                    }
+                    else if (this.keyBufferHaut)
+                    {
+                        this.deplacerHaut = true;
+                        this.deplacerBas = false;
+                        this.deplacerGauche = false;
+                        this.deplacerDroite = false;
+                        this.directionJoueur = Joueur.Directions.up;
+                    }
+                    else if (this.keyBufferBas)
+                    {
+                        this.deplacerBas = true;
+                        this.deplacerHaut = false;
+                        this.deplacerGauche = false;
+                        this.deplacerDroite = false;
+                        this.directionJoueur = Joueur.Directions.down;
+                    }
+                    else if (this.keyBufferDroite)
+                    {
+                        this.deplacerDroite = true;
+                        this.deplacerGauche = false;
+                        this.deplacerHaut = false;
+                        this.deplacerBas = false;
+                        this.directionJoueur = Joueur.Directions.right;
+                    }
+                    else if (this.keyBufferGauche)
+                    {
+                        this.deplacerGauche = true;
+                        this.deplacerDroite = false;
+                        this.deplacerHaut = false;
+                        this.deplacerBas = false;
+                        this.directionJoueur = Joueur.Directions.left;
+                    }
                 }
             }
             else
