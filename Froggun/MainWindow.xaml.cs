@@ -626,7 +626,7 @@ namespace Froggun
             MessageBoxResult result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
             if (result == MessageBoxResult.Yes)
             {
-                recommencer(5);
+                Recommencer(5);
             }
             else
             {
@@ -635,20 +635,21 @@ namespace Froggun
             }
         }
 
-        public void recommencer(int nombreDeVie)
+        public void Recommencer(int nombreDeVie)
         {
             Console.WriteLine(ennemis.Count);
-            for (int i = 0; i < ennemis.Count; i++)
-            {
-                Console.WriteLine(ennemis[i]);
-                canvas.Children.Remove(ennemis[i].Image);
-                ennemis.Remove(ennemis[i]);
-            }
-            for (int i = 0; i < proies.Count; i++)
-            {
-                canvas.Children.Remove(proies[i].Image);
-                proies.Remove(proies[i]);
-            }
+            //for (int i = 0; i < ennemis.Count; i++)
+            //{
+            //    Console.WriteLine(ennemis[i]);
+            //    canvas.Children.Remove(ennemis[i].Image);
+            //    ennemis.Remove(ennemis[i]);
+            //}
+            //for (int i = 0; i < proies.Count; i++)
+            //{
+            //    canvas.Children.Remove(proies[i].Image);
+            //    proies.Remove(proies[i]);
+            //}
+            Ennemis.ReccomencerEnnemis(ennemis);
             joueur.nombreDeVie = nombreDeVie;
             nombreDeVie = 5;
             AffichageDeVie(nombreDeVie);

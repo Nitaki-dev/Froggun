@@ -285,6 +285,19 @@ namespace Froggun
             AddKillToStreak(ref joueur, e);
         }
 
+        public static void ReccomencerEnnemis(List<Ennemis> ennemis)
+        {
+            for (int i = 0; i < ennemis.Count; i++)
+            {
+                ennemis[i].IsAlive = false;
+                ennemis[i].Image.Visibility = Visibility.Hidden;
+                canvas.Children.Remove(ennemis[i]);
+                canvas.Children.Remove(ennemis[i].healthBarEmpty);
+                canvas.Children.Remove(ennemis[i].healthBar);
+                ennemis.RemoveAt(i);
+            }
+
+        }
         public static void AddKillToStreak(ref Joueur joueur, Ennemis e)
         {
             joueur.killStreak++;
