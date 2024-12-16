@@ -660,12 +660,13 @@ namespace Froggun
             //    canvas.Children.Remove(ennemis[i].Image);
             //    ennemis.Remove(ennemis[i]);
             //}
-            //for (int i = 0; i < proies.Count; i++)
-            //{
-            //    canvas.Children.Remove(proies[i].Image);
-            //    proies.Remove(proies[i]);
-            //}
-            Ennemis.ReccomencerEnnemis(ennemis);
+            for (int i = 0; i < proies.Count; i++)
+            {
+                canvas.Children.Remove(proies[i].Image);
+                proies.Remove(proies[i]);
+            }
+            Ennemis.ReccomencerEnnemis(ennemis, canvas);
+            Proies.ReccomencerProies(proies, canvas);
             joueur.nombreDeVie = nombreDeVie;
             nombreDeVie = 5;
             AffichageDeVie(nombreDeVie);

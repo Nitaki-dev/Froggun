@@ -105,7 +105,18 @@ namespace Froggun
             BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{imagePath}/{frame}.png"));
             return bitmapImage;
         }
-
+        public static void ReccomencerProies(List<Proies> proies, Canvas canvas)
+        {
+            //for (int i = 0; i < proies.Count; i++)
+            //{
+            //   // proies[i].IsAlive = false;
+            //    proies[i].Image.Visibility = Visibility.Hidden;
+            //    canvas.Children.Remove(proies[i].Image);
+            //    //canvas.Children.Remove(proies[i].healthBarEmpty);
+            //    //canvas.Children.Remove(proies[i].healthBar);
+            //    proies.RemoveAt(i);
+            //}
+        }
         public void GenerateRandomTarget(object? sender, EventArgs e)
         {
             Random random = new Random();
