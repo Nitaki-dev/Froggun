@@ -280,25 +280,59 @@ namespace Froggun
             int nbrGrandEnnemis;
 
             // TODO: make this not terrible (redo difficulty spawnrates for the 6th time)
-            if (waveCount <= 5)
+            if (waveCount <= 3)
             {
                 nbrPetitEnnemis = waveCount * 3;
-                nbrMoyenEnnemis = 0;
+                nbrMoyenEnnemis = 1;
+                nbrGrandEnnemis = 0;
+            }
+            else if (waveCount <= 5)
+            {
+                nbrPetitEnnemis = waveCount * 3;
+                nbrMoyenEnnemis = 2;
                 nbrGrandEnnemis = 0;
             }
             else if (waveCount <= 8)
             {
-                nbrPetitEnnemis = (waveCount-3)*2;
-                nbrMoyenEnnemis = (waveCount - 7) * 2;
-                nbrGrandEnnemis = 0;
+                nbrPetitEnnemis = waveCount * 2;
+                nbrMoyenEnnemis = waveCount / 2 + 1;
+                nbrGrandEnnemis = waveCount / 8;
+            }
+            else if (waveCount <= 13)
+            {
+                nbrPetitEnnemis = waveCount;
+                nbrMoyenEnnemis = waveCount;
+                nbrGrandEnnemis = 2;
+            }
+            else if (waveCount <= 21)
+            {
+                nbrPetitEnnemis = waveCount * 2;
+                nbrMoyenEnnemis = waveCount - 3;
+                nbrGrandEnnemis = 1;
             }
             else
             {
-                nbrPetitEnnemis = waveCount;
-                nbrMoyenEnnemis = (waveCount - 5);
-                nbrGrandEnnemis = (waveCount - 8) * 1;
+                nbrPetitEnnemis = 35+(waveCount-21)/2;
+                nbrMoyenEnnemis = 20+(waveCount-21)/3;
+                nbrGrandEnnemis = 2+(waveCount-21)/5;
+                if (waveCount % 4 == 0)
+                {
+                    nbrPetitEnnemis = nbrPetitEnnemis - 6;
+                    nbrMoyenEnnemis = nbrMoyenEnnemis + 3;
+                }
+                else if (waveCount % 3 == 0)
+                {
+                    nbrPetitEnnemis = nbrPetitEnnemis - 10;
+                    nbrMoyenEnnemis = nbrMoyenEnnemis - 4;
+                    nbrGrandEnnemis = nbrGrandEnnemis + 2;
+                }
+                else if (waveCount % 2 == 0)
+                {
+                    nbrPetitEnnemis = nbrPetitEnnemis + 11;
+                    nbrMoyenEnnemis = nbrMoyenEnnemis + 7;
+                    nbrGrandEnnemis = 0;
+                }
             }
-
             // poisson disk sampling (voir Sampling.cs)
             Sampler sampler = new Sampler(1260, 680, 50);
             List<Point> allPoints = sampler.GeneratePoints();
