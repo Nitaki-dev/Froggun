@@ -152,7 +152,7 @@ namespace Froggun
             blinkTimer.Start();
         }
 
-        public void UpdatePositionJoueur()
+        public void UpdatePositionJoueur(Canvas c)
         {
             // ~12 frames, very generous
             if (tempsRoulade > 50 && tempsRoulade < 250 || blinkFrame>0) estInvinsible = true;
@@ -304,25 +304,31 @@ namespace Froggun
             nouvellePositionJoueur.X += nouvelleVitesseJoueur.X;
             nouvellePositionJoueur.Y += nouvelleVitesseJoueur.Y;
             newHitbox = new Rect { X=posJoueur.X, Y=posJoueur.Y, Width=player.Width, Height=player.Height };
-
-            Ellipse e = new Ellipse { Width = 1280, Height = 720, Fill = Brushes.Red };
+            
+            Vector2 nouveauxCentreJoueur = new Vector2((float) (nouvellePositionJoueur.X + player.Width/2), (float)(nouvellePositionJoueur.Y + player.Height / 2));
+            Ellipse e = new Ellipse { Width = 1280, Height = 720 };
+            
             Canvas.SetTop(e, 0);
             Canvas.SetLeft(e, 0);
-            if (EllipseContains(e, nouvellePositionJoueur))
+            if (!EllipseContains(e, nouveauxCentreJoueur))
             {
-                vitesseJoueur = nouvelleVitesseJoueur;
-                posJoueur = nouvellePositionJoueur;
-                hitbox = newHitbox;
-                
-                joueurTransformGroup.Children.Clear();
-                player.RenderTransformOrigin = new Point(0.5, 0.5);
-                joueurTransformGroup.Children.Add(joueurRoulade);
-                joueurTransformGroup.Children.Add(joueurFlip);
-                player.RenderTransform = joueurTransformGroup;
-
-                Canvas.SetLeft(player, posJoueur.X);
-                Canvas.SetTop(player, posJoueur.Y);
+                //apply oppositve velocity to slow down player
+                nouvellePositionJoueur.X -= nouvelleVitesseJoueur.X;
+                nouvellePositionJoueur.Y -= nouvelleVitesseJoueur.Y;
             }
+
+            vitesseJoueur = nouvelleVitesseJoueur;
+            posJoueur = nouvellePositionJoueur;
+            hitbox = newHitbox;
+
+            joueurTransformGroup.Children.Clear();
+            player.RenderTransformOrigin = new Point(0.5, 0.5);
+            joueurTransformGroup.Children.Add(joueurRoulade);
+            joueurTransformGroup.Children.Add(joueurFlip);
+            player.RenderTransform = joueurTransformGroup;
+
+            Canvas.SetLeft(player, posJoueur.X);
+            Canvas.SetTop(player, posJoueur.Y);
         }
 
         public void ChangeJoueurDirection()
@@ -385,20 +391,11 @@ namespace Froggun
             double _xRadius = Ellipse.Width / 2;
             double _yRadius = Ellipse.Height / 2;
 
-
-            if (_xRadius <= 0.0 || _yRadius <= 0.0)
-                return false;
-            /* This is a more general form of the circle equation
-             *
-             * X^2/a^2 + Y^2/b^2 <= 1
-             */
-
-            Point normalized = new Point(point.X - center.X,
-                                         point.Y - center.Y);
-
-            return ((double)(normalized.X * normalized.X)
-                     / (_xRadius * _xRadius)) + ((double)(normalized.Y * normalized.Y) / (_yRadius * _yRadius))
-                <= 1.0;
+            if (_xRadius <= 0.0 || _yRadius <= 0.0) return false;
+            
+            // X^2/a^2 + Y^2/b^2 <= 1
+            Point normalized = new Point(point.X - center.X, point.Y - center.Y);
+            return ((double)(normalized.X * normalized.X) / (_xRadius * _xRadius)) + ((double)(normalized.Y * normalized.Y) / (_yRadius * _yRadius)) <= 1.0;
         }
     }
 }

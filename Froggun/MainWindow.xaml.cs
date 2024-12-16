@@ -549,7 +549,7 @@ namespace Froggun
             CheckCollisionProie();
             if (!joueur.estEnRoulade) joueur.ChangeJoueurDirection();
             UpdateMousePosition();
-            joueur.UpdatePositionJoueur();
+            joueur.UpdatePositionJoueur(canvas);
 
             //stopwatch.Stop();
             //Console.WriteLine($"{stopwatch.Elapsed}");
