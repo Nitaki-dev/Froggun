@@ -714,11 +714,11 @@ namespace Froggun
             {
                 Balle balle = Balles[i];
                 balle.UpdatePositionBalles();
-                if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
+                if (balle.X < -balle.balleImage.ActualWidth || balle.Y < -balle.balleImage.ActualHeight
                     || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
                 {
                     Balles.RemoveAt(i);
-                    canvas.Children.Remove(balle.BalleImage);
+                    canvas.Children.Remove(balle.balleImage);
                 }
             }
         }
