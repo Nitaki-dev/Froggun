@@ -40,44 +40,44 @@ namespace Froggun
         public double maxVie{ get; set; }
         public bool estVivant { get; private set; }
         public bool estEntreEnCollision { get; set; }
-        public Rectangle healthBarEmpty { get; set; }
-        public Rectangle healthBar { get; set; }
-        private static int healthBarWidth = 100;
+        public Rectangle BarDeVieVide { get; set; }
+        public Rectangle BarDeVie { get; set; }
+        private static int BarDeVieWidth = 100; // todo change that maybe
 
-        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double speed, Canvas canvas, double SpeedMultiplier = 1.0, Rect BoundingBox = new Rect())
+        public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double vitesse, Canvas canvas, double multiplicateurDeVitesse = 1.0, Rect Hitbox = new Rect())
         {
             X = x;
             Y = y;
             this.width = width;
             this.height = height;
-            vitesse = speed;
+            this.vitesse = vitesse;
 
-            healthBarEmpty = new Rectangle
+            BarDeVieVide = new Rectangle
             {
                 Fill = Brushes.Gray,
-                Width = healthBarWidth,
+                Width = BarDeVieWidth,
                 Height = 10,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top
             };
 
-            Canvas.SetLeft(healthBarEmpty, X);
-            Canvas.SetTop(healthBarEmpty, Y - 15);
+            Canvas.SetLeft(BarDeVieVide, X);
+            Canvas.SetTop(BarDeVieVide, Y - 15);
 
-            canvas.Children.Add(healthBarEmpty);
+            canvas.Children.Add(BarDeVieVide);
 
-            healthBar = new Rectangle
+            BarDeVie = new Rectangle
             {
                 Fill = Brushes.Green,
-                Width = healthBarWidth,
+                Width = BarDeVieWidth,
                 Height = 10,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 VerticalAlignment = VerticalAlignment.Top
             };
 
-            Canvas.SetLeft(healthBar, X);
-            Canvas.SetTop(healthBar, Y - 15);
-            canvas.Children.Add(healthBar);
+            Canvas.SetLeft(BarDeVie, X);
+            Canvas.SetTop(BarDeVie, Y - 15);
+            canvas.Children.Add(BarDeVie);
 
             estRalenti = false;
             estVivant = true;
@@ -126,7 +126,7 @@ namespace Froggun
             Canvas.SetTop(image, Y);
             canvas.Children.Add(image);
 
-            BoundingBox = new Rect(X + 5, Y + 5, this.width-10, this.height - 10);
+            Hitbox = new Rect(X + 5, Y + 5, this.width-10, this.height - 10);
 
             timerAnimation = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             timerAnimation.Tick += AnimationTimer_Tick;
@@ -139,11 +139,11 @@ namespace Froggun
             if (indexAnimationActuelle >= indexAnimation.Length) indexAnimationActuelle = 0; 
             
             int frame = indexAnimation[indexAnimationActuelle];
-            BitmapImage newImageSource = GetImageSourceForFrame(frame);
+            BitmapImage newImageSource = ObtenirSourceImagePourFrame(frame);
             image.Source = newImageSource;
         }
 
-        private BitmapImage GetImageSourceForFrame(int frame)
+        private BitmapImage ObtenirSourceImagePourFrame(int frame)
         {
             BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{chemainImage}/{frame}.png"));
             return bitmapImage;
@@ -152,7 +152,6 @@ namespace Froggun
         public static void UpdateEnnemis(List<Ennemis> ennemis, List<Balle> balles, Canvas canvas, ref Joueur joueur)
         {
             // Cache bounding box and other frequently used values
-            Rect rJoueur = joueur.hitbox;
             for (int i = 0; i < ennemis.Count; i++)
             {
                 Ennemis ennemi = ennemis[i];
@@ -166,13 +165,13 @@ namespace Froggun
                     Balle balle = balles[j];
                     if (balle.aToucher) continue;
 
-                    Rect rImgBalle = new Rect(balle.X, balle.Y, 25, 25);
+                    Rect hitboxBalle = new Rect(balle.X, balle.Y, 25, 25);
 
-                    if (ennemi.hitbox.IntersectsWith(rImgBalle) && !ennemi.estEntreEnCollision)
+                    if (ennemi.hitbox.IntersectsWith(hitboxBalle) && !ennemi.estEntreEnCollision)
                     {
                         ennemi.vie -= 50;
-                        if (ennemi.vie <= 0) ennemi.Die(ennemis, ennemi, canvas, ref joueur);
-                        if (ennemi.vie > 0) ennemi.healthBar.Width = healthBarWidth * ((double)ennemi.vie / ennemi.maxVie);
+                        if (ennemi.vie <= 0) ennemi.Meurt(ennemis, ennemi, canvas, ref joueur);
+                        if (ennemi.vie > 0) ennemi.BarDeVie.Width = BarDeVieWidth * ((double)ennemi.vie / ennemi.maxVie);
 
                         balle.aToucher = true;
                         canvas.Children.Remove(balle.balleImage);
@@ -194,44 +193,44 @@ namespace Froggun
                 ennemi.hitbox = new Rect(ennemi.X, ennemi.Y, ennemi.width, ennemi.height);  // Update the bounding box (optimized for reuse)
                 
                 // Calculate direction towards the player (only do this if necessary)
-                Vector2 direction = new Vector2((float)(rJoueur.X - ennemi.X), (float)(rJoueur.Y - ennemi.Y));
+                Vector2 direction = new Vector2((float)(joueur.hitbox.X - ennemi.X), (float)(joueur.hitbox.Y - ennemi.Y));
                 direction = Vector2.Normalize(direction);
 
-                double newX = ennemi.X + direction.X * ennemi.vitesse * ennemi.multiplicateurVitesse;
-                double newY = ennemi.Y + direction.Y * ennemi.vitesse * ennemi.multiplicateurVitesse;
+                double nouveauX = ennemi.X + direction.X * ennemi.vitesse * ennemi.multiplicateurVitesse;
+                double nouveauY = ennemi.Y + direction.Y * ennemi.vitesse * ennemi.multiplicateurVitesse;
 
                 // Check if enemy can move (avoid unnecessary checks)
-                bool canMove = true;
+                bool peutBouger = true;
                 for (int j = 0; j < ennemis.Count; j++)
                 {
                     if (i == j) continue; // Skip self
                     if (ennemis[i].hitbox.IntersectsWith(ennemis[j].hitbox))
                     {
-                        canMove = false;
+                        peutBouger = false;
                         break; // No need to check further
                     }
                 }
 
-                if (canMove)
+                if (peutBouger)
                 {
-                    ennemi.X = newX;
-                    ennemi.Y = newY;
+                    ennemi.X = nouveauX;
+                    ennemi.Y = nouveauY;
                 }
 
                 // Check if the enemy collides with the player
-                if (rJoueur.IntersectsWith(ennemi.hitbox) && !ennemi.estRalenti)
+                if (joueur.hitbox.IntersectsWith(ennemi.hitbox) && !ennemi.estRalenti)
                 {
-                    ennemi.SlowDown(3); // Slow down effect
+                    ennemi.Ralentir(3); // Slow down effect
                     joueur.hit(1);
                 }
 
                 // Efficiently update canvas positions
                 Canvas.SetLeft(ennemi.image, ennemi.X);
                 Canvas.SetTop(ennemi.image, ennemi.Y);
-                Canvas.SetLeft(ennemi.healthBarEmpty, ennemi.X);
-                Canvas.SetTop(ennemi.healthBarEmpty, ennemi.Y - 15);
-                Canvas.SetLeft(ennemi.healthBar, ennemi.X);
-                Canvas.SetTop(ennemi.healthBar, ennemi.Y - 15);
+                Canvas.SetLeft(ennemi.BarDeVieVide, ennemi.X);
+                Canvas.SetTop(ennemi.BarDeVieVide, ennemi.Y - 15);
+                Canvas.SetLeft(ennemi.BarDeVie, ennemi.X);
+                Canvas.SetTop(ennemi.BarDeVie, ennemi.Y - 15);
             }
 
             // Collision handling between enemies
@@ -245,15 +244,15 @@ namespace Froggun
                     if (ennemiA.hitbox.IntersectsWith(ennemiB.hitbox))
                     {
                         // Resolve collision by pushing enemies apart
-                        Vector2 direction = new Vector2((float)(rJoueur.X - ennemiA.X), (float)(rJoueur.Y - ennemiA.Y));
+                        Vector2 direction = new Vector2((float)(joueur.hitbox.X - ennemiA.X), (float)(joueur.hitbox.Y - ennemiA.Y));
                         direction = Vector2.Normalize(direction);
 
-                        float collisionPushback = 3.0f;
-                        ennemiA.X += direction.X * collisionPushback;
-                        ennemiA.Y += direction.Y * collisionPushback;
+                        float RepoussementDeCollision = 3.0f;
+                        ennemiA.X += direction.X * RepoussementDeCollision;
+                        ennemiA.Y += direction.Y * RepoussementDeCollision;
 
-                        ennemiB.X -= direction.X * collisionPushback;
-                        ennemiB.Y -= direction.Y * collisionPushback;
+                        ennemiB.X -= direction.X * RepoussementDeCollision;
+                        ennemiB.Y -= direction.Y * RepoussementDeCollision;
                     }
                 }
             }
@@ -269,16 +268,16 @@ namespace Froggun
             musique.Play();
         }
 
-        public void Die(List<Ennemis> ennemis, Ennemis e, Canvas canvas, ref Joueur joueur)
+        public void Meurt(List<Ennemis> ennemis, Ennemis e, Canvas canvas, ref Joueur joueur)
         {
             estVivant = false;
             image.Visibility = Visibility.Hidden;
             canvas.Children.Remove(image);
-            canvas.Children.Remove(healthBarEmpty);
-            canvas.Children.Remove(healthBar);
+            canvas.Children.Remove(BarDeVieVide);
+            canvas.Children.Remove(BarDeVie);
             ennemis.Remove(e);
             joueur.score += Math.Round(100 * joueur.scoreMultiplier);
-            AddKillToStreak(ref joueur, e);
+            AjouterUnKillALaSerie(ref joueur, e);
         }
 
         public static void ReccomencerEnnemis(List<Ennemis> ennemis, Canvas canvas)
@@ -288,14 +287,14 @@ namespace Froggun
                 ennemis[i].estVivant = false;
                 ennemis[i].image.Visibility = Visibility.Hidden;
                 canvas.Children.Remove(ennemis[i].image);
-                canvas.Children.Remove(ennemis[i].healthBarEmpty);
-                canvas.Children.Remove(ennemis[i].healthBar);
+                canvas.Children.Remove(ennemis[i].BarDeVieVide);
+                canvas.Children.Remove(ennemis[i].BarDeVie);
                 ennemis.RemoveAt(i);
                 Console.WriteLine(ennemis.Count);
             }
-
         }
-        public static void AddKillToStreak(ref Joueur joueur, Ennemis e)
+
+        public static void AjouterUnKillALaSerie(ref Joueur joueur, Ennemis e)
         {
             joueur.killStreak++;
             joueur.killStreakTimer = 5; // you got 5 seconds to get a new kill before it resets 
@@ -304,7 +303,7 @@ namespace Froggun
             joueur.scoreMultiplier = Math.Round(joueur.scoreMultiplier, 1);
         }
 
-        public void SlowDown(int durationInSeconds)
+        public void Ralentir(int durationInSeconds)
         {
             estRalenti = true;
             DispatcherTimer timer = new DispatcherTimer();
