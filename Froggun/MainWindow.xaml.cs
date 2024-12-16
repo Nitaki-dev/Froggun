@@ -640,6 +640,7 @@ namespace Froggun
         public void mort(int nombreDeVie)
         {
             MessageBoxResult result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            
             if (result == MessageBoxResult.Yes)
             {
                 recommencer(5);
@@ -836,6 +837,7 @@ namespace Froggun
             Stream audioStream = Application.GetResourceStream(audioUri).Stream;
             // Créer un objet SoundPlayer pour lire le son
             SoundPlayer musique = new SoundPlayer(audioStream);
+
             musique.Play();
         }
 
@@ -846,12 +848,16 @@ namespace Froggun
             Stream audioStream = Application.GetResourceStream(audioUri).Stream;
             // Créer un objet SoundPlayer pour lire le son
             SoundPlayer musique = new SoundPlayer(audioStream);
+
             musique.Play();
         }
 
+
+
+
         private void ShootGun()
         {
-            //SonGun();
+            SonGun();
             int scaleX = (Math.Abs(currentAngle) > 90) ? -1 : 1;
             Balle balle = new Balle(posArme.X, posArme.Y, currentAngle, vitesseBalle, 10, canvas, imageBalle, scaleX);
             Balles.Add(balle);
@@ -859,7 +865,7 @@ namespace Froggun
         
         private void ShootTung()
         {
-            //SonLangue();
+            SonLangue();
             if (tirLangue) return;
             else tirLangue = true;
             expensionLangue = true;
