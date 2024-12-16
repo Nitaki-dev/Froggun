@@ -879,27 +879,47 @@ namespace Froggun
         {
             if (e.Key == Key.D && !pause)
             {
-                joueur.deplacerDroite = true;
-                joueur.deplacerGauche = false;
-                joueur.directionJoueur = Joueur.Directions.right;
+                joueur.keyBufferDroite = true;
+                joueur.keyBufferGauche = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerDroite = true;
+                    joueur.deplacerGauche = false;
+                    joueur.directionJoueur = Joueur.Directions.right;
+                }
             }
             if ((e.Key == Key.Q || e.Key == Key.A) && !pause)
             {
-                joueur.deplacerGauche = true;
-                joueur.deplacerDroite = false;
-                joueur.directionJoueur = Joueur.Directions.left;
+                joueur.keyBufferGauche = true;
+                joueur.keyBufferDroite = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerGauche = true;
+                    joueur.deplacerDroite = false;
+                    joueur.directionJoueur = Joueur.Directions.left;
+                }
             }
             if (e.Key == Key.S && !pause)
             {
-                joueur.deplacerBas = true;
-                joueur.deplacerHaut = false;
-                joueur.directionJoueur = Joueur.Directions.down;
+                joueur.keyBufferBas = true;
+                joueur.keyBufferHaut = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerBas = true;
+                    joueur.deplacerHaut = false;
+                    joueur.directionJoueur = Joueur.Directions.down;
+                }
             }
             if ((e.Key == Key.Z || e.Key == Key.W) && !pause)
             {
-                joueur.deplacerHaut = true;
-                joueur.deplacerBas = false;
-                joueur.directionJoueur = Joueur.Directions.up;
+                joueur.keyBufferHaut = true;
+                joueur.keyBufferBas = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerHaut = true;
+                    joueur.deplacerBas = false;
+                    joueur.directionJoueur = Joueur.Directions.up;
+                }
             }
             if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
             {
@@ -929,21 +949,25 @@ namespace Froggun
             if (e.Key == Key.D)
             {
                 joueur.deplacerDroite = false;
+                joueur.keyBufferDroite = false;
             }
             if (e.Key == Key.Q || e.Key == Key.A)
             {
+                joueur.keyBufferGauche = false;
                 joueur.deplacerGauche = false;
             }
             if (e.Key == Key.S)
             {
                 joueur.deplacerBas = false;
+                joueur.keyBufferBas = false;
             }
             if (e.Key == Key.Z || e.Key == Key.W)
             {
                 joueur.deplacerHaut = false;
+                joueur.keyBufferHaut = false;
             }
 
-            }
+        }
 
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {
