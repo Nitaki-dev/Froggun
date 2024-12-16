@@ -509,7 +509,7 @@ namespace Froggun
             //Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
             //stopwatch.Start();
 
-            if (waveCount == 10)
+            if (waveCount == 1)
             {
                 // bossfight
                 if (!fightingBoss && AreAllEnemiesDestroyed()) startBoss();
@@ -864,7 +864,6 @@ namespace Froggun
             else tirLangue = true;
             expensionLangue = true;
         }
-        
         public void AfficheScore()
         {
             labelScore.Content = $"Score : {joueur.score} ";

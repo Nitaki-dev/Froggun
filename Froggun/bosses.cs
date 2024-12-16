@@ -29,7 +29,7 @@ namespace Froggun
         public Joueur Joueur { get; set; }
         public Rectangle BossbarEmpty { get; set; }
         public Rectangle Bossbar { get; set; }
-        public List<Rect> DamageAreas { get; set; }
+        public Dictionary<Guid, Rect> DamageAreas { get; set; }
         private Random Random { get; set; }
         private bool isMoving { get; set; }
         private bool isPoking { get; set; }
@@ -46,7 +46,7 @@ namespace Froggun
             this.Width = width;
             this.Height = height;
             this.isAlive = true;
-            this.DamageAreas = new List<Rect> { };
+            this.DamageAreas = new Dictionary<Guid, Rect>();
             this.Random = new Random();
             this.isMoving = false;
 
@@ -74,6 +74,20 @@ namespace Froggun
         
         public void DefeatMantis()
         {
+            BitmapImage imgPokeAttack = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/poke_attack.png"));
+            BitmapImage sourceRain = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/acide_droplet.png"));
+            BitmapImage imgSwingAttack = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/poke_attack.png"));
+
+            List<Image> toRemove = canvas.Children.OfType<Image>()
+                .Where(img => img.Source is BitmapImage bitmap &&
+                             (bitmap.UriSource == imgPokeAttack.UriSource ||
+                              bitmap.UriSource == sourceRain.UriSource ||
+                              bitmap.UriSource == imgSwingAttack.UriSource))
+                .ToList();
+
+            foreach (Image img in toRemove) canvas.Children.Remove(img);
+            foreach (KeyValuePair<Guid, Rect> r in DamageAreas) DamageAreas.Remove(r.Key);
+            
             canvas.Children.Remove(this.Image);
             canvas.Children.Remove(BossbarEmpty);
             canvas.Children.Remove(Bossbar);
@@ -140,10 +154,10 @@ namespace Froggun
                 }
             }
 
-            foreach (Rect r in DamageAreas) {
-                //Rectangle re = DebugRect(r);
+            foreach (KeyValuePair<Guid, Rect> r in DamageAreas) {
+                //Rectangle re = DebugRect(r.Value); // debug areas where player will get damadged
                 //canvas.Children.Add(re);
-                if (Joueur.hitbox.IntersectsWith(r))
+                if (Joueur.hitbox.IntersectsWith(r.Value))
                 {
                     if (!Joueur.estInvinsible) Joueur.hit(1);
                 }
@@ -188,8 +202,9 @@ namespace Froggun
             isPoking = true;
             for (int i = 0; i < 5; i++) // change based on difficulty
             {
+                if (!isAlive) return;
                 Poke();
-                await Task.Delay(900); // minimum 700 or else it breaks
+                await Task.Delay(900);
             }
             await Task.Delay(1000);
             isAttacking = false;
@@ -214,10 +229,9 @@ namespace Froggun
                 Height =  imgPoke.Height
             };
 
-            DamageAreas.Add(dmg);
-            Rect trackedDmg = dmg;
+            Guid id = AddDmgArea(dmg);
 
-            double targetY = canvas.ActualHeight - imgPoke.Height;
+            double targetY = canvas.ActualHeight;
             double currentY = 0;
             int steps = 30;
             double stepDelay = 300.0 / steps; // time per step in ms
@@ -228,16 +242,13 @@ namespace Froggun
                 if (!isAlive) return;
                 currentY += stepSize;
                 Canvas.SetTop(imgPoke, currentY);
-
-                trackedDmg.Y = currentY;
-                int index = DamageAreas.IndexOf(dmg);
-                if (index != -1) DamageAreas[index] = trackedDmg;
+                DamageAreas[id] = new Rect { X=dmg.X, Y=currentY, Width=dmg.Width, Height=dmg.Height };
 
                 await Task.Delay((int)stepDelay);
             }
 
             canvas.Children.Remove(imgPoke);
-            DamageAreas.Remove(trackedDmg);
+            DamageAreas.Remove(id);
         }
 
         private async void AcidrainAttack()
@@ -267,7 +278,6 @@ namespace Froggun
             int spawnDuration = 3000; // spawn raindrops for 3000ms aka 3s
             int spawnInterval = 20;   // wait 20ms between each new raindrops
 
-            // add the zone where the player will get damaged
             Rect dmg = new Rect
             {
                 X = min,
@@ -276,8 +286,7 @@ namespace Froggun
                 Height = canvas.ActualHeight
             };
 
-            DamageAreas.Add(dmg);
-            Rect trackedDmg = dmg;
+            Guid id = AddDmgArea(dmg);
 
             for (int i = 0; i < spawnDuration / spawnInterval; i++)
             {
@@ -286,7 +295,7 @@ namespace Froggun
                 await Task.Delay(spawnInterval);
             }
 
-            DamageAreas.Remove(trackedDmg);
+            DamageAreas.Remove(id);
             await Task.Delay(1000);
             isAttacking = false;
             isRaining = false;
@@ -303,8 +312,9 @@ namespace Froggun
 
             double targetY = canvas.ActualHeight - raindrop.Height;
             double currentY = y;
+            
             int steps = 30;
-            double stepDelay = 100.0 / steps; // time per step in ms
+            double stepDelay = 100.0 / steps;
             double stepSize = targetY / steps;
 
             for (int i = 0; i < steps; i++)
@@ -323,18 +333,17 @@ namespace Froggun
             isSwinging = true;
             this.isAttacking = true;
 
-            // init the images bruv
             BitmapImage imgSwingAttack = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/poke_attack.png"));
             Image imgSwing = new Image { Source = imgSwingAttack, Height = canvas.ActualHeight-150, Width = 74, Stretch = Stretch.Fill };
-            Canvas.SetLeft(imgSwing, -imgSwing.Width); // start from outside left of canvas
+            Canvas.SetLeft(imgSwing, -imgSwing.Width);
             Canvas.SetTop(imgSwing, 150);
             RenderOptions.SetBitmapScalingMode(imgSwing, BitmapScalingMode.NearestNeighbor);
             canvas.Children.Add(imgSwing);
 
-            double targetX = canvas.Width;
-            double currentX = -imgSwing.Width; // starting position outside canvas
-            int steps = 50; // number of steps for animation
-            double stepDelay = 500.0 / steps; // total animation duration: 800ms
+            double targetX = canvas.Width+imgSwing.Width;
+            double currentX = -imgSwing.Width;
+            int steps = 50;
+            double stepDelay = 500.0 / steps;
             double stepSize = canvas.ActualWidth / steps;
 
             // define damage zone for the swing
@@ -346,8 +355,7 @@ namespace Froggun
                 Height = canvas.ActualHeight
             };
 
-            DamageAreas.Add(dmg);
-            Rect trackedDmg = dmg;
+            Guid id = AddDmgArea(dmg);
 
             // animate the swing
             for (int i = 0; i < steps; i++)
@@ -356,20 +364,16 @@ namespace Froggun
                 currentX += stepSize;
                 Canvas.SetLeft(imgSwing, currentX);
 
-                trackedDmg.X = currentX;
-                // replace the rect in the list if it still exists
-                int index = DamageAreas.IndexOf(dmg);
-                if (index != -1) DamageAreas[index] = trackedDmg;
+                // todo: safely update the dmgArea
+                DamageAreas[id] = new Rect { X = currentX, Y = dmg.Y, Width = dmg.Width, Height = dmg.Height };
 
                 await Task.Delay((int) stepDelay);
             }
 
-            // wait briefly for the visual effect to linger
             await Task.Delay(500);
-
-            // cleanup
+            
+            DamageAreas.Remove(id);
             canvas.Children.Remove(imgSwing);
-            DamageAreas.Remove(trackedDmg);
 
             this.isAttacking = false;
             isSwinging = false;
@@ -381,11 +385,18 @@ namespace Froggun
             {
                 Width = rect.Width,
                 Height = rect.Height,
-                Fill = Brushes.Transparent, // or any brush of your choice
-                Stroke = Brushes.Black, // optional: stroke color for visibility
-                StrokeThickness = 1, // optional: thickness of the border
-                RenderTransform = new TranslateTransform(rect.X, rect.Y) // position the rectangle
+                Fill = Brushes.Transparent,
+                Stroke = Brushes.Black,
+                StrokeThickness = 1,
+                RenderTransform = new TranslateTransform(rect.X, rect.Y)
             };
+        }
+
+        public Guid AddDmgArea(Rect area)
+        {
+            Guid uniqueId = Guid.NewGuid();
+            DamageAreas[uniqueId] = area;
+            return uniqueId;
         }
     }
 }
