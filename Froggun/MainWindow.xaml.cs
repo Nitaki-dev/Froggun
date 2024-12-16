@@ -509,7 +509,7 @@ namespace Froggun
             //Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
             //stopwatch.Start();
 
-            if (waveCount == 10)
+            if (waveCount == 1)
             {
                 // bossfight
                 if (!fightingBoss && AreAllEnemiesDestroyed()) startBoss();
@@ -639,11 +639,13 @@ namespace Froggun
         
         public void mort(int nombreDeVie)
         {
+            minuterie.Stop();
+            pauseVagues.Stop();
             MessageBoxResult result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
             
             if (result == MessageBoxResult.Yes)
             {
-                recommencer(5);
+                Recommencer(5);
             }
             else
             {
@@ -652,30 +654,28 @@ namespace Froggun
             }
         }
 
-        public void recommencer(int nombreDeVie)
+        public void Recommencer(int nombreDeVie)
         {
-            Console.WriteLine(ennemis.Count);
-            for (int i = 0; i < ennemis.Count; i++)
-            {
-                Console.WriteLine(ennemis[i]);
-                canvas.Children.Remove(ennemis[i].Image);
-                ennemis.Remove(ennemis[i]);
-            }
             for (int i = 0; i < proies.Count; i++)
             {
                 canvas.Children.Remove(proies[i].Image);
                 proies.Remove(proies[i]);
             }
+            Ennemis.ReccomencerEnnemis(ennemis, canvas);
+            Proies.ReccomencerProies(proies, canvas);
             joueur.nombreDeVie = nombreDeVie;
+            joueur.score = 0;
             nombreDeVie = 5;
             AffichageDeVie(nombreDeVie);
             AfficheScore();
             waveCount = 0;
-            pauseEntreVagues = 5; 
+            pauseEntreVagues = 5;
+            pauseVagues.Stop();
             pauseCounter = 0;
-
             pause = false;
             lab_Defaite.Visibility = Visibility.Collapsed;
+            minuterie.Start();
+            pauseVagues.Start();
         }
 
         private void CheckBallesSortieEcran()
@@ -870,7 +870,6 @@ namespace Froggun
             else tirLangue = true;
             expensionLangue = true;
         }
-        
         public void AfficheScore()
         {
             labelScore.Content = $"Score : {joueur.score} ";
@@ -885,27 +884,47 @@ namespace Froggun
         {
             if (e.Key == Key.D && !pause)
             {
-                joueur.deplacerDroite = true;
-                joueur.deplacerGauche = false;
-                joueur.directionJoueur = Joueur.Directions.right;
+                joueur.keyBufferDroite = true;
+                joueur.keyBufferGauche = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerDroite = true;
+                    joueur.deplacerGauche = false;
+                    joueur.directionJoueur = Joueur.Directions.right;
+                }
             }
             if ((e.Key == Key.Q || e.Key == Key.A) && !pause)
             {
-                joueur.deplacerGauche = true;
-                joueur.deplacerDroite = false;
-                joueur.directionJoueur = Joueur.Directions.left;
+                joueur.keyBufferGauche = true;
+                joueur.keyBufferDroite = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerGauche = true;
+                    joueur.deplacerDroite = false;
+                    joueur.directionJoueur = Joueur.Directions.left;
+                }
             }
             if (e.Key == Key.S && !pause)
             {
-                joueur.deplacerBas = true;
-                joueur.deplacerHaut = false;
-                joueur.directionJoueur = Joueur.Directions.down;
+                joueur.keyBufferBas = true;
+                joueur.keyBufferHaut = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerBas = true;
+                    joueur.deplacerHaut = false;
+                    joueur.directionJoueur = Joueur.Directions.down;
+                }
             }
             if ((e.Key == Key.Z || e.Key == Key.W) && !pause)
             {
-                joueur.deplacerHaut = true;
-                joueur.deplacerBas = false;
-                joueur.directionJoueur = Joueur.Directions.up;
+                joueur.keyBufferHaut = true;
+                joueur.keyBufferBas = false;
+                if (!joueur.estEnRoulade)
+                {
+                    joueur.deplacerHaut = true;
+                    joueur.deplacerBas = false;
+                    joueur.directionJoueur = Joueur.Directions.up;
+                }
             }
             if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
             {
@@ -935,21 +954,25 @@ namespace Froggun
             if (e.Key == Key.D)
             {
                 joueur.deplacerDroite = false;
+                joueur.keyBufferDroite = false;
             }
             if (e.Key == Key.Q || e.Key == Key.A)
             {
+                joueur.keyBufferGauche = false;
                 joueur.deplacerGauche = false;
             }
             if (e.Key == Key.S)
             {
                 joueur.deplacerBas = false;
+                joueur.keyBufferBas = false;
             }
             if (e.Key == Key.Z || e.Key == Key.W)
             {
                 joueur.deplacerHaut = false;
+                joueur.keyBufferHaut = false;
             }
 
-            }
+        }
 
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {
