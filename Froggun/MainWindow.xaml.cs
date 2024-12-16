@@ -77,10 +77,11 @@ namespace Froggun
         private Joueur joueur;
 
         private MantisBosses mantis;
+
         public MainWindow()
         {
             InitializeComponent();
-
+            InitMusique(true);
             // Création de la fenêtre parametre avec un Canvas
             parametre fentreNiveau = new parametre();
             fentreNiveau.Left = fenetreGauche;
@@ -176,8 +177,8 @@ namespace Froggun
                 fentreDifficulte.Top = fenetreHaut;
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
-                //InitMusique(false);
-                //InitMusiqueJeux(true);
+                InitMusique(false);
+                InitMusiqueJeux(true);
                 this.Left = fenetreGauche;
                 this.Top = fenetreHaut;
             }
@@ -186,7 +187,6 @@ namespace Froggun
             lab_Defaite.Visibility = Visibility.Collapsed;
 
             InitImage();
-            //InitMusique(true);
 
             Rect playerRect = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
             joueur = new Joueur(player, playerRect, 640 - (int)player.Width/2, 360 - (int)player.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
@@ -205,7 +205,9 @@ namespace Froggun
             if (jouer)
             {
                 musiqueDeFond = new MediaPlayer();
-                musiqueDeFond.Open(new Uri("son/intro.mp3", UriKind.Relative));
+                musiqueDeFond.Open(new Uri("/son/intro.mp3", UriKind.Relative));
+                musiqueDeFond.Volume = Properties.Settings.Default.Volume;
+                Console.WriteLine(Properties.Settings.Default.Volume);
                 musiqueDeFond.MediaEnded += RelanceMusique;
                 musiqueDeFond.Play();
             }
@@ -219,6 +221,7 @@ namespace Froggun
         private void RelanceMusique(object? sender, EventArgs e)
         {
             musiqueDeFond.Position = TimeSpan.Zero;
+            musiqueDeFond.Volume = Properties.Settings.Default.Volume;
             musiqueDeFond.Play();
         }
 
@@ -227,9 +230,9 @@ namespace Froggun
             if (jouer)
             {
                 musiqueDeJeu = new MediaPlayer();
-                musiqueDeJeu.Open(new Uri("son/son_jeu.mp3", UriKind.Relative));
+                musiqueDeJeu.Open(new Uri("/son/son_jeu.mp3", UriKind.Relative));
                 musiqueDeJeu.MediaEnded += RelanceMusiqueJeux;
-                musiqueDeJeu.Volume = 1.0;
+                musiqueDeJeu.Volume = Properties.Settings.Default.Volume; 
                 musiqueDeJeu.Play();
             }
             else
@@ -242,6 +245,7 @@ namespace Froggun
         private void RelanceMusiqueJeux(object? sender, EventArgs e)
         {
             musiqueDeJeu.Position = TimeSpan.Zero;
+            musiqueDeJeu.Volume = Properties.Settings.Default.Volume;
             musiqueDeJeu.Play();
         }
 
@@ -832,6 +836,7 @@ namespace Froggun
             Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
             Stream audioStream = Application.GetResourceStream(audioUri).Stream;
             // Créer un objet SoundPlayer pour lire le son
+
             SoundPlayer musique = new SoundPlayer(audioStream);
 
             musique.Play();

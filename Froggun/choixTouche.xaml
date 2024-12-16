@@ -8,7 +8,6 @@
     Title="choixTouche"
     Width="600"
     Height="350"
-
     ResizeMode="NoResize"
     mc:Ignorable="d">
     <Grid>
@@ -50,12 +49,13 @@
             Margin="10,10,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
+            Background="#FFA2A2A2"
             Content="Parametre du son :"
             FontFamily="Cooper Black" />
 
         <Label
             x:Name="labelSonJeu"
-            Margin="122,77,0,0"
+            Margin="10,39,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Content="Son jeu :"
@@ -64,10 +64,138 @@
 
         <Slider
             x:Name="sliderSon"
-            Width="356"
-            Height="33"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
+            Width="155"
+            Height="28"
+            Margin="10,75,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
             ValueChanged="SliderSon_ValueChanged" />
+        <Label
+            x:Name="labelHaut"
+            Margin="24,175,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Haut :"
+            Foreground="White"
+            RenderTransformOrigin="0.371,-1.811" />
+        <Label
+            x:Name="labelDeplacementJoueur"
+            Margin="10,139,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Deplacement Grenouille :"
+            FontFamily="Segoe Print"
+            Foreground="Gray" />
+        <Label
+            x:Name="labelParametreSon_Copy"
+            Margin="10,115,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Background="#FFADADAD"
+            Content="Parametre de deplacement :"
+            FontFamily="Cooper Black" />
+        <Label
+            x:Name="labelbas"
+            Margin="24,201,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Bas :"
+            Foreground="White"
+            RenderTransformOrigin="0.371,-1.811" />
+        <Label
+            x:Name="labeldroite"
+            Margin="24,241,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Droite :"
+            Foreground="White"
+            RenderTransformOrigin="0.371,-1.811" />
+        <Label
+            x:Name="labelgauchr"
+            Margin="24,263,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Gauche :"
+            Foreground="White"
+            RenderTransformOrigin="0.371,-1.811" />
+        <Button
+            x:Name="BtnChoixHaut"
+            Margin="91,178,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="BtnChoixHaut_Click"
+            Content="Choix Touche" />
+        <Button
+            x:Name="BtnChoixBas"
+            Margin="91,204,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="BtnChoixBas_Click"
+            Content="Choix Touche" />
+        <Button
+            x:Name="BtnChoixHautDroite"
+            Margin="91,246,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="BtnChoixHautDroite_Click"
+            Content="Choix Touche" />
+        <Button
+            x:Name="BtnChoixHautGauche"
+            Margin="114,269,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="BtnChoixHautGauche_Click"
+            Content="Choix Touche"
+            RenderTransformOrigin="0.484,-0.213" />
+        <Label
+            x:Name="labelDeplacementTir"
+            Margin="230,139,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Background="Transparent"
+            Content="Deplacement Grenouille :"
+            FontFamily="Segoe Print"
+            Foreground="Black" />
+        <Label
+            x:Name="labelRoulade"
+            Margin="244,173,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Roulade :"
+            Foreground="White"
+            RenderTransformOrigin="0.371,-1.811" />
+        <Label
+            x:Name="labelpause"
+            Margin="244,258,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Content="Pause :"
+            Foreground="White"
+            RenderTransformOrigin="0.371,-1.811" />
+        <Button
+            x:Name="BtnRoulade"
+            Margin="318,178,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="BtnRoulade_Click"
+            Content="Choix Touche" />
+        <Button
+            x:Name="BtnPause"
+            Margin="318,261,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Click="BtnPause_Click"
+            Content="Choix Touche"
+            RenderTransformOrigin="0.484,-0.213" />
+        <Label
+            x:Name="labelAutreDeplacement"
+            Margin="230,222,0,0"
+            HorizontalAlignment="Left"
+            VerticalAlignment="Top"
+            Background="Transparent"
+            Content="Autre Parametre :"
+            FontFamily="Segoe Print"
+            Foreground="Black" />
+
     </Grid>
 </Window>

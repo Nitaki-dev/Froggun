@@ -77,12 +77,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Content Include="son\intro.mp3">
+	  <Resource Include="son\intro.mp3">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="son\son_jeu.mp3">
+	  </Resource>
+	  <Resource Include="son\son_jeu.mp3">
 	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Content>
+	  </Resource>
 	</ItemGroup>
 
 	<ItemGroup>
