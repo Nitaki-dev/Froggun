@@ -20,8 +20,8 @@ namespace Froggun
     public partial class MainWindow : Window
     {
         public static int fenetreGauche = 100;
-        public static int fenetreHaut = 100;
         public const int WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 720;
+        public static int fenetreHaut = 100;
 
         private static Random alea = new Random();
 
@@ -53,7 +53,6 @@ namespace Froggun
         private static BitmapImage imgFrogSideHit;
 
         private static BitmapImage[] imgExplosion = new BitmapImage[6];
-
         private static BitmapImage imgMantis;
 
         private List<Balle> Balles = new List<Balle>();
@@ -76,7 +75,7 @@ namespace Froggun
 
         private Joueur joueur;
 
-        private MantisBosses mantis;
+        private BossMante mantis;
         public MainWindow()
         {
             InitializeComponent();
@@ -366,6 +365,29 @@ namespace Froggun
             imgMantis = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/mantis.png"));
         }
 
+        //private void RandomPointInEllipse()
+        //{
+        //    // Define ellipse center and radii
+        //    Point center = new Point(1280 / 2, 720 / 2);
+        //    double xRadius = 1280 / 2;
+        //    double yRadius = 720 / 2;
+        //
+        //    // Generate a random angle between 0 and 2π
+        //    Random random = new Random();
+        //    double angle = 2 * Math.PI * random.NextDouble();
+        //
+        //    // Generate a random radius factor between 0 and 1
+        //    double radiusFactor = Math.Sqrt(random.NextDouble()); // sqrt to make points more densely packed near the center
+        //
+        //    // Scale the random radius to the ellipse's axes
+        //    double x = center.X + radiusFactor * xRadius * Math.Cos(angle);
+        //    double y = center.Y + radiusFactor * yRadius * Math.Sin(angle);
+        //
+        //    Point pos = new Point(x, y);
+        //
+        //    BitmapImage source = (random.Next(2) == 1) ? imgGrass1 : imgGrass2;
+        //}
+
         private void UpdateMousePosition()
         {
             // Get the mouse position once and calculate the direction to player center
@@ -506,8 +528,8 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             if (pause) return;
-            //Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
-            //stopwatch.Start();
+            Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
+            stopwatch.Start();
 
             if (waveCount == 1)
             {
@@ -532,9 +554,9 @@ namespace Froggun
             Proies.UpdateProies(canvas, proies, joueur.hitbox);
             if (this.fightingBoss && this.bossSpawned)
             {
-                mantis.UpdateMantisBoss(Balles, joueur);
+                mantis.UpdateBossMante(Balles, joueur);
 
-                if (!mantis.isAlive)
+                if (!mantis.estVivant)
                 {
                     this.fightingBoss = false;
                     this.bossSpawned = false;
@@ -551,8 +573,8 @@ namespace Froggun
             UpdateMousePosition();
             joueur.UpdatePositionJoueur(canvas);
 
-            //stopwatch.Stop();
-            //Console.WriteLine($"{stopwatch.Elapsed}");
+            stopwatch.Stop();
+            Console.WriteLine($"FPS: {Math.Round(1000.0/stopwatch.Elapsed.TotalMilliseconds)}  {stopwatch.Elapsed} aka {stopwatch.Elapsed.TotalMilliseconds}ms");
         }
 
         private async Task startBoss()
@@ -569,7 +591,7 @@ namespace Froggun
             Explostions(1100, 100, 500);
             ChangeBackground("img/arena/arena_broken_top.png");
             await Task.Delay(300);
-            mantis = new MantisBosses(canvas, imgMantis, joueur, 4000, 215, 266);
+            mantis = new BossMante(canvas, imgMantis, joueur, 4000, 215, 266);
             await Task.Delay(400);
 
             // todo: restrict players movement
@@ -673,6 +695,14 @@ namespace Froggun
             pauseVagues.Stop();
             pauseCounter = 0;
             pause = false;
+            joueur.deplacerGauche = false;
+            joueur.deplacerDroite = false;
+            joueur.deplacerHaut = false;
+            joueur.deplacerBas = false;
+            joueur.keyBufferGauche = false;
+            joueur.keyBufferDroite = false;
+            joueur.keyBufferHaut = false;
+            joueur.keyBufferBas = false;
             lab_Defaite.Visibility = Visibility.Collapsed;
             minuterie.Start();
             pauseVagues.Start();
@@ -847,9 +877,6 @@ namespace Froggun
 
             musique.Play();
         }
-
-
-
 
         private void ShootGun()
         {
