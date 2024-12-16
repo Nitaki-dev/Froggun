@@ -9,13 +9,13 @@
     Width="1280"
     Height="720"
     KeyDown="keydown"
-    SizeToContent="WidthAndHeight"
     KeyUp="keyup"
     MouseLeftButtonDown="leftButtonDown"
     MouseRightButtonDown="rightButtonDown"
     ResizeMode="NoResize"
+    SizeToContent="WidthAndHeight"
     mc:Ignorable="d">
-    
+
     <Grid
         x:Name="grid"
         Width="1280"
@@ -37,7 +37,7 @@
                 VerticalAlignment="Top"
                 Fill="HotPink" />
             <Image
-                x:Name="player"
+                x:Name="joueurImage"
                 Canvas.Left="375"
                 Canvas.Top="187"
                 Width="51"
@@ -77,13 +77,6 @@
                 FontFamily="72 Black"
                 FontSize="16"
                 Foreground="White" />
-            <Image
-                Canvas.Left="746"
-                Canvas.Top="128"
-                Width="234"
-                Height="41"
-                Source="/img/health5.png"
-                Stretch="Fill" />
             <Image
                 Canvas.Left="746"
                 Canvas.Top="128"
