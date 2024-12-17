@@ -863,7 +863,7 @@ namespace Froggun
                             }
                         }
                     }
-                    if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
+                    if (expensionLangue) langueJoueur.Width += expensionLangueVitesse;
                 }
                 else
                 {
