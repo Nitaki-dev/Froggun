@@ -32,7 +32,9 @@ namespace Froggun
         public Rectangle Hitbox { get; set; }
         public Image Image { get; set; }
         private int currentFrameIndex { get; set; }
-        private DispatcherTimer animationTimer { get; set; }
+        private double animationTimeElapsed { get; set; }
+        private const double AnimationFrameDuration = 100;
+        private BitmapImage[] frameImages;
         public Canvas canvas { get; set; }
 
         public double objectifX;
@@ -76,24 +78,39 @@ namespace Froggun
             Canvas.SetLeft(Image, X);
             Canvas.SetTop(Image, Y);
             canvas.Children.Add(Image);
+            
+            LoadFrames();
 
-            animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-            animationTimer.Tick += AnimationTimer_Tick;
-            animationTimer.Start();
+            // https://learn.microsoft.com/fr-fr/dotnet/api/system.windows.media.compositiontarget.rendering?view=windowsdesktop-9.0
+            CompositionTarget.Rendering += OnRendering;
 
             timerMouvement = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(newPosDelay) };
             timerMouvement.Tick += TrouverNouvellePosition;
             timerMouvement.Start();
         }
 
-        private void AnimationTimer_Tick(object sender, EventArgs e)
+        private void LoadFrames()
         {
-            currentFrameIndex++;
-            if (currentFrameIndex >= indexAnimation.Length) currentFrameIndex = 0;
+            frameImages = new BitmapImage[indexAnimation.Length];
+            for (int i = 0; i < indexAnimation.Length; i++) frameImages[i] = GetImageSourceForFrame(indexAnimation[i]);
+        }
 
-            int frame = indexAnimation[currentFrameIndex];
-            BitmapImage newImageSource = GetImageSourceForFrame(frame);
-            Image.Source = newImageSource;
+        private void OnRendering(object sender, EventArgs e)
+        {
+            animationTimeElapsed += 16;
+
+            if (animationTimeElapsed >= AnimationFrameDuration)
+            {
+                currentFrameIndex++;
+                if (currentFrameIndex >= indexAnimation.Length)
+                    currentFrameIndex = 0;
+
+                animationTimeElapsed = 0;
+                int frame = indexAnimation[currentFrameIndex];
+                //BitmapImage newImageSource = GetImageSourceForFrame(frame);
+                //Image.Source = newImageSource;
+                Image.Source = frameImages[currentFrameIndex];
+            }
         }
 
         private BitmapImage GetImageSourceForFrame(int frame)
@@ -101,7 +118,7 @@ namespace Froggun
             BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{chemainImage}/{frame}.png"));
             return bitmapImage;
         }
-        
+
         public void TrouverNouvellePosition(object? sender, EventArgs e)
         {
             Random random = new Random();
