@@ -76,9 +76,6 @@ namespace Froggun
             Canvas.SetLeft(Image, X);
             Canvas.SetTop(Image, Y);
             canvas.Children.Add(Image);
-            
-            if (Double.IsNaN(X)) 
-                Console.WriteLine(ToString());
 
             animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             animationTimer.Tick += AnimationTimer_Tick;
@@ -110,6 +107,11 @@ namespace Froggun
             Random random = new Random();
             objectifX = X + random.Next(-distanceMaxNouvellePosition, distanceMaxNouvellePosition);
             objectifY = Y + random.Next(-distanceMaxNouvellePosition, distanceMaxNouvellePosition);
+            if (objectifY < 0) objectifY = 10;
+            if (objectifX < 0) objectifX = 10;
+
+            if (objectifY > canvas.ActualHeight - largeur) objectifY = 10;
+            if (objectifX > canvas.ActualWidth - largeur) objectifX = 10;
         }
 
         public static void ReccomencerProies(List<Proies> proies, Canvas canvas)
@@ -126,7 +128,8 @@ namespace Froggun
         {
             foreach (Proies proie in proies)
             {
-                //.......
+                //Console.WriteLine(proie.ToString());
+
                 if (Double.IsNaN(proie.X) || Double.IsNaN(proie.Y))
                 {
                     proie.X = 10; proie.Y = 10;
@@ -134,7 +137,6 @@ namespace Froggun
                     Canvas.SetTop(proie.Hitbox, 10);
                 }
 
-                if (Double.IsNaN(proie.X) || Double.IsNaN(proie.Y)) Console.WriteLine(proie.ToString());
                 
                 // Move the enemy
                 Vector2 direction = new Vector2(
@@ -142,7 +144,7 @@ namespace Froggun
                     (float)(proie.objectifY - proie.Y)
                 );
 
-                direction = Vector2.Normalize(direction);
+                direction = (direction.Length() !=0) ? Vector2.Normalize(direction) : new Vector2(0,0);
                 double newX = proie.X + direction.X * proie.Vitesse;
                 double newY = proie.Y + direction.Y * proie.Vitesse;
 
@@ -165,7 +167,10 @@ namespace Froggun
 
         public override string? ToString()
         {
-            return "X" + Math.Round(this.X) + "    Y" + Math.Round(this.Y) + "     Hitbox:  w:" + Math.Round(this.Hitbox.Width) + " h:" + Math.Round(this.Hitbox.Height) + " x:" + Math.Round(Canvas.GetLeft(Hitbox)) + " y:" + Math.Round(Canvas.GetTop(Hitbox));
+            return " objX:" + Math.Round(objectifX) + "  objY:" + Math.Round (objectifY) + 
+                "     X" + Math.Round(this.X) + "    Y" + Math.Round(this.Y) + 
+                "     Hitbox:  w:" + Math.Round(this.Hitbox.Width) +      " h:" + Math.Round(this.Hitbox.Height) + 
+                             " x:" + Math.Round(Canvas.GetLeft(Hitbox)) + " y:" + Math.Round(Canvas.GetTop(Hitbox));
         }
     }
 }

@@ -216,7 +216,8 @@ namespace Froggun
                     musiqueDeFond.Volume = Properties.Settings.Default.Volume;
                     musiqueDeFond.MediaEnded += RelanceMusique;
                     musiqueDeFond.Play();
-                }catch(Exception ex) {Console.WriteLine(ex.ToString());}
+                } 
+                catch(Exception ex) {Console.WriteLine(ex.ToString());}
             }
             else musiqueDeFond.Stop();
         }
@@ -253,10 +254,8 @@ namespace Froggun
             if (timerEstActif || estEnCombatAvecBoss) return;
             timerEstActif = true;
 
-            //if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
-            //else pauseEntreVagues = 10;
-
-            pauseEntreVagues = 0;
+            if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
+            else pauseEntreVagues = 10;
 
             pauseVagues = new DispatcherTimer();
             pauseVagues.Interval = TimeSpan.FromSeconds(1);
@@ -289,21 +288,21 @@ namespace Froggun
             // TODO: make this not terrible (redo difficulty spawnrates for the 6th time)
             if (nombreDeVagues <= 3)
             {
-                nbrProies = nombreDeVagues * 2;
+                nbrProies = nombreDeVagues;
                 nbrPetitEnnemis = nombreDeVagues * 3;
                 nbrMoyenEnnemis = 1;
                 nbrGrandEnnemis = 0;
             }
             else if (nombreDeVagues <= 5)
             {
-                nbrProies = nombreDeVagues * 2;
+                nbrProies = nombreDeVagues;
                 nbrPetitEnnemis = nombreDeVagues * 3;
                 nbrMoyenEnnemis = 2;
                 nbrGrandEnnemis = 0;
             }
             else if (nombreDeVagues <= 8)
             {
-                nbrProies = (int)(nombreDeVagues * 1.5);
+                nbrProies = nombreDeVagues;
                 nbrPetitEnnemis = nombreDeVagues * 2;
                 nbrMoyenEnnemis = nombreDeVagues / 2 + 1;
                 nbrGrandEnnemis = nombreDeVagues / 8;
@@ -706,16 +705,19 @@ namespace Froggun
 
         public void Recommencer(int nombreDeVie)
         {
-            for (int i = 0; i < proies.Count; i++)
-            {
-                canvas.Children.Remove(proies[i].Image);
-                proies.Remove(proies[i]);
-            }
             Ennemis.ReccomencerEnnemis(ennemis, canvas);
             Proies.ReccomencerProies(proies, canvas);
-            joueur.nombreDeVie = nombreDeVie;
+
+            if (estBossApparu) estBossApparu = false;
+            if (estEnCombatAvecBoss)
+            {
+                estEnCombatAvecBoss = false;
+                mante.VaincreMante();
+                ChangerFond("img/arena/arena_unaltered.png");
+            }
+
             joueur.score = 0;
-            nombreDeVie = 5;
+            joueur.nombreDeVie = nombreDeVie;
             AffichageDeVie(nombreDeVie);
             AfficheScore();
             nombreDeVagues = 0;
