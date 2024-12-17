@@ -26,71 +26,51 @@
             </ImageBrush>
         </Grid.Background>
 
-        <!--  Ajouter un ScrollViewer pour permettre le défilement si nécessaire  -->
-
         <StackPanel Margin="10">
-            <!--  Titre principal centré  -->
             <!--  Titre principal centré  -->
             <Label
                 Content="Instructions de jeu"
                 FontSize="20"
                 FontWeight="Bold"
                 Foreground="#FFD4D4D4" />
+
             <!--  Contenu principal  -->
-            <TextBlock
-                Width="655"
-                Foreground="#FFD4D4D4"
-                Text="• Objectif principal : Rester en vie donc ne pas perdre de cœur."
-                TextWrapping="Wrap" />
+            <Label Content="• Objectif principal : Rester en vie donc ne pas perdre de cœur." Foreground="#FFD4D4D4" />
 
-            <TextBlock
-                Margin="0,10,0,5"
+            <Label
+                Content="• Contrôles :"
                 FontWeight="Bold"
-                Foreground="#FFD4D4D4"
-                Text="• Contrôles :" />
+                Foreground="#FFD4D4D4" />
 
-            <TextBlock
-                Margin="0,0,0,5"
-                Foreground="#FFD4D4D4"
-                Text="   o Déplacement : Utilisez les touches directionnelles ou les touches : " />
-            <TextBlock
-                Margin="20,0,0,5"
-                Foreground="#FFD4D4D4"
-                Text="     - 'Q' pour déplacer la grenouille à gauche."
-                TextWrapping="Wrap" />
-            <TextBlock
-                Margin="20,0,0,5"
-                Foreground="#FFD4D4D4"
-                Text="     - 'D' pour déplacer la grenouille à droite."
-                TextWrapping="Wrap" />
-            <TextBlock
-                Margin="20,0,0,5"
-                Foreground="#FFD4D4D4"
-                Text="     - 'Z' pour déplacer la grenouille vers le haut."
-                TextWrapping="Wrap" />
-
-            <TextBlock
-                Margin="20,0,0,5"
-                Foreground="#FFD4D4D4"
-                Text="     - 'S' pour déplacer la grenouille vers le bas."
-                TextWrapping="Wrap" />
-            <TextBlock
-                Margin="20,0,0,5"
-                Foreground="#FFD4D4D4"
-                Text="     - 'Ctrl' pour rouler / esquiver et aller plus vite."
-                TextWrapping="Wrap" />
-            <TextBlock
-                Margin="20,0,0,5"
-                Foreground="#FFD4D4D4"
-                Text="     - 'Espace' pour mettre le jeu en pause."
-                TextWrapping="Wrap" />
-            <TextBlock Margin="20,0,0,5" TextWrapping="Wrap"><Run Foreground="#FFD4D4D4" Text="   o Tirer avec le pistolet : Appuyez sur la touche 'Clique Gauche' pour tirer avec le pistolet" /><Run Language="fr-fr" Text="." /></TextBlock>
-            <TextBlock
-                Margin="20,0,0,5"
-                Foreground="#FFD4D4D4"
-                Text="   o Tirer avec la langue : Appuyez sur la touche 'Clique Droit' pour tirer la langue."
-                TextWrapping="Wrap" />
+            <Label Content="   o Déplacement : Utilisez les touches directionnelles ou les touches :" Foreground="#FFD4D4D4" />
+            <Label
+                x:Name="labelGauche"
+                Content="     - 'Q' pour déplacer la grenouille à gauche."
+                Foreground="#FFD4D4D4" />
+            <Label
+                x:Name="labelDroite"
+                Content="     - 'D' pour déplacer la grenouille à droite."
+                Foreground="#FFD4D4D4" />
+            <Label
+                x:Name="labelHaut"
+                Content="     - 'Z' pour déplacer la grenouille vers le haut."
+                Foreground="#FFD4D4D4" />
+            <Label
+                x:Name="labelBas"
+                Content="     - 'S' pour déplacer la grenouille vers le bas."
+                Foreground="#FFD4D4D4" />
+            <Label
+                x:Name="labelRoulade"
+                Content="     - 'Ctrl' pour rouler / esquiver et aller plus vite."
+                Foreground="#FFD4D4D4" />
+            <Label
+                x:Name="labelPause"
+                Content="     - 'Espace' pour mettre le jeu en pause."
+                Foreground="#FFD4D4D4" />
+            <Label Content="   o Tirer avec le pistolet : Appuyez sur la touche 'Clique Gauche' pour tirer avec le pistolet." Foreground="#FFD4D4D4" />
+            <Label Content="   o Tirer avec la langue : Appuyez sur la touche 'Clique Droit' pour tirer la langue." Foreground="#FFD4D4D4" />
         </StackPanel>
+
         <Button
             x:Name="boutonQuitter"
             Margin="477,268,0,0"
