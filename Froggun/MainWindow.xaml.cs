@@ -290,7 +290,6 @@ namespace Froggun
             int nbrMoyenEnnemis;
             int nbrGrandEnnemis;
 
-            // TODO: make this not terrible (redo difficulty spawnrates for the 6th time)
             if (nombreDeVagues <= 3)
             {
                 nbrProies = nombreDeVagues;
