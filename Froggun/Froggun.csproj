@@ -21,8 +21,8 @@
 		<None Remove="img\difficile.jpg" />
 		<None Remove="img\ennemis\Firefly\1.png" />
 		<None Remove="img\ennemis\Firefly\2.png" />
-		<None Remove="img\ennemis\Food1\1.png" />
-		<None Remove="img\ennemis\Food1\2.png" />
+		<None Remove="img\Proies\1.png" />
+		<None Remove="img\Proies\2.png" />
 		<None Remove="img\ennemis\LL\1.png" />
 		<None Remove="img\ennemis\LL\2.png" />
 		<None Remove="img\ennemis\LL\3.png" />
@@ -93,8 +93,8 @@
 		<Resource Include="img\difficile.jpg" />
 		<Resource Include="img\ennemis\Firefly\1.png" />
 		<Resource Include="img\ennemis\Firefly\2.png" />
-		<Resource Include="img\ennemis\Food1\1.png" />
-		<Resource Include="img\ennemis\Food1\2.png" />
+		<Resource Include="img\Proies\1.png" />
+		<Resource Include="img\Proies\2.png" />
 		<Resource Include="img\ennemis\LL\1.png" />
 		<Resource Include="img\ennemis\LL\2.png" />
 		<Resource Include="img\ennemis\LL\3.png" />
