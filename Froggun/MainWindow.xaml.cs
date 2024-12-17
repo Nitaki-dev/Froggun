@@ -175,6 +175,11 @@ namespace Froggun
                 fentreDifficulte.Top = fenetreHaut;
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
+                if (fentreDifficulte.DialogResult == false)
+                {
+                    Application.Current.Shutdown();
+                    return;
+                }
                 InitMusique(false);
                 InitMusiqueJeux(true);
                 this.Left = fenetreGauche;
