@@ -59,27 +59,26 @@ namespace Froggun
 
             currentFrameIndex = 0;
 
-            Image = new Image
-            {
-                Width = largeur,
-                Height = hauteur
-            };
-
+            Image = new Image { Width = largeur, Height = hauteur };
             RenderOptions.SetBitmapScalingMode(Image, BitmapScalingMode.NearestNeighbor);
 
-            Canvas.SetLeft(Image, X);
-            Canvas.SetTop(Image, Y);
-            canvas.Children.Add(Image);
-
-            this.Hitbox = new Rectangle {
-                Width = largeur-10,
-                Height = hauteur-10,
+            this.Hitbox = new Rectangle
+            {
+                Width = largeur - 10,
+                Height = hauteur - 10,
                 Stroke = Brushes.Red,
                 StrokeThickness = 1
             };
 
             Canvas.SetLeft(Hitbox, x + 5);
             Canvas.SetTop(Hitbox, y + 5);
+
+            Canvas.SetLeft(Image, X);
+            Canvas.SetTop(Image, Y);
+            canvas.Children.Add(Image);
+            
+            if (Double.IsNaN(X)) 
+                Console.WriteLine(ToString());
 
             animationTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             animationTimer.Tick += AnimationTimer_Tick;
@@ -115,25 +114,28 @@ namespace Froggun
 
         public static void ReccomencerProies(List<Proies> proies, Canvas canvas)
         {
-            //for (int i = 0; i < proies.Count; i++)
-            //{
-            //   // proies[i].IsAlive = false;
-            //    proies[i].Image.Visibility = Visibility.Hidden;
-            //    canvas.Children.Remove(proies[i].Image);
-            //    //canvas.Children.Remove(proies[i].healthBarEmpty);
-            //    //canvas.Children.Remove(proies[i].healthBar);
-            //    proies.RemoveAt(i);
-            //}
+            for (int i = 0; i < proies.Count; i++)
+            {
+                proies[i].Image.Visibility = Visibility.Hidden;
+                canvas.Children.Remove(proies[i].Image);
+                proies.RemoveAt(i);
+            }
         }
 
         public static void UpdateProies(Canvas canvas, List<Proies> proies, Rect joueur)
         {
             foreach (Proies proie in proies)
             {
-                // Update bounding box
-                Canvas.SetLeft(proie.Hitbox, proie.X + 5);
-                Canvas.SetTop(proie.Hitbox, proie.Y + 5);
+                //.......
+                if (Double.IsNaN(proie.X) || Double.IsNaN(proie.Y))
+                {
+                    proie.X = 10; proie.Y = 10;
+                    Canvas.SetLeft(proie.Hitbox, 10);
+                    Canvas.SetTop(proie.Hitbox, 10);
+                }
 
+                if (Double.IsNaN(proie.X) || Double.IsNaN(proie.Y)) Console.WriteLine(proie.ToString());
+                
                 // Move the enemy
                 Vector2 direction = new Vector2(
                     (float)(proie.objectifX - proie.X),
@@ -155,7 +157,15 @@ namespace Froggun
                 Canvas.SetLeft(proie.Image, proie.X);
                 Canvas.SetTop(proie.Image, proie.Y);
 
+                // Update bounding box
+                Canvas.SetLeft(proie.Hitbox, proie.X + 5);
+                Canvas.SetTop(proie.Hitbox, proie.Y + 5);
             }
+        }
+
+        public override string? ToString()
+        {
+            return "X" + Math.Round(this.X) + "    Y" + Math.Round(this.Y) + "     Hitbox:  w:" + Math.Round(this.Hitbox.Width) + " h:" + Math.Round(this.Hitbox.Height) + " x:" + Math.Round(Canvas.GetLeft(Hitbox)) + " y:" + Math.Round(Canvas.GetTop(Hitbox));
         }
     }
 }

@@ -253,8 +253,10 @@ namespace Froggun
             if (timerEstActif || estEnCombatAvecBoss) return;
             timerEstActif = true;
 
-            if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
-            else pauseEntreVagues = 10;
+            //if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
+            //else pauseEntreVagues = 10;
+
+            pauseEntreVagues = 0;
 
             pauseVagues = new DispatcherTimer();
             pauseVagues.Interval = TimeSpan.FromSeconds(1);
@@ -603,7 +605,7 @@ namespace Froggun
             joueur.UpdatePositionJoueur(canvas);
 
             stopwatch.Stop();
-            Console.WriteLine($"FPS: {Math.Round(1000.0/stopwatch.Elapsed.TotalMilliseconds)}  {stopwatch.Elapsed} aka {stopwatch.Elapsed.TotalMilliseconds}ms");
+            //Console.WriteLine($"FPS: {Math.Round(1000.0/stopwatch.Elapsed.TotalMilliseconds)}  {stopwatch.Elapsed} aka {stopwatch.Elapsed.TotalMilliseconds}ms");
         }
 
         private async Task startBoss()
@@ -1028,6 +1030,11 @@ namespace Froggun
             {
                 joueur.deplacerHaut = false;
                 joueur.keyBufferHaut = false;
+            }
+
+            if (e.Key == Key.R)
+            {
+                Recommencer(5);
             }
 
         }
