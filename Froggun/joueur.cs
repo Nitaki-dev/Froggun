@@ -66,22 +66,22 @@ namespace Froggun
 
         public enum Directions
         {
-            left,
-            right,
-            up,
-            down,
-            diagUpLeft,
-            diagUpRight,
-            diagDownLeft,
-            diagDownRight
+            gauche,
+            droite,
+            haut,
+            bas,
+            diagHautGauche,
+            diagHautDroite,
+            diagBasGauche,
+            diagBasDroite
         }
 
         public Directions directionJoueur { get; set; }
 
         public double score {  get; set; }
         public int killStreak { get; set; }
-        public int killStreakTimer { get; set; }
-        public double scoreMultiplier { get; set; }
+        public int timerKillstreak { get; set; }
+        public double multiplicateurDeScore { get; set; }
         public DispatcherTimer StreakTimerUpdate { get; set; }
 
         public Joueur(Image player, Rect hitbox, int posX, int posY, Grid grid, BitmapImage front, BitmapImage side, BitmapImage back, BitmapImage frontHit, BitmapImage sideHit, BitmapImage backHit)
@@ -106,7 +106,7 @@ namespace Froggun
             this.correctionVitesseDiagonal = (float)(1.0f / Math.Sqrt(2.0f));
             this.vitesseDeplacement = 8.0f;
             this.friction = 0.4f;
-            this.directionJoueur = Directions.right;
+            this.directionJoueur = Directions.droite;
 
             this.proiePourHeal = 3;
             this.proieManger = 0;
@@ -126,24 +126,23 @@ namespace Froggun
 
             this.score = 0;
             this.killStreak = 0;
-            this.killStreakTimer = 0;
-            this.scoreMultiplier = 0;
+            this.timerKillstreak = 0;
+            this.multiplicateurDeScore = 0;
 
             this.StreakTimerUpdate = new DispatcherTimer();
             this.StreakTimerUpdate.Interval = TimeSpan.FromSeconds(1);
             this.StreakTimerUpdate.Tick += (s, e) =>
             {
-                if (this.killStreakTimer > 0) this.killStreakTimer--;
-                if (this.killStreakTimer <= 0)
+                if (this.timerKillstreak > 0) this.timerKillstreak--;
+                if (this.timerKillstreak <= 0)
                 {
                     this.killStreak = 0;
-                    this.scoreMultiplier = 0;
+                    this.multiplicateurDeScore = 0;
                 }
-                //Console.WriteLine("Timer: " + this.killStreakTimer + "  |  Streak: " + this.killStreak);
             };
             this.StreakTimerUpdate.Start();
 
-            //combien de degats fait le joueur
+            // combien de degats fait le joueur
             this.degats = 50;
 
             blinkTimer = new DispatcherTimer(); 
@@ -154,7 +153,7 @@ namespace Froggun
 
         public void UpdatePositionJoueur(Canvas c)
         {
-            // ~12 frames, very generous
+            // ~12 frames d'invinsibilité 
             if (tempsRoulade > 50 && tempsRoulade < 250 || blinkFrame>0) estInvinsible = true;
             else estInvinsible = false;
 
@@ -173,31 +172,31 @@ namespace Froggun
 
                 switch (directionJoueur)
                 {
-                    case Directions.down:
+                    case Directions.bas:
                         nouvelleVitesseJoueur.Y = 15.0f;
                         break;
-                    case Directions.up:
+                    case Directions.haut:
                         nouvelleVitesseJoueur.Y = -15.0f;
                         break;
-                    case Directions.right:
+                    case Directions.droite:
                         nouvelleVitesseJoueur.X = 15.0f;
                         break;
-                    case Directions.left:
+                    case Directions.gauche:
                         nouvelleVitesseJoueur.X = -15.0f;
                         break;
-                    case Directions.diagDownLeft:
+                    case Directions.diagBasGauche:
                         nouvelleVitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
                         nouvelleVitesseJoueur.Y =  15.0f * correctionVitesseDiagonal;
                         break;
-                    case Directions.diagDownRight:
+                    case Directions.diagBasDroite:
                         nouvelleVitesseJoueur.X = 15.0f * correctionVitesseDiagonal;
                         nouvelleVitesseJoueur.Y = 15.0f * correctionVitesseDiagonal;
                         break;
-                    case Directions.diagUpLeft:
+                    case Directions.diagHautGauche:
                         nouvelleVitesseJoueur.X = -15.0f * correctionVitesseDiagonal;
                         nouvelleVitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
                         break;
-                    case Directions.diagUpRight:
+                    case Directions.diagHautDroite:
                         nouvelleVitesseJoueur.X =  15.0f * correctionVitesseDiagonal;
                         nouvelleVitesseJoueur.Y = -15.0f * correctionVitesseDiagonal;
                         break;
@@ -213,7 +212,7 @@ namespace Froggun
                         this.deplacerDroite = true;
                         this.deplacerBas = false;
                         this.deplacerGauche = false;
-                        this.directionJoueur = Joueur.Directions.diagUpRight;
+                        this.directionJoueur = Joueur.Directions.diagHautDroite;
                     }
                     else if (this.keyBufferHaut && this.keyBufferGauche)
                     {
@@ -221,7 +220,7 @@ namespace Froggun
                         this.deplacerGauche = true;
                         this.deplacerBas = false;
                         this.deplacerDroite = false;
-                        this.directionJoueur = Joueur.Directions.diagUpLeft;
+                        this.directionJoueur = Joueur.Directions.diagHautGauche;
                     }
                     else if (this.keyBufferBas && this.keyBufferDroite)
                     {
@@ -229,7 +228,7 @@ namespace Froggun
                         this.deplacerDroite = true;
                         this.deplacerHaut = false;
                         this.deplacerGauche = false;
-                        this.directionJoueur = Joueur.Directions.diagDownRight;
+                        this.directionJoueur = Joueur.Directions.diagBasDroite;
                     }
                     else if (this.keyBufferBas && this.keyBufferGauche)
                     {
@@ -237,7 +236,7 @@ namespace Froggun
                         this.deplacerGauche = true;
                         this.deplacerHaut = false;
                         this.deplacerDroite = false;
-                        this.directionJoueur = Joueur.Directions.diagDownLeft;
+                        this.directionJoueur = Joueur.Directions.diagBasGauche;
                     }
                     else if (this.keyBufferHaut)
                     {
@@ -245,7 +244,7 @@ namespace Froggun
                         this.deplacerBas = false;
                         this.deplacerGauche = false;
                         this.deplacerDroite = false;
-                        this.directionJoueur = Joueur.Directions.up;
+                        this.directionJoueur = Joueur.Directions.haut;
                     }
                     else if (this.keyBufferBas)
                     {
@@ -253,7 +252,7 @@ namespace Froggun
                         this.deplacerHaut = false;
                         this.deplacerGauche = false;
                         this.deplacerDroite = false;
-                        this.directionJoueur = Joueur.Directions.down;
+                        this.directionJoueur = Joueur.Directions.bas;
                     }
                     else if (this.keyBufferDroite)
                     {
@@ -261,7 +260,7 @@ namespace Froggun
                         this.deplacerGauche = false;
                         this.deplacerHaut = false;
                         this.deplacerBas = false;
-                        this.directionJoueur = Joueur.Directions.right;
+                        this.directionJoueur = Joueur.Directions.droite;
                     }
                     else if (this.keyBufferGauche)
                     {
@@ -269,7 +268,7 @@ namespace Froggun
                         this.deplacerDroite = false;
                         this.deplacerHaut = false;
                         this.deplacerBas = false;
-                        this.directionJoueur = Joueur.Directions.left;
+                        this.directionJoueur = Joueur.Directions.gauche;
                     }
                 }
             }
@@ -293,8 +292,8 @@ namespace Froggun
                 }
 
                 // Corrige la vitesse du joueur si il bouge en diagonale (car sqrt(2) = 1.4 et pas 1)
-                if (directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagUpRight ||
-                    directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight)
+                if (directionJoueur == Directions.diagHautGauche || directionJoueur == Directions.diagHautDroite ||
+                    directionJoueur == Directions.diagBasGauche || directionJoueur == Directions.diagBasDroite)
                 {
                     nouvelleVitesseJoueur.X *= correctionVitesseDiagonal;
                     nouvelleVitesseJoueur.Y *= correctionVitesseDiagonal;
@@ -336,31 +335,31 @@ namespace Froggun
             if (estEnRoulade) return;
 
             // Corrige la direction du joueur
-            if (deplacerBas && deplacerDroite)       directionJoueur = Directions.diagDownRight;
-            else if (deplacerBas && deplacerGauche)  directionJoueur = Directions.diagDownLeft;
-            else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagUpRight;
-            else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagUpLeft;
-            else if (deplacerDroite)                 directionJoueur = Directions.right;
-            else if (deplacerGauche)                 directionJoueur = Directions.left;
-            else if (deplacerBas)                    directionJoueur = Directions.down;
-            else if (deplacerHaut)                   directionJoueur = Directions.up;
+            if (deplacerBas && deplacerDroite)       directionJoueur = Directions.diagBasDroite;
+            else if (deplacerBas && deplacerGauche)  directionJoueur = Directions.diagBasGauche;
+            else if (deplacerHaut && deplacerDroite) directionJoueur = Directions.diagHautDroite;
+            else if (deplacerHaut && deplacerGauche) directionJoueur = Directions.diagHautGauche;
+            else if (deplacerDroite)                 directionJoueur = Directions.droite;
+            else if (deplacerGauche)                 directionJoueur = Directions.gauche;
+            else if (deplacerBas)                    directionJoueur = Directions.bas;
+            else if (deplacerHaut)                   directionJoueur = Directions.haut;
 
             // Inverse l'image du joueur si nécessaire
-            doitFlip = (directionJoueur == Directions.left || directionJoueur == Directions.diagUpLeft || directionJoueur == Directions.diagDownLeft);
+            doitFlip = (directionJoueur == Directions.gauche || directionJoueur == Directions.diagHautGauche || directionJoueur == Directions.diagBasGauche);
             joueurFlip.ScaleX = doitFlip ? 1 : -1;
 
             // Change l'image du joueur dépendament de sa direction
             if (blinkFrame % 2 == 0)
             {
-                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       joueurImage.Source = side;
-                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   joueurImage.Source = back;
-                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) joueurImage.Source = front;
+                if (directionJoueur == Directions.gauche || directionJoueur == Directions.droite)                                                       joueurImage.Source = side;
+                if (directionJoueur == Directions.haut   || directionJoueur == Directions.diagHautGauche   || directionJoueur == Directions.diagHautDroite)   joueurImage.Source = back;
+                if (directionJoueur == Directions.bas || directionJoueur == Directions.diagBasGauche || directionJoueur == Directions.diagBasDroite) joueurImage.Source = front;
             }
             else
             {
-                if (directionJoueur == Directions.left || directionJoueur == Directions.right)                                                       joueurImage.Source = sideHit;
-                if (directionJoueur == Directions.up   || directionJoueur == Directions.diagUpLeft   || directionJoueur == Directions.diagUpRight)   joueurImage.Source = backHit;
-                if (directionJoueur == Directions.down || directionJoueur == Directions.diagDownLeft || directionJoueur == Directions.diagDownRight) joueurImage.Source = frontHit;
+                if (directionJoueur == Directions.gauche || directionJoueur == Directions.droite)                                                       joueurImage.Source = sideHit;
+                if (directionJoueur == Directions.haut   || directionJoueur == Directions.diagHautGauche   || directionJoueur == Directions.diagHautDroite)   joueurImage.Source = backHit;
+                if (directionJoueur == Directions.bas || directionJoueur == Directions.diagBasGauche || directionJoueur == Directions.diagBasDroite) joueurImage.Source = frontHit;
             }
         }
 

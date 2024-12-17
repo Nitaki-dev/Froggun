@@ -276,7 +276,7 @@ namespace Froggun
             canvas.Children.Remove(BarDeVieVide);
             canvas.Children.Remove(BarDeVie);
             ennemis.Remove(e);
-            joueur.score += Math.Round(100 * joueur.scoreMultiplier);
+            joueur.score += Math.Round(100 * joueur.multiplicateurDeScore);
             AjouterUnKillALaSerie(ref joueur, e);
         }
 
@@ -297,10 +297,10 @@ namespace Froggun
         public static void AjouterUnKillALaSerie(ref Joueur joueur, Ennemis e)
         {
             joueur.killStreak++;
-            joueur.killStreakTimer = 5; // you got 5 seconds to get a new kill before it resets 
-            joueur.scoreMultiplier += (e.type == TypeEnnemis.Firefly) ? 0.1 : ((e.type == TypeEnnemis.Spider) ? 0.5 : 1.0);
-            if (joueur.scoreMultiplier<=1) joueur.scoreMultiplier += 1;
-            joueur.scoreMultiplier = Math.Round(joueur.scoreMultiplier, 1);
+            joueur.timerKillstreak = 5; // you got 5 seconds to get a new kill before it resets 
+            joueur.multiplicateurDeScore += (e.type == TypeEnnemis.Firefly) ? 0.1 : ((e.type == TypeEnnemis.Spider) ? 0.5 : 1.0);
+            if (joueur.multiplicateurDeScore<=1) joueur.multiplicateurDeScore += 1;
+            joueur.multiplicateurDeScore = Math.Round(joueur.multiplicateurDeScore, 1);
         }
 
         public void Ralentir(int durationInSeconds)

@@ -11,7 +11,7 @@ namespace Froggun
     {
         private readonly double width;
         private readonly double height;
-        private readonly double minDistance;
+        private readonly double distanceMin;
         private readonly Random random;
 
         // Poisson Disk Sampling https://bost.ocks.org/mike/algorithms/
@@ -19,7 +19,7 @@ namespace Froggun
         {
             this.width = width;
             this.height = height;
-            this.minDistance = minDistance;
+            this.distanceMin = minDistance;
             this.random = seed.HasValue ? new Random(seed.Value) : new Random();
         }
 
@@ -40,7 +40,7 @@ namespace Froggun
         {
             // distance entre les deux extrémités
             double distance = Math.Sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-            int nbrPoints = (int)(distance / minDistance);
+            int nbrPoints = (int)(distance / distanceMin);
 
             // divise le bord en segments égaux pour placer les points
             for (int i = 0; i <= nbrPoints; i++)
@@ -57,7 +57,7 @@ namespace Froggun
         {
             foreach (var point in points)
             {
-                if (Distance(candidate, point) < minDistance) return false;
+                if (Distance(candidate, point) < distanceMin) return false;
             }
             return true;
         }

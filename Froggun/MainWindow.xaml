@@ -28,7 +28,7 @@
                     TileMode="FlipXY" />
             </Canvas.Background>
             <Rectangle
-                x:Name="playerTongue"
+                x:Name="langueJoueur"
                 Canvas.Left="390"
                 Canvas.Top="187"
                 Width="0"
