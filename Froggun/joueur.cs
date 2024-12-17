@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using static Froggun.MainWindow;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 using System.Windows.Controls;
 using System.Numerics;
 using System.Windows.Media;

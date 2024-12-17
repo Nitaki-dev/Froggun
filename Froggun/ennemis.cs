@@ -34,15 +34,17 @@ namespace Froggun
         public int[] indexAnimation { get; set; }
         public Rect hitbox { get; set; }
         public Image image { get; set; }
-        private int indexAnimationActuelle { get; set; }
-        private DispatcherTimer timerAnimation { get; set; }
+        private int currentFrameIndex { get; set; }
+        private double animationTimeElapsed { get; set; }
+        private const double AnimationFrameDuration = 100;
+        private BitmapImage[] frameImages;
         private int vie { get; set; }
         public double maxVie{ get; set; }
         public bool estVivant { get; private set; }
         public bool estEntreEnCollision { get; set; }
         public Rectangle BarDeVieVide { get; set; }
         public Rectangle BarDeVie { get; set; }
-        private static int BarDeVieWidth = 100; // todo change that maybe
+        private static int BarDeVieWidth = 100;
 
         public Ennemis(TypeEnnemis type, double x, double y, double width, double height, double vitesse, Canvas canvas, double multiplicateurDeVitesse = 1.0, Rect Hitbox = new Rect())
         {
@@ -117,10 +119,16 @@ namespace Froggun
                     maxVie = vie;
                     break;
             }
-          
-            indexAnimationActuelle = 0;
+
+            currentFrameIndex = 0;
+            animationTimeElapsed = 0;
             image = new Image { Width = width, Height = height };
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.NearestNeighbor);
+            
+            LoadFrames();
+
+            // https://learn.microsoft.com/fr-fr/dotnet/api/system.windows.media.compositiontarget.rendering?view=windowsdesktop-9.0
+            CompositionTarget.Rendering += OnRendering;
 
             Canvas.SetLeft(image, X);
             Canvas.SetTop(image, Y);
@@ -128,22 +136,31 @@ namespace Froggun
 
             Hitbox = new Rect(X + 5, Y + 5, this.width-10, this.height - 10);
 
-            timerAnimation = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
-            timerAnimation.Tick += AnimationTimer_Tick;
-            timerAnimation.Start();
-        }
-        
-        private void AnimationTimer_Tick(object sender, EventArgs e)
-        {
-            indexAnimationActuelle++;
-            if (indexAnimationActuelle >= indexAnimation.Length) indexAnimationActuelle = 0; 
-            
-            int frame = indexAnimation[indexAnimationActuelle];
-            BitmapImage newImageSource = ObtenirSourceImagePourFrame(frame);
-            image.Source = newImageSource;
         }
 
-        private BitmapImage ObtenirSourceImagePourFrame(int frame)
+        private void LoadFrames()
+        {
+            frameImages = new BitmapImage[indexAnimation.Length];
+            for (int i = 0; i < indexAnimation.Length; i++) frameImages[i] = GetImageSourceForFrame(indexAnimation[i]);
+        }
+
+        private void OnRendering(object sender, EventArgs e)
+        {
+            animationTimeElapsed += 16;
+
+            if (animationTimeElapsed >= AnimationFrameDuration)
+            {
+                currentFrameIndex++;
+                if (currentFrameIndex >= indexAnimation.Length)
+                    currentFrameIndex = 0;
+
+                animationTimeElapsed = 0;
+                int frame = indexAnimation[currentFrameIndex];
+                image.Source = frameImages[currentFrameIndex];
+            }
+        }
+
+        private BitmapImage GetImageSourceForFrame(int frame)
         {
             BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{chemainImage}/{frame}.png"));
             return bitmapImage;
@@ -151,11 +168,10 @@ namespace Froggun
 
         public static void UpdateEnnemis(List<Ennemis> ennemis, List<Balle> balles, Canvas canvas, ref Joueur joueur)
         {
-
-            // Cache bounding box and other frequently used values
             for (int i = 0; i < ennemis.Count; i++)
             {
                 Ennemis ennemi = ennemis[i];
+
                 if (!ennemi.estVivant) continue;
 
                 ennemi.estEntreEnCollision = false;
@@ -276,9 +292,9 @@ namespace Froggun
             canvas.Children.Remove(image);
             canvas.Children.Remove(BarDeVieVide);
             canvas.Children.Remove(BarDeVie);
+            AjouterUnKillALaSerie(ref joueur, e);
             ennemis.Remove(e);
             joueur.score += Math.Round(100 * joueur.multiplicateurDeScore);
-            AjouterUnKillALaSerie(ref joueur, e);
         }
 
         public static void ReccomencerEnnemis(List<Ennemis> ennemis, Canvas canvas)
@@ -298,9 +314,10 @@ namespace Froggun
         public static void AjouterUnKillALaSerie(ref Joueur joueur, Ennemis e)
         {
             joueur.killStreak++;
-            joueur.timerKillstreak = 5; // you got 5 seconds to get a new kill before it resets 
-            joueur.multiplicateurDeScore += (e.type == TypeEnnemis.Firefly) ? 0.1 : ((e.type == TypeEnnemis.Spider) ? 0.5 : 1.0);
-            if (joueur.multiplicateurDeScore<=1) joueur.multiplicateurDeScore += 1;
+            joueur.timerKillstreak = 5; // you got 5 seconds to get a new kill before it resets
+            joueur.multiplicateurDeScore += 0.5;
+            if (joueur.multiplicateurDeScore<=1) joueur.multiplicateurDeScore = 1;
+
             joueur.multiplicateurDeScore = Math.Round(joueur.multiplicateurDeScore, 1);
         }
 

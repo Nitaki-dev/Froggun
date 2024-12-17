@@ -11,6 +11,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Security.Authentication;
 using System.Diagnostics;
+using System.Windows.Interop;
 
 namespace Froggun
 {
@@ -82,6 +83,9 @@ namespace Froggun
         {
             InitializeComponent();
             InitMusique(true);
+
+            RenderOptions.ProcessRenderMode = RenderMode.Default;
+
             // Création de la fenêtre parametre avec un Canvas
             parametre fentreNiveau = new parametre();
             fentreNiveau.Left = fenetreGauche;
@@ -263,6 +267,7 @@ namespace Froggun
             pauseCounter = 0;
             pauseVagues.Start();
         }
+
         
         private void Vague(object? sender, EventArgs e)
         {
@@ -273,10 +278,10 @@ namespace Froggun
             }
 
             pauseCounter++;
-            labelWave.Content = $"Prochainne vague dans {pauseEntreVagues - pauseCounter}!";
-            if (pauseCounter < pauseEntreVagues) return;
-
             labelWave.Content = $"Vague {nombreDeVagues+1}";
+            labelAlerte.Content = $"Prochaine vague dans {pauseEntreVagues - pauseCounter} secondes!";
+            if (pauseCounter < pauseEntreVagues) return;
+            labelAlerte.Content = " ";
             if (difficulte == "facile" && !TousLesEnnemisSontMort()) return;
             nombreDeVagues++;
             
@@ -285,7 +290,6 @@ namespace Froggun
             int nbrMoyenEnnemis;
             int nbrGrandEnnemis;
 
-            // TODO: make this not terrible (redo difficulty spawnrates for the 6th time)
             if (nombreDeVagues <= 3)
             {
                 nbrProies = nombreDeVagues;
@@ -348,7 +352,6 @@ namespace Froggun
 
             if (difficulte == "facile")
             {
-                nbrProies *= 2;
                 nbrPetitEnnemis /= 2;
             }
             if (difficulte == "difficile")
@@ -376,9 +379,7 @@ namespace Froggun
             foreach (Point point in moyens) ennemis.Add(new Ennemis(TypeEnnemis.Spider, point.X, point.Y, 100, 100, 8, canvas));
             foreach (Point point in grands) ennemis.Add(new Ennemis(TypeEnnemis.Squit, point.X, point.Y, 150, 150, 13, canvas));
             foreach (Point point in proiesList) proies.Add(new Proies(TypeProies.Fly, point.X, point.Y, 50, 50, 3, 500, 200, canvas));
-
-            //proies.Add(new Proies(TypeProies.Fly, point.X, point.Y, 50, 50, 3, 500, 200, canvas));
-
+            
             pauseVagues.Stop();
             timerEstActif = false;
         }
@@ -560,7 +561,7 @@ namespace Froggun
             if (pause) return;
             Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
             stopwatch.Start();
-
+            
             // bossfight
             if ((nombreDeVagues + 1) % 9 == 0)
             {
@@ -581,6 +582,7 @@ namespace Froggun
 
             Ennemis.UpdateEnnemis(ennemis, Balles, canvas , ref joueur);
             Proies.UpdateProies(canvas, proies, joueur.hitbox);
+            
             if (this.estEnCombatAvecBoss && this.estBossApparu)
             {
                 mante.UpdateBossMante(Balles, joueur);
@@ -604,7 +606,7 @@ namespace Froggun
             joueur.UpdatePositionJoueur(canvas);
 
             stopwatch.Stop();
-            //Console.WriteLine($"FPS: {Math.Round(1000.0/stopwatch.Elapsed.TotalMilliseconds)}  {stopwatch.Elapsed} aka {stopwatch.Elapsed.TotalMilliseconds}ms");
+            Console.WriteLine($"FPS: {Math.Round(1000.0 / stopwatch.Elapsed.TotalMilliseconds)}  {stopwatch.Elapsed} aka {stopwatch.Elapsed.TotalMilliseconds}ms");
         }
 
         private async Task startBoss()
