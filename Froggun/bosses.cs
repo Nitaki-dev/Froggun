@@ -110,7 +110,7 @@ namespace Froggun
             for (int j = 0; j < balles.Count; j++)
             {
                 Balle balle = balles[j];
-                if (balle.hasHit) continue;
+                if (balle.aToucher) continue;
 
                 Rect rImgBalle = new Rect(balle.X, balle.Y, 25, 25);
 
@@ -119,8 +119,8 @@ namespace Froggun
                     // damage the boss
                     DamageMantis(joueur.degats);
                     balles.RemoveAt(j);
-                    balle.hasHit = true;
-                    canvas.Children.Remove(balle.BalleImage);
+                    balle.aToucher = true;
+                    canvas.Children.Remove(balle.balleImage);
 
                     break;
                 }
