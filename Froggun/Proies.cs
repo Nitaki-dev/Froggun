@@ -21,8 +21,8 @@ namespace Froggun
         public TypeProies type { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
+        public double largeur { get; set; }
+        public double hauteur { get; set; }
         public double Vitesse { get; set; }
         public double delayAvantNouvellePosition { get; set; }
         public int distanceMaxNouvellePosition { get; set; }
@@ -43,9 +43,9 @@ namespace Froggun
         {
             X = x;
             Y = y;
-            Width = width;
-            Height = height;
-            Vitesse = speed;
+            this.largeur = largeur;
+            this.hauteur = hauteur;
+            Vitesse = vitesse;
             distanceMaxNouvellePosition = newPosOffset;
             this.canvas = canvas;
 
@@ -72,8 +72,8 @@ namespace Froggun
             canvas.Children.Add(Image);
 
             this.Hitbox = new Rectangle {
-                Width = width-10,
-                Height = height-10,
+                Width = largeur-10,
+                Height = hauteur-10,
                 Stroke = Brushes.Red,
                 StrokeThickness = 1
             };
