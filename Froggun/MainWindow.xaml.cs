@@ -20,8 +20,8 @@ namespace Froggun
     public partial class MainWindow : Window
     {
         public static int fenetreGauche = 100;
-        public static int fenetreHaut = 100;
         public const int WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 720;
+        public static int fenetreHaut = 100;
 
         private static Random alea = new Random();
 
@@ -53,7 +53,6 @@ namespace Froggun
         private static BitmapImage imgFrogSideHit;
 
         private static BitmapImage[] imgExplosion = new BitmapImage[6];
-
         private static BitmapImage imgMantis;
 
         private List<Balle> Balles = new List<Balle>();
@@ -61,7 +60,7 @@ namespace Froggun
         private List<Proies> proies = new List<Proies>();
         public static string difficulte;
         public static int bulletOffset = 0;
-        int pauseEntreVagues = 1; // en secondes
+        int pauseEntreVagues = 5; // en secondes
         int pauseCounter = 0;
         int waveCount = 0;
         private bool isTimerRunning = false;
@@ -76,11 +75,11 @@ namespace Froggun
 
         private Joueur joueur;
 
-        private MantisBosses mantis;
+        private BossMante mantis;
         public MainWindow()
         {
             InitializeComponent();
-
+            InitMusique(true);
             // Création de la fenêtre parametre avec un Canvas
             parametre fentreNiveau = new parametre();
             fentreNiveau.Left = fenetreGauche;
@@ -176,8 +175,8 @@ namespace Froggun
                 fentreDifficulte.Top = fenetreHaut;
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
-                //InitMusique(false);
-                //InitMusiqueJeux(true);
+                InitMusique(false);
+                InitMusiqueJeux(true);
                 this.Left = fenetreGauche;
                 this.Top = fenetreHaut;
             }
@@ -186,39 +185,36 @@ namespace Froggun
             lab_Defaite.Visibility = Visibility.Collapsed;
 
             InitImage();
-            //InitMusique(true);
 
-            Rect playerRect = new Rect(Canvas.GetLeft(player), Canvas.GetTop(player), player.Width, player.Height);
-            joueur = new Joueur(player, playerRect, 640 - (int)player.Width/2, 360 - (int)player.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
+            Rect playerRect = new Rect(Canvas.GetLeft(joueurImage), Canvas.GetTop(joueurImage), joueurImage.Width, joueurImage.Height);
+            joueur = new Joueur(joueurImage, playerRect, 640 - (int)joueurImage.Width/2, 360 - (int)joueurImage.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
 
             InitialiserMinuterie();
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
-            RenderOptions.SetBitmapScalingMode(player, BitmapScalingMode.NearestNeighbor);
+            RenderOptions.SetBitmapScalingMode(joueurImage, BitmapScalingMode.NearestNeighbor);
             Measure(new Size(WINDOW_WIDTH, WINDOW_HEIGHT));
             Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
 
-            ChangeBackground("img/arena/arena_unaltered.png");
+            ChangerFond("img/arena/arena_unaltered.png");
         }
-
         private void InitMusique(bool jouer)
         {
             if (jouer)
             {
                 musiqueDeFond = new MediaPlayer();
-                musiqueDeFond.Open(new Uri("son/intro.mp3", UriKind.Relative));
+                musiqueDeFond.Open(new Uri("/son/intro.mp3", UriKind.Relative));
+                musiqueDeFond.Volume = Properties.Settings.Default.Volume;
+                Console.WriteLine(Properties.Settings.Default.Volume);
                 musiqueDeFond.MediaEnded += RelanceMusique;
                 musiqueDeFond.Play();
             }
-            else
-            {
-                musiqueDeFond.Stop();
-            }
-
+            else musiqueDeFond.Stop();
         }
-        
+
         private void RelanceMusique(object? sender, EventArgs e)
         {
             musiqueDeFond.Position = TimeSpan.Zero;
+            musiqueDeFond.Volume = Properties.Settings.Default.Volume;
             musiqueDeFond.Play();
         }
 
@@ -227,21 +223,18 @@ namespace Froggun
             if (jouer)
             {
                 musiqueDeJeu = new MediaPlayer();
-                musiqueDeJeu.Open(new Uri("son/son_jeu.mp3", UriKind.Relative));
+                musiqueDeJeu.Open(new Uri("/son/son_jeu.mp3", UriKind.Relative));
                 musiqueDeJeu.MediaEnded += RelanceMusiqueJeux;
-                musiqueDeJeu.Volume = 1.0;
+                musiqueDeJeu.Volume = Properties.Settings.Default.Volume; 
                 musiqueDeJeu.Play();
             }
-            else
-            {
-                musiqueDeJeu.Stop();
-            }
-
+            else musiqueDeJeu.Stop();
         }
         
         private void RelanceMusiqueJeux(object? sender, EventArgs e)
         {
             musiqueDeJeu.Position = TimeSpan.Zero;
+            musiqueDeJeu.Volume = Properties.Settings.Default.Volume;
             musiqueDeJeu.Play();
         }
 
@@ -249,9 +242,9 @@ namespace Froggun
         {
             if (isTimerRunning || fightingBoss) return;
             isTimerRunning = true;
-            
-            //if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
-            //else pauseEntreVagues = 10;
+
+            if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
+            else pauseEntreVagues = 10;
 
             pauseVagues = new DispatcherTimer();
             pauseVagues.Interval = TimeSpan.FromSeconds(1);
@@ -273,7 +266,7 @@ namespace Froggun
             if (pauseCounter < pauseEntreVagues) return;
 
             labelWave.Content = $"Vague {waveCount+1}";
-            if (difficulte == "facile" && !AreAllEnemiesDestroyed()) return;
+            if (difficulte == "facile" && !TousLesEnnemisSontMort()) return;
             waveCount++;
             
             int nbrPetitEnnemis;
@@ -281,24 +274,67 @@ namespace Froggun
             int nbrGrandEnnemis;
 
             // TODO: make this not terrible (redo difficulty spawnrates for the 6th time)
-            if (waveCount <= 5)
+            if (waveCount <= 3)
             {
                 nbrPetitEnnemis = waveCount * 3;
-                nbrMoyenEnnemis = 0;
+                nbrMoyenEnnemis = 1;
+                nbrGrandEnnemis = 0;
+            }
+            else if (waveCount <= 5)
+            {
+                nbrPetitEnnemis = waveCount * 3;
+                nbrMoyenEnnemis = 2;
                 nbrGrandEnnemis = 0;
             }
             else if (waveCount <= 8)
             {
-                nbrPetitEnnemis = (waveCount-3)*2;
-                nbrMoyenEnnemis = (waveCount - 7) * 2;
-                nbrGrandEnnemis = 0;
+                nbrPetitEnnemis = waveCount * 2;
+                nbrMoyenEnnemis = waveCount / 2 + 1;
+                nbrGrandEnnemis = waveCount / 8;
+            }
+            else if (waveCount <= 13)
+            {
+                nbrPetitEnnemis = waveCount;
+                nbrMoyenEnnemis = waveCount;
+                nbrGrandEnnemis = 2;
+            }
+            else if (waveCount <= 21)
+            {
+                nbrPetitEnnemis = waveCount * 2;
+                nbrMoyenEnnemis = waveCount - 3;
+                nbrGrandEnnemis = 1;
             }
             else
             {
-                nbrPetitEnnemis = waveCount;
-                nbrMoyenEnnemis = (waveCount - 5);
-                nbrGrandEnnemis = (waveCount - 8) * 1;
+                nbrPetitEnnemis = 35+(waveCount-21)/2;
+                nbrMoyenEnnemis = 20+(waveCount-21)/3;
+                nbrGrandEnnemis = 2+(waveCount-21)/5;
+                if (waveCount % 4 == 0)
+                {
+                    nbrPetitEnnemis = nbrPetitEnnemis - 6;
+                    nbrMoyenEnnemis = nbrMoyenEnnemis + 3;
+                }
+                else if (waveCount % 3 == 0)
+                {
+                    nbrPetitEnnemis = nbrPetitEnnemis - 10;
+                    nbrMoyenEnnemis = nbrMoyenEnnemis - 4;
+                    nbrGrandEnnemis = nbrGrandEnnemis + 2;
+                }
+                else if (waveCount % 2 == 0)
+                {
+                    nbrPetitEnnemis = nbrPetitEnnemis + 11;
+                    nbrMoyenEnnemis = nbrMoyenEnnemis + 7;
+                    nbrGrandEnnemis = 0;
+                }
             }
+
+            if (difficulte == "facile") nbrPetitEnnemis /= 2;
+            if (difficulte == "difficile")
+            {
+                nbrMoyenEnnemis *= 2;
+                nbrGrandEnnemis += 2;
+            }
+
 
             // poisson disk sampling (voir Sampling.cs)
             Sampler sampler = new Sampler(1260, 680, 50);
@@ -324,7 +360,7 @@ namespace Froggun
             isTimerRunning = false;
         }
 
-        private bool AreAllEnemiesDestroyed()
+        private bool TousLesEnnemisSontMort()
         {
             return ennemis.Count == 0 && proies.Count == 0;
         }
@@ -366,14 +402,37 @@ namespace Froggun
             imgMantis = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/mantis.png"));
         }
 
-        private void UpdateMousePosition()
+        //private void RandomPointInEllipse()
+        //{
+        //    // Define ellipse center and radii
+        //    Point center = new Point(1280 / 2, 720 / 2);
+        //    double xRadius = 1280 / 2;
+        //    double yRadius = 720 / 2;
+        //
+        //    // Generate a random angle between 0 and 2π
+        //    Random random = new Random();
+        //    double angle = 2 * Math.PI * random.NextDouble();
+        //
+        //    // Generate a random radius factor between 0 and 1
+        //    double radiusFactor = Math.Sqrt(random.NextDouble()); // sqrt to make points more densely packed near the center
+        //
+        //    // Scale the random radius to the ellipse's axes
+        //    double x = center.X + radiusFactor * xRadius * Math.Cos(angle);
+        //    double y = center.Y + radiusFactor * yRadius * Math.Sin(angle);
+        //
+        //    Point pos = new Point(x, y);
+        //
+        //    BitmapImage source = (random.Next(2) == 1) ? imgGrass1 : imgGrass2;
+        //}
+
+        private void UpdatePositionSouris()
         {
             // Get the mouse position once and calculate the direction to player center
             Point mousePos = Mouse.GetPosition(canvas);
 
             Vector2 posCentreJoueur = new Vector2(
-                (float)(joueur.posJoueur.X + player.Width / 2.0f),
-                (float)(joueur.posJoueur.Y + player.Height / 2.0f)
+                (float)(joueur.posJoueur.X + joueurImage.Width / 2.0f),
+                (float)(joueur.posJoueur.Y + joueurImage.Height / 2.0f)
             );
 
             Vector2 direction = new Vector2(
@@ -397,11 +456,11 @@ namespace Froggun
             
 
             // Update positions for both the weapon and tongue
-            UpdateWeaponPosition(mousePos, posCentreJoueur, directionSouris);
-            UpdateTonguePosition(mousePos, posCentreJoueur, directionSouris);
+            UpdatePositionArme(mousePos, posCentreJoueur, directionSouris);
+            UpdatePositionLangue(mousePos, posCentreJoueur, directionSouris);
         }
 
-        private void UpdateWeaponPosition(Point mousePos, Vector2 posCentreJoueur, Vector2 directionSouris)
+        private void UpdatePositionArme(Point mousePos, Vector2 posCentreJoueur, Vector2 directionSouris)
         {
             // Calculate weapon position around the player
             float distanceJoueurSouris = Vector2.Distance(posCentreJoueur, new Vector2((float)mousePos.X, (float)mousePos.Y));
@@ -424,7 +483,7 @@ namespace Froggun
             Canvas.SetLeft(gun, posArme.X);
         }
 
-        private void UpdateTonguePosition(Point mousePos, Vector2 posCentreJoueur, Vector2 directionSouris)
+        private void UpdatePositionLangue(Point mousePos, Vector2 posCentreJoueur, Vector2 directionSouris)
         {
             // Set tongue rotation based on the calculated angle
             RotateTransform rotationArme = new RotateTransform(currentAngle);
@@ -435,7 +494,7 @@ namespace Froggun
             Canvas.SetLeft(playerTongue, posCentreJoueur.X);
         }
 
-        public static bool TryGetIntersection(Line line1, Line line2, out Point intersection)
+        public static bool IntersectionLigneLigne(Line line1, Line line2, out Point intersection)
         {
             // explication: https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
             Point p = new Point(line1.X1, line1.Y1);
@@ -506,13 +565,13 @@ namespace Froggun
         private void Loop(object? sender, EventArgs e)
         {
             if (pause) return;
-            //Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
-            //stopwatch.Start();
+            Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
+            stopwatch.Start();
 
             if (waveCount == 1)
             {
                 // bossfight
-                if (!fightingBoss && AreAllEnemiesDestroyed()) startBoss();
+                if (!fightingBoss && TousLesEnnemisSontMort()) startBoss();
             }
             else
             {
@@ -527,20 +586,20 @@ namespace Froggun
                 }
             }
 
-
             Ennemis.UpdateEnnemis(ennemis, Balles, canvas , ref joueur);
             Proies.UpdateProies(canvas, proies, joueur.hitbox);
             if (this.fightingBoss && this.bossSpawned)
             {
-                mantis.UpdateMantisBoss(Balles, joueur);
+                mantis.UpdateBossMante(Balles, joueur);
 
-                if (!mantis.isAlive)
+                if (!mantis.estVivant)
                 {
                     this.fightingBoss = false;
                     this.bossSpawned = false;
                     waveCount++;
                 }
             }
+
             AfficheScore();
             AfficheCombo();
 
@@ -548,11 +607,11 @@ namespace Froggun
             CheckBallesSortieEcran();
             CheckCollisionProie();
             if (!joueur.estEnRoulade) joueur.ChangeJoueurDirection();
-            UpdateMousePosition();
-            joueur.UpdatePositionJoueur();
+            UpdatePositionSouris();
+            joueur.UpdatePositionJoueur(canvas);
 
-            //stopwatch.Stop();
-            //Console.WriteLine($"{stopwatch.Elapsed}");
+            stopwatch.Stop();
+            Console.WriteLine($"FPS: {Math.Round(1000.0/stopwatch.Elapsed.TotalMilliseconds)}  {stopwatch.Elapsed} aka {stopwatch.Elapsed.TotalMilliseconds}ms");
         }
 
         private async Task startBoss()
@@ -561,15 +620,15 @@ namespace Froggun
             this.bossSpawned = false;
 
             await Task.Delay(500);
-            Explostions(100, 100, 500); 
-            Explostions(300, 100, 500); 
-            Explostions(500, 100, 500);
-            Explostions(700, 100, 500);
-            Explostions(900, 100, 500);
-            Explostions(1100, 100, 500);
-            ChangeBackground("img/arena/arena_broken_top.png");
+            Explosions(100, 100, 500); 
+            Explosions(300, 100, 500); 
+            Explosions(500, 100, 500);
+            Explosions(700, 100, 500);
+            Explosions(900, 100, 500);
+            Explosions(1100, 100, 500);
+            ChangerFond("img/arena/arena_broken_top.png");
             await Task.Delay(300);
-            mantis = new MantisBosses(canvas, imgMantis, joueur, 4000, 215, 266);
+            mantis = new BossMante(canvas, imgMantis, joueur, 4000, 215, 266);
             await Task.Delay(400);
 
             // todo: restrict players movement
@@ -577,7 +636,7 @@ namespace Froggun
             this.bossSpawned = true;
         }
 
-        private void ChangeBackground(string path)
+        private void ChangerFond(string path)
         {
             var imageBrush = new ImageBrush
             {
@@ -590,7 +649,7 @@ namespace Froggun
             canvas.Background = imageBrush;
         }
 
-        private void Explostions(int x, int y, int size)
+        private void Explosions(int x, int y, int size)
         {
             Image boom = new Image();
             boom.Width = size;
@@ -604,11 +663,9 @@ namespace Froggun
             animationTimer.Interval = TimeSpan.FromMilliseconds(100);
             int frame=0, maxFrames = 5;
 
-            animationTimer.Tick += (e,s) =>
-            {
+            animationTimer.Tick += (e,s) => {
                 frame++;
-                if (frame >= maxFrames)
-                {
+                if (frame >= maxFrames) {
                     animationTimer.Stop();
                     canvas.Children.Remove(boom);
                 }
@@ -619,16 +676,14 @@ namespace Froggun
 
         private void AffichageDeVie(int nombreDeVie)
         {
-            if (nombreDeVie <= 0)
+            if (nombreDeVie <= -1)
             {
                 Console.WriteLine("Mort");
                 ImgvieJoueur.Source = imageVie0;
                 pause = true;
                 lab_Defaite.Visibility = Visibility.Visible;
                 mort(nombreDeVie);
-            }
-            else
-            {
+            } else {
                 if (nombreDeVie == 5) ImgvieJoueur.Source = imageVie5;
                 else if (nombreDeVie == 4) ImgvieJoueur.Source = imageVie4;
                 else if (nombreDeVie == 3) ImgvieJoueur.Source = imageVie3;
@@ -673,6 +728,14 @@ namespace Froggun
             pauseVagues.Stop();
             pauseCounter = 0;
             pause = false;
+            joueur.deplacerGauche = false;
+            joueur.deplacerDroite = false;
+            joueur.deplacerHaut = false;
+            joueur.deplacerBas = false;
+            joueur.keyBufferGauche = false;
+            joueur.keyBufferDroite = false;
+            joueur.keyBufferHaut = false;
+            joueur.keyBufferBas = false;
             lab_Defaite.Visibility = Visibility.Collapsed;
             minuterie.Start();
             pauseVagues.Start();
@@ -684,11 +747,11 @@ namespace Froggun
             {
                 Balle balle = Balles[i];
                 balle.UpdatePositionBalles();
-                if (balle.X < -balle.BalleImage.ActualWidth || balle.Y < -balle.BalleImage.ActualHeight
+                if (balle.X < -balle.balleImage.ActualWidth || balle.Y < -balle.balleImage.ActualHeight
                     || balle.X > grid.ActualWidth || balle.Y > grid.ActualHeight)
                 {
                     Balles.RemoveAt(i);
-                    canvas.Children.Remove(balle.BalleImage);
+                    canvas.Children.Remove(balle.balleImage);
                 }
             }
         }
@@ -783,15 +846,15 @@ namespace Froggun
                             Y2 = y,
                         };
 
-                        if (TryGetIntersection(line_frog_1, line_AB, out intersection)
-                            || TryGetIntersection(line_frog_1, line_BD, out intersection)
-                            || TryGetIntersection(line_frog_1, line_DC, out intersection)
-                            || TryGetIntersection(line_frog_1, line_CA, out intersection)
+                        if (IntersectionLigneLigne(line_frog_1, line_AB, out intersection)
+                            || IntersectionLigneLigne(line_frog_1, line_BD, out intersection)
+                            || IntersectionLigneLigne(line_frog_1, line_DC, out intersection)
+                            || IntersectionLigneLigne(line_frog_1, line_CA, out intersection)
 
-                            || TryGetIntersection(line_frog_2, line_AB, out intersection)
-                            || TryGetIntersection(line_frog_2, line_BD, out intersection)
-                            || TryGetIntersection(line_frog_2, line_DC, out intersection)
-                            || TryGetIntersection(line_frog_2, line_CA, out intersection))
+                            || IntersectionLigneLigne(line_frog_2, line_AB, out intersection)
+                            || IntersectionLigneLigne(line_frog_2, line_BD, out intersection)
+                            || IntersectionLigneLigne(line_frog_2, line_DC, out intersection)
+                            || IntersectionLigneLigne(line_frog_2, line_CA, out intersection))
                         {
                             expensionLangue = false;
 
@@ -832,6 +895,7 @@ namespace Froggun
             Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
             Stream audioStream = Application.GetResourceStream(audioUri).Stream;
             // Créer un objet SoundPlayer pour lire le son
+
             SoundPlayer musique = new SoundPlayer(audioStream);
 
             musique.Play();
@@ -847,9 +911,6 @@ namespace Froggun
 
             musique.Play();
         }
-
-
-
 
         private void ShootGun()
         {
@@ -879,7 +940,7 @@ namespace Froggun
 
         private void keydown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.D && !pause)
+            if (e.Key == Touche.ToucheGauche && !pause)
             {
                 joueur.keyBufferDroite = true;
                 joueur.keyBufferGauche = false;
@@ -890,7 +951,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.right;
                 }
             }
-            if ((e.Key == Key.Q || e.Key == Key.A) && !pause)
+            if (e.Key == Touche.ToucheDroite && !pause)
             {
                 joueur.keyBufferGauche = true;
                 joueur.keyBufferDroite = false;
@@ -901,7 +962,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.left;
                 }
             }
-            if (e.Key == Key.S && !pause)
+            if (e.Key == Touche.ToucheBas && !pause)
             {
                 joueur.keyBufferBas = true;
                 joueur.keyBufferHaut = false;
@@ -912,7 +973,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.down;
                 }
             }
-            if ((e.Key == Key.Z || e.Key == Key.W) && !pause)
+            if (e.Key == Touche.ToucheHaut && !pause)
             {
                 joueur.keyBufferHaut = true;
                 joueur.keyBufferBas = false;
@@ -923,7 +984,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.up;
                 }
             }
-            if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
+            if (e.Key == Touche.ToucheRoulade && !pause)
             {
                 joueur.estEnRoulade = true;
             }
@@ -933,7 +994,7 @@ namespace Froggun
                 ennemis.Add(new Ennemis(TypeEnnemis.Spider, joueur.posJoueur.X + 60, joueur.posJoueur.Y + 60, 100, 100, 8, canvas));
             }
 
-            if (e.Key == Key.Escape || e.Key == Key.Space )
+            if (e.Key == Touche.TouchePause)
             {
                 // dont let the player pause during a bossfight
                 if (fightingBoss) return;
@@ -948,22 +1009,22 @@ namespace Froggun
 
         private void keyup(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.D)
+            if (e.Key == Touche.ToucheGauche)
             {
                 joueur.deplacerDroite = false;
                 joueur.keyBufferDroite = false;
             }
-            if (e.Key == Key.Q || e.Key == Key.A)
+            if (e.Key == Touche.ToucheDroite)
             {
                 joueur.keyBufferGauche = false;
                 joueur.deplacerGauche = false;
             }
-            if (e.Key == Key.S)
+            if (e.Key == Touche.ToucheBas)
             {
                 joueur.deplacerBas = false;
                 joueur.keyBufferBas = false;
             }
-            if (e.Key == Key.Z || e.Key == Key.W)
+            if (e.Key == Touche.ToucheHaut)
             {
                 joueur.deplacerHaut = false;
                 joueur.keyBufferHaut = false;

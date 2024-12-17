@@ -28,32 +28,32 @@ namespace Froggun
             var points = new List<Point>();
 
             // sample points
-            AddEdgePoints(0, 0, width, 0, points); // top
-            AddEdgePoints(0, height, width, height, points); // bottom
-            AddEdgePoints(0, 0, 0, height, points); // left
-            AddEdgePoints(width, 0, width, height, points); // right
+            AjouterDesPointsAuBord(0, 0, width, 0, points); // top
+            AjouterDesPointsAuBord(0, height, width, height, points); // bottom
+            AjouterDesPointsAuBord(0, 0, 0, height, points); // left
+            AjouterDesPointsAuBord(width, 0, width, height, points); // right
 
             return points;
         }
 
-        private void AddEdgePoints(double x1, double y1, double x2, double y2, List<Point> points)
+        private void AjouterDesPointsAuBord(double x1, double y1, double x2, double y2, List<Point> points)
         {
             // distance entre les deux extrémités
             double distance = Math.Sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-            int numPoints = (int)(distance / minDistance);
+            int nbrPoints = (int)(distance / minDistance);
 
             // divise le bord en segments égaux pour placer les points
-            for (int i = 0; i <= numPoints; i++)
+            for (int i = 0; i <= nbrPoints; i++)
             {
-                double t = (double)i / numPoints;
+                double t = (double)i / nbrPoints;
                 double x = x1 + t * (x2 - x1);
                 double y = y1 + t * (y2 - y1);
 
-                if (estAssezLoin(new Point(x, y), points)) points.Add(new Point(x, y));
+                if (EstAssezLoin(new Point(x, y), points)) points.Add(new Point(x, y));
             }
         }
 
-        private bool estAssezLoin(Point candidate, List<Point> points)
+        private bool EstAssezLoin(Point candidate, List<Point> points)
         {
             foreach (var point in points)
             {
