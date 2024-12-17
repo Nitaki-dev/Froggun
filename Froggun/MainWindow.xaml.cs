@@ -110,6 +110,7 @@ namespace Froggun
                             // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
                             if (fentrechoixTouche.DialogResult == false)
                             {
+                                musiqueDeFond.Volume = Properties.Settings.Default.Volume;
                                 // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
                                 fentreNiveau = new parametre();  // Nouvelle instance de parametre
                                 fentreNiveau.Left = fenetreGauche;
@@ -211,7 +212,6 @@ namespace Froggun
                     musiqueDeFond = new MediaPlayer();
                     musiqueDeFond.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/intro.mp3"));
                     musiqueDeFond.Volume = Properties.Settings.Default.Volume;
-                    Console.WriteLine(Properties.Settings.Default.Volume);
                     musiqueDeFond.MediaEnded += RelanceMusique;
                     musiqueDeFond.Play();
                 }catch(Exception ex) {Console.WriteLine(ex.ToString());}
