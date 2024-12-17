@@ -869,6 +869,67 @@ namespace Froggun
                             }
                         }
                     }
+                    foreach (Ennemis ennemie in ennemis.ToList())
+                    {
+                        double x = ennemie.X;
+                        double y = ennemie.Y;
+
+                        /*
+                        *   A--------B 
+                        *   |        |
+                        *   |        |
+                        *   C--------D
+                        */
+
+                        Point intersection;
+                        Line line_AB = new Line
+                        {
+                            X1 = x,
+                            Y1 = y,
+                            X2 = x + ennemie.width,
+                            Y2 = y,
+                        };
+
+                        Line line_BD = new Line
+                        {
+                            X1 = x + ennemie.width,
+                            Y1 = y,
+                            X2 = x + ennemie.width,
+                            Y2 = y + ennemie.height,
+                        };
+
+                        Line line_DC = new Line
+                        {
+                            X1 = x + ennemie.width,
+                            Y1 = y + ennemie.height,
+                            X2 = x,
+                            Y2 = y + ennemie.height,
+                        };
+
+                        Line line_CA = new Line
+                        {
+                            X1 = x,
+                            Y1 = y + ennemie.height,
+                            X2 = x,
+                            Y2 = y,
+                        };
+
+                        if (IntersectionLigneLigne(line_frog_1, line_AB, out intersection)
+                            || IntersectionLigneLigne(line_frog_1, line_BD, out intersection)
+                            || IntersectionLigneLigne(line_frog_1, line_DC, out intersection)
+                            || IntersectionLigneLigne(line_frog_1, line_CA, out intersection)
+
+                            || IntersectionLigneLigne(line_frog_2, line_AB, out intersection)
+                            || IntersectionLigneLigne(line_frog_2, line_BD, out intersection)
+                            || IntersectionLigneLigne(line_frog_2, line_DC, out intersection)
+                            || IntersectionLigneLigne(line_frog_2, line_CA, out intersection))
+                        {
+                            expensionLangue = false;
+
+                            joueur.nombreDeVie--;
+                            joueur.score -= 500;
+                        }
+                    }
                     if (expensionLangue) langueJoueur.Width += expensionLangueVitesse;
                 }
                 else
