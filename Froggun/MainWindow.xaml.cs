@@ -206,12 +206,15 @@ namespace Froggun
         {
             if (jouer)
             {
-                musiqueDeFond = new MediaPlayer();
-                musiqueDeFond.Open(new Uri("/son/intro.mp3", UriKind.Relative));
-                musiqueDeFond.Volume = Properties.Settings.Default.Volume;
-                Console.WriteLine(Properties.Settings.Default.Volume);
-                musiqueDeFond.MediaEnded += RelanceMusique;
-                musiqueDeFond.Play();
+                try
+                {
+                    musiqueDeFond = new MediaPlayer();
+                    musiqueDeFond.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/intro.mp3"));
+                    musiqueDeFond.Volume = Properties.Settings.Default.Volume;
+                    Console.WriteLine(Properties.Settings.Default.Volume);
+                    musiqueDeFond.MediaEnded += RelanceMusique;
+                    musiqueDeFond.Play();
+                }catch(Exception ex) {Console.WriteLine(ex.ToString());}
             }
             else musiqueDeFond.Stop();
         }
@@ -228,7 +231,7 @@ namespace Froggun
             if (jouer)
             {
                 musiqueDeJeu = new MediaPlayer();
-                musiqueDeJeu.Open(new Uri("/son/son_jeu.mp3", UriKind.Relative));
+                musiqueDeJeu.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/son_jeu.mp3"));
                 musiqueDeJeu.MediaEnded += RelanceMusiqueJeux;
                 musiqueDeJeu.Volume = Properties.Settings.Default.Volume; 
                 musiqueDeJeu.Play();
