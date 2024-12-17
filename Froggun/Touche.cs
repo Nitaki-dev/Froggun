@@ -19,7 +19,7 @@ namespace Froggun
             ToucheBas = Key.S;
             ToucheDroite = Key.Q;
             ToucheGauche = Key.D;
-            ToucheRoulade = Key.LeftCtrl;
+            ToucheRoulade = Key.LeftShift;
             TouchePause = Key.Space;
         }
     }

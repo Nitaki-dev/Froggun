@@ -21,8 +21,8 @@ namespace Froggun
         public TypeProies type { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
+        public double largeur { get; set; }
+        public double hauteur { get; set; }
         public double Vitesse { get; set; }
         public double delayAvantNouvellePosition { get; set; }
         public int distanceMaxNouvellePosition { get; set; }
@@ -39,13 +39,13 @@ namespace Froggun
         public double objectifY;
         private DispatcherTimer timerMouvement;
 
-        public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Canvas canvas)
+        public Proies(TypeProies type, double x, double y, double largeur, double hauteur, double vitesse, double newPosDelay, int newPosOffset, Canvas canvas)
         {
             X = x;
             Y = y;
-            Width = width;
-            Height = height;
-            Vitesse = speed;
+            this.largeur = largeur;
+            this.hauteur = hauteur;
+            Vitesse = vitesse;
             distanceMaxNouvellePosition = newPosOffset;
             this.canvas = canvas;
 
@@ -53,7 +53,7 @@ namespace Froggun
             {
                 case TypeProies.Fly:
                     indexAnimation = new int[] { 1, 2 };
-                    chemainImage = "img/ennemis/Food1";
+                    chemainImage = "img/Proies";
                     break;
             }
 
@@ -61,8 +61,8 @@ namespace Froggun
 
             Image = new Image
             {
-                Width = width,
-                Height = height
+                Width = largeur,
+                Height = hauteur
             };
 
             RenderOptions.SetBitmapScalingMode(Image, BitmapScalingMode.NearestNeighbor);
@@ -72,8 +72,8 @@ namespace Froggun
             canvas.Children.Add(Image);
 
             this.Hitbox = new Rectangle {
-                Width = width-10,
-                Height = height-10,
+                Width = largeur-10,
+                Height = hauteur-10,
                 Stroke = Brushes.Red,
                 StrokeThickness = 1
             };
@@ -145,8 +145,8 @@ namespace Froggun
                 double newY = proie.Y + direction.Y * proie.Vitesse;
 
                 // Prevent moving off-screen (adjust position if out of bounds)
-                newX = Math.Max(0, Math.Min(newX, canvas.ActualWidth - proie.Width - 20));
-                newY = Math.Max(0, Math.Min(newY, canvas.ActualHeight - proie.Height - 20));
+                newX = Math.Max(0, Math.Min(newX, canvas.ActualWidth - proie.largeur - 20));
+                newY = Math.Max(0, Math.Min(newY, canvas.ActualHeight - proie.hauteur - 20));
 
                 proie.X = newX;
                 proie.Y = newY;
@@ -154,6 +154,7 @@ namespace Froggun
                 // Update image position
                 Canvas.SetLeft(proie.Image, proie.X);
                 Canvas.SetTop(proie.Image, proie.Y);
+
             }
         }
     }
