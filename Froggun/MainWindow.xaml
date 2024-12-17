@@ -77,6 +77,18 @@
                 FontFamily="72 Black"
                 FontSize="16"
                 Foreground="White" />
+            <Label
+                x:Name="labelAlerte"
+                Canvas.Left="444"
+                Canvas.Top="497"
+                Width="392"
+                Height="90"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Center"
+                Content="Prochaine vague dans 5 secondes!"
+                FontFamily="72 Black"
+                FontSize="22"
+                Foreground="White" />
             <Image
                 Canvas.Left="746"
                 Canvas.Top="128"
@@ -138,6 +150,7 @@
                 FontSize="280"
                 FontWeight="Bold"
                 Foreground="Black" />
+
         </Canvas>
     </Grid>
 </Window>

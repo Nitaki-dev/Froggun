@@ -263,6 +263,7 @@ namespace Froggun
             pauseCounter = 0;
             pauseVagues.Start();
         }
+
         
         private void Vague(object? sender, EventArgs e)
         {
@@ -273,10 +274,10 @@ namespace Froggun
             }
 
             pauseCounter++;
-            labelWave.Content = $"Prochainne vague dans {pauseEntreVagues - pauseCounter}!";
-            if (pauseCounter < pauseEntreVagues) return;
-
             labelWave.Content = $"Vague {nombreDeVagues+1}";
+            labelAlerte.Content = $"Prochaine vague dans {pauseEntreVagues - pauseCounter}secondes !";
+            if (pauseCounter < pauseEntreVagues) return;
+            labelAlerte.Content = " ";
             if (difficulte == "facile" && !TousLesEnnemisSontMort()) return;
             nombreDeVagues++;
             
