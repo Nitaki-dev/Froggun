@@ -53,7 +53,7 @@ namespace Froggun
             {
                 case TypeProies.Fly:
                     indexAnimation = new int[] { 1, 2 };
-                    chemainImage = "img/ennemis/Food1";
+                    chemainImage = "img/Proies";
                     break;
             }
 
@@ -154,6 +154,7 @@ namespace Froggun
                 // Update image position
                 Canvas.SetLeft(proie.Image, proie.X);
                 Canvas.SetTop(proie.Image, proie.Y);
+
             }
         }
     }

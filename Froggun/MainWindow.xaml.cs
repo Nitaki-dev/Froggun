@@ -368,11 +368,13 @@ namespace Froggun
             List<Point> petits = listeDePoints.Take(nbrPetitEnnemis).ToList();
             List<Point> moyens = listeDePoints.Skip(nbrPetitEnnemis).Take(nbrMoyenEnnemis).ToList(); //skip les petits ennemis
             List<Point> grands = listeDePoints.Skip(nbrPetitEnnemis + nbrMoyenEnnemis).Take(nbrGrandEnnemis).ToList(); //skip les petits et moyens ennemis
+            List<Point> proiesList = listeDePoints.Skip(nbrPetitEnnemis + nbrMoyenEnnemis + nbrGrandEnnemis).Take(nbrProies).ToList(); //skip tous les ennemis
 
             // creation des ennemis
             foreach (Point point in petits) ennemis.Add(new Ennemis(TypeEnnemis.Firefly, point.X, point.Y, 50, 50, 12, canvas));
             foreach (Point point in moyens) ennemis.Add(new Ennemis(TypeEnnemis.Spider, point.X, point.Y, 100, 100, 8, canvas));
             foreach (Point point in grands) ennemis.Add(new Ennemis(TypeEnnemis.Squit, point.X, point.Y, 150, 150, 13, canvas));
+            foreach (Point point in proiesList) proies.Add(new Proies(TypeProies.Fly, point.X, point.Y, 50, 50, 3, 500, 200, canvas));
 
             //proies.Add(new Proies(TypeProies.Fly, point.X, point.Y, 50, 50, 3, 500, 200, canvas));
 

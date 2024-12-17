@@ -22,8 +22,15 @@ namespace Froggun
         public aide()
         {
             InitializeComponent();
+            labelGauche.Content = "     - "+Touche.ToucheGauche + " pour déplacer la grenouille vers la gauche.";
+            labelDroite.Content = "     - " + Touche.ToucheDroite + " pour déplacer la grenouille vers la droite.";
+            labelBas.Content = "     - " + Touche.ToucheBas + " pour déplacer la grenouille vers le bas.";
+            labelHaut.Content = "     - " + Touche.ToucheHaut + " pour déplacer la grenouille vers le haut.";
+            labelRoulade.Content = "     - " + Touche.ToucheRoulade + " pour rouler / esquiver et aller plus vite.";
+            labelPause.Content = "     - " + Touche.TouchePause + " pour mettre le jeu en pause.";
         }
 
+        
 
         private void boutonQuitter_Click(object sender, RoutedEventArgs e)
         {
