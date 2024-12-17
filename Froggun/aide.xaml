@@ -30,12 +30,12 @@
             <!--  Titre principal centré  -->
             <Label
                 Content="Instructions de jeu"
-                FontSize="20"
+                FontSize="15"
                 FontWeight="Bold"
                 Foreground="#FFD4D4D4" />
 
             <!--  Contenu principal  -->
-            <Label Content="• Objectif principal : Rester en vie donc ne pas perdre de cœur." Foreground="#FFD4D4D4" />
+            <Label Content="• Objectif principal : Rester en vie donc ne pas perdre de vie." Foreground="#FFD4D4D4" />
 
             <Label
                 Content="• Contrôles :"
@@ -67,13 +67,13 @@
                 x:Name="labelPause"
                 Content="     - 'Espace' pour mettre le jeu en pause."
                 Foreground="#FFD4D4D4" />
-            <Label Content="   o Tirer avec le pistolet : Appuyez sur la touche 'Clique Gauche' pour tirer avec le pistolet." Foreground="#FFD4D4D4" />
-            <Label Content="   o Tirer avec la langue : Appuyez sur la touche 'Clique Droit' pour tirer la langue." Foreground="#FFD4D4D4" />
+            <Label Content="   o Tirer avec le pistolet : 'Clique Gauche' souris pour tirer avec le pistolet." Foreground="#FFD4D4D4" />
+            <Label Content="   o Tirer avec la langue : 'Clique Droit' souris pour tirer la langue." Foreground="#FFD4D4D4" />
         </StackPanel>
 
         <Button
             x:Name="boutonQuitter"
-            Margin="477,268,0,0"
+            Margin="485,282,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
             Click="boutonQuitter_Click"
