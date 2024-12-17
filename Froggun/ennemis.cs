@@ -131,6 +131,9 @@ namespace Froggun
             timerAnimation = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(100) };
             timerAnimation.Tick += AnimationTimer_Tick;
             timerAnimation.Start();
+
+            //BitmapImage newImageSource = ObtenirSourceImagePourFrame(1);
+            //image.Source = newImageSource;
         }
         
         private void AnimationTimer_Tick(object sender, EventArgs e)
@@ -156,6 +159,7 @@ namespace Froggun
             for (int i = 0; i < ennemis.Count; i++)
             {
                 Ennemis ennemi = ennemis[i];
+
                 if (!ennemi.estVivant) continue;
 
                 ennemi.estEntreEnCollision = false;
@@ -271,14 +275,15 @@ namespace Froggun
 
         public void Meurt(List<Ennemis> ennemis, Ennemis e, Canvas canvas, ref Joueur joueur)
         {
+            timerAnimation.Stop();
             estVivant = false;
             image.Visibility = Visibility.Hidden;
             canvas.Children.Remove(image);
             canvas.Children.Remove(BarDeVieVide);
             canvas.Children.Remove(BarDeVie);
+            AjouterUnKillALaSerie(ref joueur, e);
             ennemis.Remove(e);
             joueur.score += Math.Round(100 * joueur.multiplicateurDeScore);
-            AjouterUnKillALaSerie(ref joueur, e);
         }
 
         public static void ReccomencerEnnemis(List<Ennemis> ennemis, Canvas canvas)
@@ -298,9 +303,10 @@ namespace Froggun
         public static void AjouterUnKillALaSerie(ref Joueur joueur, Ennemis e)
         {
             joueur.killStreak++;
-            joueur.timerKillstreak = 5; // you got 5 seconds to get a new kill before it resets 
-            joueur.multiplicateurDeScore += (e.type == TypeEnnemis.Firefly) ? 0.1 : ((e.type == TypeEnnemis.Spider) ? 0.5 : 1.0);
-            if (joueur.multiplicateurDeScore<=1) joueur.multiplicateurDeScore += 1;
+            joueur.timerKillstreak = 5; // you got 5 seconds to get a new kill before it resets
+            joueur.multiplicateurDeScore += 0.5;
+            if (joueur.multiplicateurDeScore<=1) joueur.multiplicateurDeScore = 1;
+
             joueur.multiplicateurDeScore = Math.Round(joueur.multiplicateurDeScore, 1);
         }
 
