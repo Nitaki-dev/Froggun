@@ -151,6 +151,7 @@ namespace Froggun
 
         public static void UpdateEnnemis(List<Ennemis> ennemis, List<Balle> balles, Canvas canvas, ref Joueur joueur)
         {
+
             // Cache bounding box and other frequently used values
             for (int i = 0; i < ennemis.Count; i++)
             {
