@@ -127,7 +127,7 @@ namespace Froggun
             this.score = 0;
             this.killStreak = 0;
             this.timerKillstreak = 0;
-            this.multiplicateurDeScore = 0;
+            this.multiplicateurDeScore = 1;
 
             this.StreakTimerUpdate = new DispatcherTimer();
             this.StreakTimerUpdate.Interval = TimeSpan.FromSeconds(1);
@@ -137,7 +137,7 @@ namespace Froggun
                 if (this.timerKillstreak <= 0)
                 {
                     this.killStreak = 0;
-                    this.multiplicateurDeScore = 0;
+                    this.multiplicateurDeScore = 1;
                 }
             };
             this.StreakTimerUpdate.Start();
