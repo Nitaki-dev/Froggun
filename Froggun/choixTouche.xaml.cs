@@ -10,12 +10,6 @@ namespace Froggun
     public partial class choixTouche : Window
     {
         // Configuration des touches
-        public Key ToucheHaut { get; set; }
-        public Key ToucheBas { get; set; }
-        public Key ToucheGauche { get; set; }
-        public Key ToucheDroite { get; set; }
-        public Key ToucheRoulade { get; set; }
-        public Key TouchePause { get; set; }
 
         private MediaPlayer musique;  // Lecteur pour la musique de fond
         private Button selectedButton;
@@ -50,14 +44,7 @@ namespace Froggun
                 sliderSon.Value = 5;
             }
 
-            // Configuration initiale des touches
-            ToucheHaut = Key.Z;
-            ToucheBas = Key.S;
-            ToucheDroite = Key.Q;
-            ToucheGauche = Key.D;
 
-            ToucheRoulade = Key.LeftCtrl;
-            TouchePause = Key.Space;
         }
 
         private void boutonQuitter_Click(object sender, RoutedEventArgs e)
@@ -101,14 +88,14 @@ namespace Froggun
         private void BtnChoixHautDroite_Click(object sender, RoutedEventArgs e)
         {
             selectedButton = BtnChoixHautDroite;
-            MessageBox.Show("Choisissez votre touche pour 'Haut Droite'");
+            MessageBox.Show("Choisissez votre touche pour 'Droite'");
             this.KeyDown += Window_KeyDown;
         }
 
         private void BtnChoixHautGauche_Click(object sender, RoutedEventArgs e)
         {
             selectedButton = BtnChoixHautGauche;
-            MessageBox.Show("Choisissez votre touche pour 'Haut Gauche'");
+            MessageBox.Show("Choisissez votre touche pour 'Gauche'");
             this.KeyDown += Window_KeyDown;
         }
 
@@ -138,79 +125,65 @@ namespace Froggun
                     return; // Si la touche est déjà utilisée, sortir de la fonction sans l'attribuer.
                 }
 
-                // Gérer les touches spéciales (Espace et Entrée)
-                if (e.Key == Key.Space)
-                {
-                    e.Handled = true;  // Empêcher la propagation de la touche pour éviter les conflits
-                    MessageBox.Show("Vous avez choisi la touche : Espace");
-                }
-                else if (e.Key == Key.Enter)
-                {
-                    e.Handled = true;
-                    MessageBox.Show("Vous avez choisi la touche : Entrée");
-                }
-                else
-                {
-                    // Ajouter la touche au dictionnaire
-                    string action = selectedButton.Content.ToString();
-                    usedKeys.Add(e.Key, action);
 
-                    // Mettre à jour l'objet Touche en fonction du bouton sélectionné
-                    if (selectedButton == BtnChoixHaut)
-                    {
-                        ToucheHaut = e.Key;
-                    }
-                    else if (selectedButton == BtnChoixBas)
-                    {
-                        ToucheBas = e.Key;
-                    }
-                    else if (selectedButton == BtnChoixHautDroite)
-                    {
-                        ToucheDroite = e.Key;
-                    }
-                    else if (selectedButton == BtnChoixHautGauche)
-                    {
-                        ToucheGauche = e.Key;
-                    }
-                    else if (selectedButton == BtnRoulade)
-                    {
-                        ToucheRoulade = e.Key;
-                    }
-                    else if (selectedButton == BtnPause)
-                    {
-                        TouchePause = e.Key;
-                    }
 
-                    // Mettre à jour l'étiquette correspondante en fonction du bouton
-                    if (selectedButton == BtnChoixHaut)
-                    {
-                        labelHaut.Content = "Haut : " + e.Key.ToString();
-                    }
-                    else if (selectedButton == BtnChoixBas)
-                    {
-                        labelbas.Content = "Bas : " + e.Key.ToString();
-                    }
-                    else if (selectedButton == BtnChoixHautDroite)
-                    {
-                        labeldroite.Content = "Droite : " + e.Key.ToString();
-                    }
-                    else if (selectedButton == BtnChoixHautGauche)
-                    {
-                        labelgauchr.Content = "Gauche : " + e.Key.ToString();
-                    }
-                    else if (selectedButton == BtnRoulade)
-                    {
-                        labelRoulade.Content = "Roulade : " + e.Key.ToString();
-                    }
-                    else if (selectedButton == BtnPause)
-                    {
-                        labelpause.Content = "Pause : " + e.Key.ToString();
-                    }
-
-                    // Détacher l'événement après avoir capturé la touche
-                    this.KeyDown -= Window_KeyDown;
+                // Mettre à jour l'objet Touche en fonction du bouton sélectionné
+                if (selectedButton == BtnChoixHaut)
+                {
+                    Touche.ToucheHaut = e.Key;
                 }
+                else if (selectedButton == BtnChoixBas)
+                {
+                    Touche.ToucheBas = e.Key;
+                }
+                else if (selectedButton == BtnChoixHautDroite)
+                {
+                    Touche.ToucheDroite = e.Key;
+                }
+                else if (selectedButton == BtnChoixHautGauche)
+                {
+                    Touche.ToucheGauche = e.Key;
+                }
+                else if (selectedButton == BtnRoulade)
+                {
+                    Touche.ToucheRoulade = e.Key;
+                }
+                else if (selectedButton == BtnPause)
+                {
+                    Touche.TouchePause = e.Key;
+                }
+
+                // Mettre à jour l'étiquette correspondante en fonction du bouton
+                if (selectedButton == BtnChoixHaut)
+                {
+                    labelHaut.Content = "Haut : " + e.Key.ToString();
+                }
+                else if (selectedButton == BtnChoixBas)
+                {
+                    labelbas.Content = "Bas : " + e.Key.ToString();
+                }
+                else if (selectedButton == BtnChoixHautDroite)
+                {
+                    labeldroite.Content = "Droite : " + e.Key.ToString();
+                }
+                else if (selectedButton == BtnChoixHautGauche)
+                {
+                    labelgauche.Content = "Gauche : " + e.Key.ToString();
+                }
+                else if (selectedButton == BtnRoulade)
+                {
+                    labelRoulade.Content = "Roulade : " + e.Key.ToString();
+                }
+                else if (selectedButton == BtnPause)
+                {
+                    labelPause.Content = "Pause : " + e.Key.ToString();
+                }
+
+                // Détacher l'événement après avoir capturé la touche
+                this.KeyDown -= Window_KeyDown;
+
             }
         }
     }
 }
+

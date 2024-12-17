@@ -70,24 +70,13 @@
 		<None Remove="img\vie\health4.png" />
 		<None Remove="img\vie\health5.png" />
 		<None Remove="son\coupdefeu.wav" />
-		<None Remove="son\intro.mp3" />
 		<None Remove="son\langue.wav" />
 		<None Remove="son\mortEnnemie.wav" />
-		<None Remove="son\son_jeu.mp3" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <Resource Include="img\arena\arena_broken_top.png" />
 	  <Resource Include="img\arena\arena_unaltered.png" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <Resource Include="son\intro.mp3">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Resource>
-	  <Resource Include="son\son_jeu.mp3">
-	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-	  </Resource>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -158,6 +147,12 @@
 	  <None Update="Properties\Settings.settings">
 	    <Generator>SettingsSingleFileGenerator</Generator>
 	    <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+	  </None>
+	  <None Update="son\intro.mp3">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+	  </None>
+	  <None Update="son\son_jeu.mp3">
+	    <CopyToOutputDirectory>Always</CopyToOutputDirectory>
 	  </None>
 	</ItemGroup>
 </Project>

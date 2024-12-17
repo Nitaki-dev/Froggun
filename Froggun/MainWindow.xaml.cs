@@ -112,6 +112,7 @@ namespace Froggun
                             // Si la fenêtre controle est fermée avec DialogResult == false, revenir à la fenêtre parametre
                             if (fentrechoixTouche.DialogResult == false)
                             {
+                                musiqueDeFond.Volume = Properties.Settings.Default.Volume;
                                 // Création d'une nouvelle instance de la fenêtre parametre, on ne peut pas réutiliser l'ancienne
                                 fentreNiveau = new parametre();  // Nouvelle instance de parametre
                                 fentreNiveau.Left = fenetreGauche;
@@ -177,6 +178,11 @@ namespace Froggun
                 fentreDifficulte.Top = fenetreHaut;
                 fentreDifficulte.ShowDialog();  // Affiche la fenêtre controle de manière modale
                 difficulte = fentreDifficulte.Resultat;
+                if (fentreDifficulte.DialogResult == false)
+                {
+                    Application.Current.Shutdown();
+                    return;
+                }
                 InitMusique(false);
                 InitMusiqueJeux(true);
                 this.Left = fenetreGauche;
@@ -199,17 +205,18 @@ namespace Froggun
 
             ChangerFond("img/arena/arena_unaltered.png");
         }
-
         private void InitMusique(bool jouer)
         {
             if (jouer)
             {
-                musiqueDeFond = new MediaPlayer();
-                musiqueDeFond.Open(new Uri("/son/intro.mp3", UriKind.Relative));
-                musiqueDeFond.Volume = Properties.Settings.Default.Volume;
-                Console.WriteLine(Properties.Settings.Default.Volume);
-                musiqueDeFond.MediaEnded += RelanceMusique;
-                musiqueDeFond.Play();
+                try
+                {
+                    musiqueDeFond = new MediaPlayer();
+                    musiqueDeFond.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/intro.mp3"));
+                    musiqueDeFond.Volume = Properties.Settings.Default.Volume;
+                    musiqueDeFond.MediaEnded += RelanceMusique;
+                    musiqueDeFond.Play();
+                }catch(Exception ex) {Console.WriteLine(ex.ToString());}
             }
             else musiqueDeFond.Stop();
         }
@@ -226,7 +233,7 @@ namespace Froggun
             if (jouer)
             {
                 musiqueDeJeu = new MediaPlayer();
-                musiqueDeJeu.Open(new Uri("/son/son_jeu.mp3", UriKind.Relative));
+                musiqueDeJeu.Open(new Uri(AppDomain.CurrentDomain.BaseDirectory + "/son/son_jeu.mp3"));
                 musiqueDeJeu.MediaEnded += RelanceMusiqueJeux;
                 musiqueDeJeu.Volume = Properties.Settings.Default.Volume; 
                 musiqueDeJeu.Play();
@@ -660,7 +667,7 @@ namespace Froggun
 
         private void AffichageDeVie(int nombreDeVie)
         {
-            if (nombreDeVie <= 0)
+            if (nombreDeVie <= -1)
             {
                 Console.WriteLine("Mort");
                 ImgvieJoueur.Source = imageVie0;
@@ -856,7 +863,7 @@ namespace Froggun
                             }
                         }
                     }
-                    if (expensionLangue) langueJoueur.Width += expensionLangueVitesse;
+                    if (expensionLangue) playerTongue.Width += expensionLangueVitesse;
                 }
                 else
                 {
@@ -926,7 +933,7 @@ namespace Froggun
 
         private void keydown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.D && !pause)
+            if (e.Key == Touche.ToucheGauche && !pause)
             {
                 joueur.keyBufferDroite = true;
                 joueur.keyBufferGauche = false;
@@ -937,7 +944,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.droite;
                 }
             }
-            if ((e.Key == Key.Q || e.Key == Key.A) && !pause)
+            if (e.Key == Touche.ToucheDroite && !pause)
             {
                 joueur.keyBufferGauche = true;
                 joueur.keyBufferDroite = false;
@@ -948,7 +955,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.gauche;
                 }
             }
-            if (e.Key == Key.S && !pause)
+            if (e.Key == Touche.ToucheBas && !pause)
             {
                 joueur.keyBufferBas = true;
                 joueur.keyBufferHaut = false;
@@ -959,7 +966,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.bas;
                 }
             }
-            if ((e.Key == Key.Z || e.Key == Key.W) && !pause)
+            if (e.Key == Touche.ToucheHaut && !pause)
             {
                 joueur.keyBufferHaut = true;
                 joueur.keyBufferBas = false;
@@ -970,7 +977,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.haut;
                 }
             }
-            if ((e.Key == Key.LeftCtrl || e.Key == Key.LeftShift) && !pause)
+            if (e.Key == Touche.ToucheRoulade && !pause)
             {
                 joueur.estEnRoulade = true;
             }
@@ -980,7 +987,7 @@ namespace Froggun
                 ennemis.Add(new Ennemis(TypeEnnemis.Spider, joueur.posJoueur.X + 60, joueur.posJoueur.Y + 60, 100, 100, 8, canvas));
             }
 
-            if (e.Key == Key.Escape || e.Key == Key.Space )
+            if (e.Key == Touche.TouchePause)
             {
                 // dont let the player pause during a bossfight
                 if (estEnCombatAvecBoss) return;
@@ -1000,22 +1007,22 @@ namespace Froggun
 
         private void keyup(object sender, KeyEventArgs e)
         {
-            if (e.Key == Key.D)
+            if (e.Key == Touche.ToucheGauche)
             {
                 joueur.deplacerDroite = false;
                 joueur.keyBufferDroite = false;
             }
-            if (e.Key == Key.Q || e.Key == Key.A)
+            if (e.Key == Touche.ToucheDroite)
             {
                 joueur.keyBufferGauche = false;
                 joueur.deplacerGauche = false;
             }
-            if (e.Key == Key.S)
+            if (e.Key == Touche.ToucheBas)
             {
                 joueur.deplacerBas = false;
                 joueur.keyBufferBas = false;
             }
-            if (e.Key == Key.Z || e.Key == Key.W)
+            if (e.Key == Touche.ToucheHaut)
             {
                 joueur.deplacerHaut = false;
                 joueur.keyBufferHaut = false;

@@ -111,7 +111,7 @@
             Foreground="White"
             RenderTransformOrigin="0.371,-1.811" />
         <Label
-            x:Name="labelgauchr"
+            x:Name="labelgauche"
             Margin="24,263,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
@@ -165,7 +165,7 @@
             Foreground="White"
             RenderTransformOrigin="0.371,-1.811" />
         <Label
-            x:Name="labelpause"
+            x:Name="labelPause"
             Margin="244,258,0,0"
             HorizontalAlignment="Left"
             VerticalAlignment="Top"
