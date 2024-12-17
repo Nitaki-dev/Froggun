@@ -21,13 +21,13 @@ namespace Froggun
         public TypeProies type { get; set; }
         public double X { get; set; }
         public double Y { get; set; }
-        public double Width { get; set; }
-        public double Height { get; set; }
-        public double Speed { get; set; }
-        public double newPosDelay { get; set; }
-        public int newPosMaxDiff { get; set; }
-        private string imagePath { get; set; }
-        public int[] AnimationIndex { get; set; }
+        public double largeur { get; set; }
+        public double hauteur { get; set; }
+        public double vitesse { get; set; }
+        public double delayNouvPos { get; set; }
+        public int ecartMaxNouvPos { get; set; }
+        private string cheminImage { get; set; }
+        public int[] indexAnimation { get; set; }
 
         public Rectangle BoundingBox { get; set; }
         public Image Image { get; set; }
@@ -35,25 +35,25 @@ namespace Froggun
         private DispatcherTimer animationTimer { get; set; }
         public Canvas canvas { get; set; }
 
-        public double targetX;
-        public double targetY;
-        private DispatcherTimer movementTimer;
+        public double cibleX;
+        public double cibleY;
+        private DispatcherTimer minuterieMouvement;
 
-        public Proies(TypeProies type, double x, double y, double width, double height, double speed, double newPosDelay, int newPosOffset, Canvas canvas)
+        public Proies(TypeProies type, double x, double y, double largeur, double hauteur, double vitesse, double newPosDelay, int newPosOffset, Canvas canvas)
         {
             X = x;
             Y = y;
-            Width = width;
-            Height = height;
-            Speed = speed;
-            newPosMaxDiff = newPosOffset;
+            this.largeur = largeur;
+            this.hauteur = hauteur;
+            this.vitesse = vitesse;
+            ecartMaxNouvPos = newPosOffset;
             this.canvas = canvas;
 
             switch (type)
             {
                 case TypeProies.Fly:
-                    AnimationIndex = new int[] { 1, 2 };
-                    imagePath = "img/ennemis/Food1";
+                    indexAnimation = new int[] { 1, 2 };
+                    cheminImage = "img/ennemis/Food1";
                     break;
             }
 
@@ -61,8 +61,8 @@ namespace Froggun
 
             Image = new Image
             {
-                Width = width,
-                Height = height
+                Width = largeur,
+                Height = hauteur
             };
 
             RenderOptions.SetBitmapScalingMode(Image, BitmapScalingMode.NearestNeighbor);
@@ -72,8 +72,8 @@ namespace Froggun
             canvas.Children.Add(Image);
 
             this.BoundingBox = new Rectangle {
-                Width = width-10,
-                Height = height-10,
+                Width = largeur-10,
+                Height = hauteur-10,
                 Stroke = Brushes.Red,
                 StrokeThickness = 1
             };
@@ -85,24 +85,24 @@ namespace Froggun
             animationTimer.Tick += AnimationTimer_Tick;
             animationTimer.Start();
 
-            movementTimer = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(newPosDelay) };
-            movementTimer.Tick += GenerateRandomTarget;
-            movementTimer.Start();
+            minuterieMouvement = new DispatcherTimer { Interval = TimeSpan.FromMilliseconds(newPosDelay) };
+            minuterieMouvement.Tick += GenerateRandomTarget;
+            minuterieMouvement.Start();
         }
 
         private void AnimationTimer_Tick(object sender, EventArgs e)
         {
             currentFrameIndex++;
-            if (currentFrameIndex >= AnimationIndex.Length) currentFrameIndex = 0;
+            if (currentFrameIndex >= indexAnimation.Length) currentFrameIndex = 0;
 
-            int frame = AnimationIndex[currentFrameIndex];
+            int frame = indexAnimation[currentFrameIndex];
             BitmapImage newImageSource = GetImageSourceForFrame(frame);
             Image.Source = newImageSource;
         }
 
         private BitmapImage GetImageSourceForFrame(int frame)
         {
-            BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{imagePath}/{frame}.png"));
+            BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{cheminImage}/{frame}.png"));
             return bitmapImage;
         }
 
@@ -122,8 +122,8 @@ namespace Froggun
         public void GenerateRandomTarget(object? sender, EventArgs e)
         {
             Random random = new Random();
-            targetX = X + random.Next(-newPosMaxDiff, newPosMaxDiff);
-            targetY = Y + random.Next(-newPosMaxDiff, newPosMaxDiff);
+            cibleX = X + random.Next(-ecartMaxNouvPos, ecartMaxNouvPos);
+            cibleY = Y + random.Next(-ecartMaxNouvPos, ecartMaxNouvPos);
         }
 
         public static void UpdateProies(Canvas canvas, List<Proies> proies, Rect joueur)
@@ -136,17 +136,17 @@ namespace Froggun
 
                 // Move the enemy
                 Vector2 direction = new Vector2(
-                    (float)(proie.targetX - proie.X),
-                    (float)(proie.targetY - proie.Y)
+                    (float)(proie.cibleX - proie.X),
+                    (float)(proie.cibleY - proie.Y)
                 );
 
                 direction = Vector2.Normalize(direction);
-                double newX = proie.X + direction.X * proie.Speed;
-                double newY = proie.Y + direction.Y * proie.Speed;
+                double newX = proie.X + direction.X * proie.vitesse;
+                double newY = proie.Y + direction.Y * proie.vitesse;
 
                 // Prevent moving off-screen (adjust position if out of bounds)
-                newX = Math.Max(0, Math.Min(newX, canvas.ActualWidth - proie.Width - 20));
-                newY = Math.Max(0, Math.Min(newY, canvas.ActualHeight - proie.Height - 20));
+                newX = Math.Max(0, Math.Min(newX, canvas.ActualWidth - proie.largeur - 20));
+                newY = Math.Max(0, Math.Min(newY, canvas.ActualHeight - proie.hauteur - 20));
 
                 proie.X = newX;
                 proie.Y = newY;
