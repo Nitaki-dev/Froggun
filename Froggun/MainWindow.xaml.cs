@@ -253,7 +253,7 @@ namespace Froggun
             musiqueDeJeu.Play();
         }
 
-        void NouvelleVague()
+        private void NouvelleVague()
         {
             if (timerEstActif || estEnCombatAvecBoss) return; // si pas de décompte de vague et pas de boss
             timerEstActif = true;                             // alors commencer le décompte
