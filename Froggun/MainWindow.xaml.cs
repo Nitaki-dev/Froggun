@@ -993,28 +993,6 @@ namespace Froggun
             musique.Play();
         }
 
-        private void SonMortMonstre()
-        {
-            // Charger le fichier audio depuis les ressources
-            Uri audioUri = new Uri("/son/mortEnnemie.wav", UriKind.RelativeOrAbsolute);
-            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
-            // Créer un objet SoundPlayer pour lire le son
-            SoundPlayer musique = new SoundPlayer(audioStream);
-
-            musique.Play();
-        }
-
-        private void SonMortMonstrePetit()
-        {
-            // Charger le fichier audio depuis les ressources
-            Uri audioUri = new Uri("/son/mortPetit.wav", UriKind.RelativeOrAbsolute);
-            Stream audioStream = Application.GetResourceStream(audioUri).Stream;
-            // Créer un objet SoundPlayer pour lire le son
-            SoundPlayer musique = new SoundPlayer(audioStream);
-
-            musique.Play();
-        }
-
         private void ShootGun()
         {
             SonGun();
