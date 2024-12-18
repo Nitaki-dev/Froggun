@@ -280,6 +280,7 @@ namespace Froggun
             SoundPlayer musique = new SoundPlayer(audioStream);
             musique.Play();
         }
+        
 
         public void Meurt(List<Ennemis> ennemis, Ennemis e, Canvas canvas, ref Joueur joueur)
         {
@@ -290,6 +291,7 @@ namespace Froggun
             canvas.Children.Remove(BarDeVie);
             AjouterUnKillALaSerie(ref joueur, e);
             ennemis.Remove(e);
+            SonMortEnnemie();
             joueur.score += Math.Round(100 * joueur.multiplicateurDeScore);
         }
 
