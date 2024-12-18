@@ -419,7 +419,7 @@ namespace Froggun
             imageVie1 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
             imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
 
-            bgRegenVie = new Rectangle { Width = regenVie.Width-15, Height = regenVie.Height-20, Fill=Brushes.DarkGray };
+            bgRegenVie = new Rectangle { Width = regenVie.Width-15, Height = regenVie.Height-20, Fill= (SolidColorBrush)new BrushConverter().ConvertFrom("#464646") };
             fgRegenVie = new Rectangle { Width = 0, Height = regenVie.Height-20, Fill=Brushes.DarkRed };
             Canvas.SetTop(bgRegenVie, Canvas.GetTop(regenVie) + 10);
             Canvas.SetTop(fgRegenVie, Canvas.GetTop(regenVie) + 10);
@@ -585,8 +585,9 @@ namespace Froggun
                 if (!estEnCombatAvecBoss)
                 {
                     // si tous les ennemis sont mort
-                    if ((difficulte == "facile" || difficulte == "moyen") 
-                        && (ennemis.Count <= 0 && proies.Count <= 0)) NouvelleVague();
+                    if (difficulte == "facile" || difficulte == "moyen") {
+                        if (ennemis.Count <= 0 && proies.Count <= 0) NouvelleVague();
+                    }
                     // si la difficulter est dure ou extreme alors c'est dès que la pause entre chaque vague. même si il reste des ennemis
                     else NouvelleVague();
                 }
