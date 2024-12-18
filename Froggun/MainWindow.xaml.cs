@@ -45,6 +45,8 @@ namespace Froggun
         private static BitmapImage imageVie2;
         private static BitmapImage imageVie1;
         private static BitmapImage imageVie0;
+        private static Rectangle bgRegenVie;
+        private static Rectangle fgRegenVie;
 
         private static BitmapImage imgFrogFront;
         private static BitmapImage imgFrogBack;
@@ -255,8 +257,8 @@ namespace Froggun
 
         void NouvelleVague()
         {
-            if (timerEstActif || estEnCombatAvecBoss) return;
-            timerEstActif = true;
+            if (timerEstActif || estEnCombatAvecBoss) return; // si pas de décompte de vague et pas de boss
+            timerEstActif = true;                             // alors commencer le décompte
 
             if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
             else pauseEntreVagues = 10;
@@ -280,6 +282,7 @@ namespace Froggun
             pauseCounter++;
             labelWave.Content = $"Vague {nombreDeVagues+1}";
             labelAlerte.Content = $"Prochaine vague dans {pauseEntreVagues - pauseCounter} secondes!";
+
             if (pauseCounter < pauseEntreVagues) return;
             labelAlerte.Content = " ";
             if (difficulte == "facile" && !TousLesEnnemisSontMort()) return;
@@ -416,6 +419,15 @@ namespace Froggun
             imageVie1 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
             imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
 
+            bgRegenVie = new Rectangle { Width = regenVie.Width-15, Height = regenVie.Height-20, Fill=Brushes.DarkGray };
+            fgRegenVie = new Rectangle { Width = 0, Height = regenVie.Height-20, Fill=Brushes.DarkRed };
+            Canvas.SetTop(bgRegenVie, Canvas.GetTop(regenVie) + 10);
+            Canvas.SetTop(fgRegenVie, Canvas.GetTop(regenVie) + 10);
+            Canvas.SetLeft(bgRegenVie, Canvas.GetLeft(regenVie));
+            Canvas.SetLeft(fgRegenVie, Canvas.GetLeft(regenVie));
+            canvas.Children.Add(bgRegenVie);
+            canvas.Children.Add(fgRegenVie);
+
             imgExplosion[0] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion0.png"));
             imgExplosion[1] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion1.png"));
             imgExplosion[2] = new BitmapImage(new Uri("pack://application:,,,/img/explosion/img_explosion2.png"));
@@ -428,26 +440,29 @@ namespace Froggun
 
         private void UpdatePositionSouris()
         {
-            // Get the mouse position once and calculate the direction to player center
+            // position de la souris sur l'ecran
             Point positionSouris = Mouse.GetPosition(canvas);
 
+            // position du centre de l'image du joueur
             Vector2 positionCentreJoueur = new Vector2(
                 (float)(joueur.posJoueur.X + joueurImage.Width / 2.0f),
                 (float)(joueur.posJoueur.Y + joueurImage.Height / 2.0f)
             );
 
+            // difference entre les deux
             Vector2 direction = new Vector2(
                 (float) (positionSouris.X - positionCentreJoueur.X),
                 (float) (positionSouris.Y - positionCentreJoueur.Y)
             );
 
-            float magnitude = (float)Math.Sqrt(direction.X * direction.X + direction.Y * direction.Y);
+            float magnitude = (float)Math.Sqrt(direction.X * direction.X + direction.Y * direction.Y); // pythagore
             if (magnitude != 0) {
                 direction.X /= magnitude;
                 direction.Y /= magnitude;
             }
 
-            Vector2 directionSouris = new Vector2(
+            // position a une distance donnée du joueur, en direction de la souris
+            Vector2 positionCible = new Vector2(
                 positionCentreJoueur.X + direction.X * distancePisolet,
                 positionCentreJoueur.Y + direction.Y * distancePisolet
             );
@@ -455,41 +470,39 @@ namespace Froggun
             angleActuelle = (float) (Math.Atan2(direction.Y, direction.X) * 180 / Math.PI);
 
             // Update positions for both the weapon and tongue
-            UpdatePositionArme(positionSouris, positionCentreJoueur, directionSouris);
-            UpdatePositionLangue(positionSouris, positionCentreJoueur, directionSouris);
+            UpdatePositionArme(positionSouris, positionCentreJoueur, positionCible);
+            UpdatePositionLangue(positionSouris, positionCentreJoueur, positionCible);
         }
 
-        private void UpdatePositionArme(Point positionSouris, Vector2 posCentreJoueur, Vector2 directionSouris)
+        private void UpdatePositionArme(Point positionSouris, Vector2 posCentreJoueur, Vector2 positionCible)
         {
-            // Calculate weapon position around the player
+            // calculer la position de l'arme autour du joueur
             float distanceJoueurSouris = Vector2.Distance(posCentreJoueur, new Vector2((float)positionSouris.X, (float)positionSouris.Y));
-            positionArme = directionSouris;
+            positionArme = positionCible;
 
-            // Apply transforms for the weapon
+            // transformation de l'arme (rotation et inversement en X)
             TransformGroup transformGroup = new TransformGroup();
             ScaleTransform inverseArme = new ScaleTransform();
             RotateTransform rotationArme = new RotateTransform(angleActuelle);
 
-            // Flip the weapon image if the mouse is to the left
+            // inverser l'arme si elle est a droite du joueur
             inverseArme.ScaleY = (Math.Abs(angleActuelle) > 90) ? -1 : 1;
 
             transformGroup.Children.Add(inverseArme);
             transformGroup.Children.Add(rotationArme);
             gun.RenderTransform = transformGroup;
 
-            // Set the position of the weapon
             Canvas.SetTop(gun, positionArme.Y);
             Canvas.SetLeft(gun, positionArme.X);
         }
 
-        private void UpdatePositionLangue(Point positionSouris, Vector2 posCentreJoueur, Vector2 directionSouris)
+        private void UpdatePositionLangue(Point positionSouris, Vector2 posCentreJoueur, Vector2 positionCible)
         {
-            // Set tongue rotation based on the calculated angle
+            // changer la rotation de la langue a partir de l'angle calculer précedament
             RotateTransform rotationArme = new RotateTransform(angleActuelle);
             if (!tirLangue) langueJoueur.RenderTransform = rotationArme;
 
-            // Set the position of the tongue
-            Canvas.SetTop(langueJoueur, directionSouris.X > 0 ? posCentreJoueur.Y : posCentreJoueur.Y + langueJoueur.Height / 2.0f);
+            Canvas.SetTop(langueJoueur, positionCible.X > 0 ? posCentreJoueur.Y : posCentreJoueur.Y + langueJoueur.Height / 2.0f);
             Canvas.SetLeft(langueJoueur, posCentreJoueur.X);
         }
 
@@ -501,10 +514,10 @@ namespace Froggun
             Point q = new Point(line2.X1, line2.Y1);
             Point s = new Point(line2.X2 - line2.X1, line2.Y2 - line2.Y1);
 
-            double rCrossS = CrossProduct(r, s);
+            double rCrossS = ProduitCroise(r, s);
             Point qMinusP = new Point(q.X - p.X, q.Y - p.Y);
-            double qMinusPCrossS = CrossProduct(qMinusP, s);
-            double qMinusPCrossR = CrossProduct(qMinusP, r);
+            double qMinusPCrossS = ProduitCroise(qMinusP, s);
+            double qMinusPCrossR = ProduitCroise(qMinusP, r);
 
             if (rCrossS == 0) {
                 if (qMinusPCrossR == 0) {
@@ -534,22 +547,22 @@ namespace Froggun
             return false;
         }
 
-        private static double CrossProduct(Point v1, Point v2)
+        private static double ProduitCroise(Point v1, Point v2) // Produit croisé
         {
             return v1.X * v2.Y - v1.Y * v2.X;
         }
 
+        // CREDIT: Nils Pipenbrinck 
+        // SOURCE: https://stackoverflow.com/questions/2259476/rotating-a-point-about-another-point-2d
         private Point PivotPoint(Point point, Point centre, double a)
         {
-            double radians = a * (Math.PI / 180); // Convert angle to radians
+            double radians = a * (Math.PI / 180); // Convertire angle en radians
             double cos = Math.Cos(radians);
             double sin = Math.Sin(radians);
 
-            // Translate point to origin
             double x = point.X - centre.X;
             double y = point.Y - centre.Y;
 
-            // Rotate point
             double nouveauX = x * cos - y * sin + centre.X;
             double nouveauY = x * sin + y * cos + centre.Y;
 
@@ -561,8 +574,8 @@ namespace Froggun
             if (pause) return;
             Stopwatch stopwatch = new Stopwatch(); // WPF is terrible for game dev.
             stopwatch.Start();
-            
-            // bossfight
+
+            // bossfight 
             if ((nombreDeVagues + 1) % 9 == 0)
             {
                 if (!estEnCombatAvecBoss && TousLesEnnemisSontMort()) startBoss();
@@ -571,11 +584,10 @@ namespace Froggun
             {
                 if (!estEnCombatAvecBoss)
                 {
-                    // if no enemies start a wave
-                    if (difficulte == "facile" || difficulte == "moyen")
-                    {
-                        if (ennemis.Count <= 0 && proies.Count <= 0) NouvelleVague();
-                    }
+                    // si tous les ennemis sont mort
+                    if ((difficulte == "facile" || difficulte == "moyen") 
+                        && (ennemis.Count <= 0 && proies.Count <= 0)) NouvelleVague();
+                    // si la difficulter est dure ou extreme alors c'est dès que la pause entre chaque vague. même si il reste des ennemis
                     else NouvelleVague();
                 }
             }
@@ -585,6 +597,7 @@ namespace Froggun
             
             if (this.estEnCombatAvecBoss && this.estBossApparu)
             {
+                // update le boss
                 mante.UpdateBossMante(Balles, joueur);
 
                 if (!mante.estVivant)
@@ -596,11 +609,12 @@ namespace Froggun
             }
 
             AfficheScore();
-            AfficheCombo();
+            AfficheMultiplicateurDeScore();
 
             AffichageDeVie(joueur.nombreDeVie);
             CheckBallesSortieEcran();
             CheckCollisionProie();
+
             if (!joueur.estEnRoulade) joueur.ChangeJoueurDirection();
             UpdatePositionSouris();
             joueur.UpdatePositionJoueur(canvas);
@@ -616,6 +630,7 @@ namespace Froggun
 
             await Task.Delay(500);
             
+            // "animation" d'explosions
             Explosion(100, 100, 500); 
             Explosion(300, 100, 500); 
             Explosion(500, 100, 500);
@@ -628,7 +643,7 @@ namespace Froggun
             mante = new BossMante(canvas, imgMantis, joueur, 4000, 215, 266);
             await Task.Delay(400);
 
-            // todo: restrict players movement so he cannot move where the arena is destroyed
+            joueur.mouvementRestraintHaut = true;
             this.estBossApparu = true;
         }
 
@@ -863,7 +878,7 @@ namespace Froggun
                             if (canvas.Children.Contains(proie.Hitbox)) canvas.Children.Remove(proie.Hitbox);
                             if (proies.Contains(proie)) proies.Remove(proie);
 
-                            joueur.proieManger++;
+                            if (joueur.nombreDeVie < 5) joueur.proieManger++;
                             if (joueur.proieManger >= joueur.proiePourHeal)
                             {
                                 joueur.heal();
@@ -871,6 +886,9 @@ namespace Froggun
                             }
                         }
                     }
+                    
+                    fgRegenVie.Width = (bgRegenVie.ActualWidth) * ((double)joueur.proieManger / (double)joueur.proiePourHeal);
+
                     foreach (Ennemis ennemie in ennemis.ToList())
                     {
                         double x = ennemie.X;
@@ -995,7 +1013,7 @@ namespace Froggun
             labelScore.Content = $"Score : {joueur.score} ";
         }
 
-        public void AfficheCombo()
+        public void AfficheMultiplicateurDeScore()
         {
             labelCombo.Content = $"x{joueur.multiplicateurDeScore} ";
         }

@@ -69,6 +69,7 @@
 		<None Remove="img\vie\health3.png" />
 		<None Remove="img\vie\health4.png" />
 		<None Remove="img\vie\health5.png" />
+		<None Remove="img\vie\regen_icon.png" />
 		<None Remove="son\coupdefeu.wav" />
 		<None Remove="son\langue.wav" />
 		<None Remove="son\mortEnnemie.wav" />
@@ -77,9 +78,6 @@
 	<ItemGroup>
 	  <Resource Include="img\arena\arena_broken_top.png" />
 	  <Resource Include="img\arena\arena_unaltered.png" />
-	</ItemGroup>
-
-	<ItemGroup>
 	  <Resource Include="img\boss\mantis\acide_droplet.png" />
 	</ItemGroup>
 
@@ -130,6 +128,7 @@
 		<Resource Include="img\vie\health3.png" />
 		<Resource Include="img\vie\health4.png" />
 		<Resource Include="img\vie\health5.png" />
+		<Resource Include="img\vie\regen_icon.png" />
 		<Resource Include="son\coupdefeu.wav" />
 		<Resource Include="son\langue.wav" />
 		<Resource Include="son\mortEnnemie.wav" />

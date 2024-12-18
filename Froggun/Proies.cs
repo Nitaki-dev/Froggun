@@ -79,7 +79,7 @@ namespace Froggun
             Canvas.SetTop(Image, Y);
             canvas.Children.Add(Image);
             
-            LoadFrames();
+            ChargementImage();
 
             // https://learn.microsoft.com/fr-fr/dotnet/api/system.windows.media.compositiontarget.rendering?view=windowsdesktop-9.0
             CompositionTarget.Rendering += OnRendering;
@@ -89,12 +89,14 @@ namespace Froggun
             timerMouvement.Start();
         }
 
-        private void LoadFrames()
+        private void ChargementImage()
         {
+            // charge chaques images 
             frameImages = new BitmapImage[indexAnimation.Length];
-            for (int i = 0; i < indexAnimation.Length; i++) frameImages[i] = GetImageSourceForFrame(indexAnimation[i]);
+            for (int i = 0; i < indexAnimation.Length; i++) frameImages[i] = new BitmapImage(new Uri($"pack://application:,,/{chemainImage}/{indexAnimation[i]}.png"));
         }
 
+        // cette fonction est appeller automatiquement a chaque fois que l'image est dessiner sur l'ecran
         private void OnRendering(object sender, EventArgs e)
         {
             animationTimeElapsed += 16;
@@ -107,20 +109,14 @@ namespace Froggun
 
                 animationTimeElapsed = 0;
                 int frame = indexAnimation[currentFrameIndex];
-                //BitmapImage newImageSource = GetImageSourceForFrame(frame);
-                //Image.Source = newImageSource;
+
                 Image.Source = frameImages[currentFrameIndex];
             }
         }
 
-        private BitmapImage GetImageSourceForFrame(int frame)
-        {
-            BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{chemainImage}/{frame}.png"));
-            return bitmapImage;
-        }
-
         public void TrouverNouvellePosition(object? sender, EventArgs e)
         {
+            // nouvelle position aleatoir
             Random random = new Random();
             objectifX = X + random.Next(-distanceMaxNouvellePosition, distanceMaxNouvellePosition);
             objectifY = Y + random.Next(-distanceMaxNouvellePosition, distanceMaxNouvellePosition);
@@ -133,6 +129,7 @@ namespace Froggun
 
         public static void ReccomencerProies(List<Proies> proies, Canvas canvas)
         {
+            // tous les tuer
             for (int i = 0; i < proies.Count; i++)
             {
                 proies[i].Image.Visibility = Visibility.Hidden;
@@ -146,7 +143,8 @@ namespace Froggun
             foreach (Proies proie in proies)
             {
                 //Console.WriteLine(proie.ToString());
-
+                
+                // debugging
                 if (Double.IsNaN(proie.X) || Double.IsNaN(proie.Y))
                 {
                     proie.X = 10; proie.Y = 10;
@@ -154,8 +152,7 @@ namespace Froggun
                     Canvas.SetTop(proie.Hitbox, 10);
                 }
 
-                
-                // Move the enemy
+                // mouvement de la proie
                 Vector2 direction = new Vector2(
                     (float)(proie.objectifX - proie.X),
                     (float)(proie.objectifY - proie.Y)
@@ -182,6 +179,7 @@ namespace Froggun
             }
         }
 
+        //method pour debug
         public override string? ToString()
         {
             return " objX:" + Math.Round(objectifX) + "  objY:" + Math.Round (objectifY) + 

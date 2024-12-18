@@ -63,7 +63,7 @@ namespace Froggun
             InitBossbar();
         }
 
-        public void DegatsMante(int degats)
+        public void DegatsMante(int degats) // fair des degat au boss
         {
             PV -= degats;
             
@@ -78,7 +78,7 @@ namespace Froggun
             BitmapImage sourceGoutte = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/acide_droplet.png"));
             BitmapImage sourceBalayage = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/poke_attack.png"));
 
-            // create list of all the boss attacks images 
+            // liste de toutes les image d'attaque du boss
             List<Image> aSupprimer = canvas.Children.OfType<Image>()
                 .Where(img => img.Source is BitmapImage bitmap &&
                              (bitmap.UriSource == sourcePique.UriSource ||
@@ -86,7 +86,7 @@ namespace Froggun
                               bitmap.UriSource == sourceBalayage.UriSource))
                 .ToList();
 
-            // remove them, as well as the areas where the player will get damaged
+            // supprimer les images & les zones de dégats créer par le boss
             foreach (Image img in aSupprimer) canvas.Children.Remove(img);
             foreach (KeyValuePair<Guid, Rect> r in zoneDegats) zoneDegats.Remove(r.Key);
             
@@ -97,13 +97,13 @@ namespace Froggun
             this.estVivant = false;
         }
 
-        public void UpdateBossMante(List<Balle> balles, Joueur joueur)
+        public async void UpdateBossMante(List<Balle> balles, Joueur joueur)
         {
             if (PV <= 0) VaincreMante();
             Rect nouvelleHitbox = new Rect { X = Canvas.GetLeft(this.Image), Y = Canvas.GetTop(this.Image), Width = this.Width, Height = this.Height };
             this.Hitbox = nouvelleHitbox;
 
-            // if the boss is not attacking, check if bullet hits it
+            // verif si les balles touche le boss
             for (int j = 0; j < balles.Count; j++)
             {
                 Balle balle = balles[j];
@@ -113,7 +113,7 @@ namespace Froggun
 
                 if (this.Hitbox.IntersectsWith(rImgBalle))
                 {
-                    // damage the boss
+                    // fair des degats au boss si oui
                     DegatsMante(joueur.degats);
                     balles.RemoveAt(j);
                     balle.aToucher = true;
@@ -128,7 +128,7 @@ namespace Froggun
             {
                 if (!this.estEnAttack)
                 {
-                    // pick one of two attacks
+                    // choisie une attaque parmis 2
                     int prochaineAttack = Random.Next(2); // 0 or 1
                     Console.WriteLine("Next attack: " + prochaineAttack);
                     switch (prochaineAttack)
@@ -147,7 +147,7 @@ namespace Froggun
             {
                 if (!this.estEnAttack)
                 {
-                    // pick one of three attacks
+                    // choisie une attaque parmis 3
                     int prochaineAttack = Random.Next(3);
                     Console.WriteLine("Next attack: " + prochaineAttack);
                     switch (prochaineAttack)
@@ -166,7 +166,7 @@ namespace Froggun
             }
             else
             {
-                // doesnt matter if an other attack is active, still try to attack again.
+                // peu importe si une autre attaque est active, essayez quand même d'attaquer à nouveau
                 int prochaineAttack = Random.Next(3);
                 Console.WriteLine("Next attack: " + prochaineAttack);
                 switch (prochaineAttack)
@@ -181,20 +181,19 @@ namespace Froggun
                         if (!estEnTrainDeBalayer) AttaqueBalayage();
                         break;
                 }
+                await Task.Delay(300); // petite pause entre chaque attaques sionon c'est trop dure
             }
 
             foreach (KeyValuePair<Guid, Rect> r in zoneDegats) {
-                //Rectangle re = DebugRect(r.Value); // debug areas where player will get damadged
+                //Rectangle re = DebugRect(r.Value); // debug des zones de dégats
                 //canvas.Children.Add(re);
-                if (Joueur.hitbox.IntersectsWith(r.Value))
-                {
-                    if (!Joueur.estInvinsible) Joueur.hit(1);
-                }
+                if (Joueur.hitbox.IntersectsWith(r.Value) && !Joueur.estInvinsible) Joueur.hit(1);
             }
         }
 
         private bool entre(int a, int b, int c)
         {
+            // est ce que A est entre B et C
             return (a <= b && a >= c);
         }
 
@@ -209,6 +208,7 @@ namespace Froggun
 
         private void InitBossbar()
         {
+            //initialisation des rectangle pour la var de vie du boss
             int marginX = 100;
             int marginY = 50;
             int width = (int)canvas.ActualWidth - marginX * 2;
@@ -229,7 +229,8 @@ namespace Froggun
         private async void AttaquePique()
         {
             estEnTrainDePiquer = true;
-            for (int i = 0; i < 5; i++) // change based on difficulty
+            // faire spawn 5 attaques qui vise le joueur
+            for (int i = 0; i < 5; i++)
             {
                 if (!estVivant) return;
                 Pique();
@@ -243,6 +244,8 @@ namespace Froggun
         private async void Pique()
         {
             this.estEnAttack = true;
+            
+            //creation de l'image
             BitmapImage sourceImage = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/poke_attack.png"));
             Image image = new Image { Source = sourceImage, Height = 200, Width = 38, Stretch = Stretch.Fill };
             Canvas.SetLeft(image, Joueur.posJoueur.X);
@@ -250,6 +253,7 @@ namespace Froggun
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.NearestNeighbor);
             canvas.Children.Add(image);
 
+            // creation de la zone de dégat
             Rect zoneDegat = new Rect
             {
                 X = Canvas.GetLeft(image),
@@ -263,10 +267,10 @@ namespace Froggun
             double yObjectif = canvas.ActualHeight;
             double yActuelle = 0;
             int etape = 30;
-            double delayEntreEtapes = 300.0 / etape; // time per step in ms
+            double delayEntreEtapes = 300.0 / etape; // temp par etapes en ms
             double tailleEtapes = yObjectif / etape;
 
-            // animate image and hitbox to move from top to bottom of the screen
+            // animé la hitbox et l'image pour que elle bouge vers le bas
             for (int i = 0; i < etape; i++)
             {
                 if (!estVivant) return;
@@ -295,7 +299,7 @@ namespace Froggun
             int min = (int)(canvas.ActualWidth / 3) * cote;
             int max = (int)((canvas.ActualWidth / 3) * cote + (canvas.ActualWidth / 3));
 
-            // move the mantis to the zone picked
+            // bouger le boss a la position par rapport au coté choisi
             for (int i = 0; i < 100; i++)
             {
                 if (!estVivant) return;
@@ -305,9 +309,10 @@ namespace Froggun
                 await Task.Delay(10);
             }
 
-            int dureeDeSpawn = 1500; // spawn raindrops for 3000ms aka 3s
-            int intervalDeSpawn = 20;   // wait 20ms between each new raindrops
+            int dureeDeSpawn = 1500;
+            int intervalDeSpawn = 20;
 
+            // ajout de la zone de dégat
             Rect zoneDegat = new Rect
             {
                 X = min,
@@ -318,6 +323,7 @@ namespace Froggun
 
             Guid id = AjouterZoneDegat(zoneDegat);
 
+            // ajouter les goutes de pluis 
             for (int i = 0; i < dureeDeSpawn / intervalDeSpawn; i++)
             {
                 if (!estVivant) return;
@@ -325,6 +331,7 @@ namespace Froggun
                 await Task.Delay(intervalDeSpawn);
             }
 
+            // supprimer zones de degats quand c'est fini
             zoneDegats.Remove(id);
             await Task.Delay(300);
             estEnAttack = false;
@@ -334,12 +341,15 @@ namespace Froggun
         private async void AjouterGoutte(BitmapImage source, int x, int y)
         {
             this.estEnAttack = true;
+            
+            // creation de l'image
             Image goutteAcide = new Image { Source = source, Height = 16, Width = 16, Stretch = Stretch.Fill };
             RenderOptions.SetBitmapScalingMode(goutteAcide, BitmapScalingMode.NearestNeighbor);
             Canvas.SetLeft(goutteAcide, x);
             Canvas.SetTop(goutteAcide, y);
             canvas.Children.Add(goutteAcide);
 
+            // même logique que l'attaque pique
             double yObjectif = canvas.ActualHeight - goutteAcide.Height;
             double yActuelle = y;
             int etapes = 30;
@@ -362,6 +372,7 @@ namespace Froggun
             estEnTrainDeBalayer = true;
             this.estEnAttack = true;
 
+            // creation de l'image
             BitmapImage sourceImage = new BitmapImage(new Uri("pack://application:,,,/img/boss/mantis/poke_attack.png"));
             Image image = new Image { Source = sourceImage, Height = canvas.ActualHeight-150, Width = 74, Stretch = Stretch.Fill };
             Canvas.SetLeft(image, -image.Width);
@@ -369,13 +380,14 @@ namespace Froggun
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.NearestNeighbor);
             canvas.Children.Add(image);
 
+            // même logique que l'attaque pique mais horizontal
             double xObjectif = canvas.Width+image.Width;
             double xActuelle = -image.Width;
             int etapes = 50;
             double delayEntreEtapes = 500.0 / etapes;
             double tailleEtapes = canvas.ActualWidth / etapes;
 
-            // define damage zone for the swing
+            // creation de la zone de dégat
             Rect zoneDegat = new Rect
             {
                 X = xActuelle,
@@ -386,7 +398,7 @@ namespace Froggun
 
             Guid id = AjouterZoneDegat(zoneDegat);
 
-            // animate the swing
+            // animation de l'image
             for (int i = 0; i < etapes; i++)
             {
                 if (!estVivant) return;
@@ -409,12 +421,13 @@ namespace Froggun
 
         public Guid AjouterZoneDegat(Rect area)
         {
+            // utilisation de GUID affin de garder une trace de chaques zones de dégats même lorsque on en ajouter et supprimes des zones entre temps
             Guid idUnique = Guid.NewGuid();
             zoneDegats[idUnique] = area;
             return idUnique;
         }
         
-        private Rectangle DebugRect(Rect rect)
+        private Rectangle DebugRect(Rect rect) // fonction de debug
         {
             return new Rectangle
             {

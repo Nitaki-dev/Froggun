@@ -94,6 +94,7 @@
                 Canvas.Top="128"
                 Width="234"
                 Height="41"
+                Panel.ZIndex="991"
                 Source="/img/health5.png"
                 Stretch="Fill" />
             <Label
@@ -145,12 +146,22 @@
                 VerticalContentAlignment="Center"
                 Panel.ZIndex="1000"
                 Background="#50FF0000"
-                Content="DEFAITE"
                 FontFamily="72 Monospace"
                 FontSize="280"
                 FontWeight="Bold"
                 Foreground="Black" />
 
+            <Image
+                x:Name="regenVie"
+                Canvas.Left="1090"
+                Canvas.Top="71"
+                Width="138"
+                Height="30"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Panel.ZIndex="990"
+                Source="/img/vie/regen_icon.png"
+                Stretch="Fill" />
         </Canvas>
     </Grid>
 </Window>

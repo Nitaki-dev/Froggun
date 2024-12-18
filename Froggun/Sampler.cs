@@ -27,11 +27,11 @@ namespace Froggun
         {
             var points = new List<Point>();
 
-            // sample points
-            AjouterDesPointsAuBord(0, 0, width, 0, points); // top
-            AjouterDesPointsAuBord(0, height, width, height, points); // bottom
-            AjouterDesPointsAuBord(0, 0, 0, height, points); // left
-            AjouterDesPointsAuBord(width, 0, width, height, points); // right
+            // où ajouter des points
+            AjouterDesPointsAuBord(0, 0, width, 0, points); // haut
+            AjouterDesPointsAuBord(0, height, width, height, points); // bas
+            AjouterDesPointsAuBord(0, 0, 0, height, points); // gauche
+            AjouterDesPointsAuBord(width, 0, width, height, points); // droite
 
             return points;
         }
@@ -49,24 +49,21 @@ namespace Froggun
                 double x = x1 + t * (x2 - x1);
                 double y = y1 + t * (y2 - y1);
 
+                // si les points sont assez loin on les ajoutes
                 if (EstAssezLoin(new Point(x, y), points)) points.Add(new Point(x, y));
             }
         }
 
-        private bool EstAssezLoin(Point candidate, List<Point> points)
+        // calcule la difference de position entre deux points
+        private bool EstAssezLoin(Point candidate, List<Point> points) 
         {
             foreach (var point in points)
             {
-                if (Distance(candidate, point) < distanceMin) return false;
+                double dx = candidate.X - point.X;
+                double dy = candidate.Y - point.Y;
+                if (Math.Sqrt(dx * dx + dy * dy) < distanceMin) return false;
             }
             return true;
-        }
-
-        private double Distance(Point p1, Point p2)
-        {
-            double dx = p1.X - p2.X;
-            double dy = p1.Y - p2.Y;
-            return Math.Sqrt(dx * dx + dy * dy);
         }
     }
 }

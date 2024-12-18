@@ -28,9 +28,11 @@ namespace Froggun
                 Height = 10
             };
 
+            //position initial 
             Canvas.SetLeft(balleImage, X);
             Canvas.SetTop(balleImage, Y);
 
+            // transformations (rotation & inverse)
             RotateTransform rotationBalle = new RotateTransform(angle);
             ScaleTransform scaleBalle = new ScaleTransform();
             TransformGroup groupBalle = new TransformGroup();
@@ -38,7 +40,6 @@ namespace Froggun
             scaleBalle.ScaleY = ScaleX;
             groupBalle.Children.Add(scaleBalle);
             groupBalle.Children.Add(rotationBalle);
-
             balleImage.RenderTransform = groupBalle;
 
             canvas.Children.Add(balleImage);
@@ -46,6 +47,7 @@ namespace Froggun
 
         public void UpdatePositionBalles()
         {
+            // mmmm trigonométrie (calcule de la nouvelle position basé sur l'angle de la balle)
             X += Math.Cos(angle * Math.PI / 180.0) * vitesse;
             Y += Math.Sin(angle * Math.PI / 180.0) * vitesse;
             

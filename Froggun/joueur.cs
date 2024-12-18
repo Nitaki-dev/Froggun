@@ -59,9 +59,11 @@ namespace Froggun
         public BitmapImage backHit { get; set; }
         public int degats { get; set; }
         
+        // animation quand le joueur prend des degats
         private DispatcherTimer blinkTimer = new DispatcherTimer();
-        
         private int blinkFrame=0;
+
+        public bool mouvementRestraintHaut { get; set; }
 
         public enum Directions
         {
@@ -144,9 +146,12 @@ namespace Froggun
             // combien de degats fait le joueur
             this.degats = 50;
 
+            // quand le boss est vivant...
+            this.mouvementRestraintHaut = false;
+
             blinkTimer = new DispatcherTimer(); 
             blinkTimer.Interval = TimeSpan.FromMilliseconds(100);
-            blinkTimer.Tick += BlinkPlayerEffect;
+            blinkTimer.Tick += AnimationQuandDegatsJoueur;
             blinkTimer.Start();
         }
 
@@ -169,6 +174,7 @@ namespace Froggun
                 nouvelleVitesseJoueur.X = 0;
                 nouvelleVitesseJoueur.Y = 0;
 
+                // vélocité du joueur dépendament de la direction
                 switch (directionJoueur)
                 {
                     case Directions.bas:
@@ -275,7 +281,7 @@ namespace Froggun
             {
                 joueurRoulade.Angle = 0;
                 if      (deplacerGauche && Canvas.GetLeft(joueurImage) > 0)                         nouvelleVitesseJoueur.X = -vitesseDeplacement; // bouger vers la gauche
-                else if (deplacerDroite && Canvas.GetLeft(joueurImage) < grid.Width - joueurImage.Width) nouvelleVitesseJoueur.X = vitesseDeplacement;  // bouger vers la droite
+                else if (deplacerDroite && Canvas.GetLeft(joueurImage) < grid.Width - joueurImage.Width) nouvelleVitesseJoueur.X = vitesseDeplacement; // bouger vers la droite
                 else
                 {
                     nouvelleVitesseJoueur.X *= friction; // réduire la vitesse du joueur en fonction de la friction
@@ -283,7 +289,7 @@ namespace Froggun
                 }
 
                 if      (deplacerHaut && Canvas.GetTop(joueurImage) > 0)                          nouvelleVitesseJoueur.Y = -vitesseDeplacement; // bouger vers le haut
-                else if (deplacerBas && Canvas.GetTop(joueurImage) < grid.Height - joueurImage.Height) nouvelleVitesseJoueur.Y = vitesseDeplacement;  // bouger vers le bas 
+                else if (deplacerBas && Canvas.GetTop(joueurImage) < grid.Height - joueurImage.Height) nouvelleVitesseJoueur.Y = vitesseDeplacement; // bouger vers le bas 
                 else
                 {
                     nouvelleVitesseJoueur.Y *= friction;
@@ -308,7 +314,7 @@ namespace Froggun
             
             Canvas.SetTop(e, 0);
             Canvas.SetLeft(e, 0);
-            if (!EllipseContains(e, nouveauxCentreJoueur))
+            if (!EllipseContains(e, nouveauxCentreJoueur) || (mouvementRestraintHaut && nouvellePositionJoueur.Y < 180)) // ne pas bouger si c'est en dehors de l'arene 
             {
                 //apply oppositve velocity to slow down player
                 nouvellePositionJoueur.X -= nouvelleVitesseJoueur.X;
@@ -319,6 +325,7 @@ namespace Froggun
             posJoueur = nouvellePositionJoueur;
             hitbox = newHitbox;
 
+            // transformation du joueur (flip horizontal & roulade)
             joueurTransformGroup.Children.Clear();
             joueurImage.RenderTransformOrigin = new Point(0.5, 0.5);
             joueurTransformGroup.Children.Add(joueurRoulade);
@@ -350,24 +357,24 @@ namespace Froggun
             // Change l'image du joueur dépendament de sa direction
             if (blinkFrame % 2 == 0)
             {
-                if (directionJoueur == Directions.gauche || directionJoueur == Directions.droite)                                                       joueurImage.Source = side;
-                if (directionJoueur == Directions.haut   || directionJoueur == Directions.diagHautGauche   || directionJoueur == Directions.diagHautDroite)   joueurImage.Source = back;
-                if (directionJoueur == Directions.bas || directionJoueur == Directions.diagBasGauche || directionJoueur == Directions.diagBasDroite) joueurImage.Source = front;
+                if (directionJoueur == Directions.gauche || directionJoueur == Directions.droite)                                                           joueurImage.Source = side;
+                if (directionJoueur == Directions.haut   || directionJoueur == Directions.diagHautGauche   || directionJoueur == Directions.diagHautDroite) joueurImage.Source = back;
+                if (directionJoueur == Directions.bas || directionJoueur == Directions.diagBasGauche || directionJoueur == Directions.diagBasDroite)        joueurImage.Source = front;
             }
             else
             {
-                if (directionJoueur == Directions.gauche || directionJoueur == Directions.droite)                                                       joueurImage.Source = sideHit;
-                if (directionJoueur == Directions.haut   || directionJoueur == Directions.diagHautGauche   || directionJoueur == Directions.diagHautDroite)   joueurImage.Source = backHit;
-                if (directionJoueur == Directions.bas || directionJoueur == Directions.diagBasGauche || directionJoueur == Directions.diagBasDroite) joueurImage.Source = frontHit;
+                if (directionJoueur == Directions.gauche || directionJoueur == Directions.droite)                                                           joueurImage.Source = sideHit;
+                if (directionJoueur == Directions.haut   || directionJoueur == Directions.diagHautGauche   || directionJoueur == Directions.diagHautDroite) joueurImage.Source = backHit;
+                if (directionJoueur == Directions.bas || directionJoueur == Directions.diagBasGauche || directionJoueur == Directions.diagBasDroite)        joueurImage.Source = frontHit;
             }
         }
 
-        public void heal()
+        public void heal() // regeneration de la vie du joueur
         {
             if (nombreDeVie+1<=5) nombreDeVie++;
         }
 
-        public void hit(int degats)
+        public void hit(int degats) // degat au joueur
         {
             if (estInvinsible) return;
          
@@ -375,7 +382,7 @@ namespace Froggun
             blinkFrame += 7;
         }
 
-        private void BlinkPlayerEffect(object? sender, EventArgs e) {
+        private void AnimationQuandDegatsJoueur(object? sender, EventArgs e) { // animtino lorsque le joueur prend des degats
             if (blinkFrame-1>=0) blinkFrame--;
         }
 

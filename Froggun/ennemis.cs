@@ -54,6 +54,7 @@ namespace Froggun
             this.height = height;
             this.vitesse = vitesse;
 
+            //bar de vie
             BarDeVieVide = new Rectangle
             {
                 Fill = Brushes.Gray,
@@ -83,7 +84,8 @@ namespace Froggun
 
             estRalenti = false;
             estVivant = true;
-            switch (type)
+
+            switch (type) // changer les proprieter de l'ennemis dépendament du type et de la difficulté
             {
                 case TypeEnnemis.Firefly:
                     chemainImage = "img/ennemis/Firefly";
@@ -125,7 +127,7 @@ namespace Froggun
             image = new Image { Width = width, Height = height };
             RenderOptions.SetBitmapScalingMode(image, BitmapScalingMode.NearestNeighbor);
             
-            LoadFrames();
+            ChargementImage();
 
             // https://learn.microsoft.com/fr-fr/dotnet/api/system.windows.media.compositiontarget.rendering?view=windowsdesktop-9.0
             CompositionTarget.Rendering += OnRendering;
@@ -135,35 +137,29 @@ namespace Froggun
             canvas.Children.Add(image);
 
             Hitbox = new Rect(X + 5, Y + 5, this.width-10, this.height - 10);
-
         }
 
-        private void LoadFrames()
+        private void ChargementImage()
         {
             frameImages = new BitmapImage[indexAnimation.Length];
-            for (int i = 0; i < indexAnimation.Length; i++) frameImages[i] = GetImageSourceForFrame(indexAnimation[i]);
+            for (int i = 0; i < indexAnimation.Length; i++) frameImages[i] = new BitmapImage(new Uri($"pack://application:,,/{chemainImage}/{indexAnimation[i]}.png"));
         }
 
         private void OnRendering(object sender, EventArgs e)
         {
+            // ~chaques 16 ms
             animationTimeElapsed += 16;
 
             if (animationTimeElapsed >= AnimationFrameDuration)
             {
+                // changer l'image de l'ennemis
                 currentFrameIndex++;
-                if (currentFrameIndex >= indexAnimation.Length)
-                    currentFrameIndex = 0;
+                if (currentFrameIndex >= indexAnimation.Length) currentFrameIndex = 0;
 
                 animationTimeElapsed = 0;
                 int frame = indexAnimation[currentFrameIndex];
                 image.Source = frameImages[currentFrameIndex];
             }
-        }
-
-        private BitmapImage GetImageSourceForFrame(int frame)
-        {
-            BitmapImage bitmapImage = new BitmapImage(new Uri($"pack://application:,,/{chemainImage}/{frame}.png"));
-            return bitmapImage;
         }
 
         public static void UpdateEnnemis(List<Ennemis> ennemis, List<Balle> balles, Canvas canvas, ref Joueur joueur)
