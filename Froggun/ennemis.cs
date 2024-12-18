@@ -280,7 +280,6 @@ namespace Froggun
             SoundPlayer musique = new SoundPlayer(audioStream);
             musique.Play();
         }
-        
 
         public void Meurt(List<Ennemis> ennemis, Ennemis e, Canvas canvas, ref Joueur joueur)
         {

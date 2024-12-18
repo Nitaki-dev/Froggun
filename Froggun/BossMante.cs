@@ -89,7 +89,7 @@ namespace Froggun
             // supprimer les images & les zones de dégats créer par le boss
             foreach (Image img in aSupprimer) canvas.Children.Remove(img);
             foreach (KeyValuePair<Guid, Rect> r in zoneDegats) zoneDegats.Remove(r.Key);
-            
+
             canvas.Children.Remove(this.Image);
             canvas.Children.Remove(BossbarVide);
             canvas.Children.Remove(Bossbar);
@@ -187,7 +187,10 @@ namespace Froggun
             foreach (KeyValuePair<Guid, Rect> r in zoneDegats) {
                 //Rectangle re = DebugRect(r.Value); // debug des zones de dégats
                 //canvas.Children.Add(re);
-                if (Joueur.hitbox.IntersectsWith(r.Value)) Joueur.hit(1);
+                if (Joueur.hitbox.IntersectsWith(r.Value))
+                {
+                    if (!Joueur.estInvinsible) Joueur.hit(1);
+                }
             }
         }
 

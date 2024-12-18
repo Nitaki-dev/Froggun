@@ -576,7 +576,7 @@ namespace Froggun
             stopwatch.Start();
 
             // bossfight 
-            if ((nombreDeVagues + 1) % 5 == 0)
+            if ((nombreDeVagues + 1) % 9 == 0)
             {
                 if (!estEnCombatAvecBoss && TousLesEnnemisSontMort()) startBoss();
             }
@@ -661,7 +661,7 @@ namespace Froggun
             canvas.Background = imageBrush;
         }
 
-        private void Explosion(int x, int y, int size)
+        public void Explosion(int x, int y, int size)
         {
             Image boom = new Image();
             boom.Width = size;
