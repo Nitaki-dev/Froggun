@@ -6,8 +6,8 @@
     xmlns:local="clr-namespace:Froggun"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     Title="choixTouche"
-    Width="600"
-    Height="350"
+    Width="610"
+    Height="360"
     ResizeMode="NoResize"
     mc:Ignorable="d">
     <Grid>

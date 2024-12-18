@@ -72,8 +72,9 @@
                 Content="FROGGUN"
                 FontFamily="Bodoni MT Black"
                 FontSize="42"
-                Foreground="White" />
+                Foreground="White" Height="88" />
             <StackPanel HorizontalAlignment="Center">
+
                 <Button
                     x:Name="boutnJouer"
                     Width="169"
@@ -82,7 +83,7 @@
                     Content="Jouer"
                     FontSize="20">
                     <Button.Style>
-                        <Style TargetType="Button">
+                        <Style TargetType="{x:Type Button}">
                             <Setter Property="Background" Value="Transparent" />
                             <Setter Property="BorderBrush" Value="Transparent" />
                             <Setter Property="Foreground" Value="White" />
@@ -105,7 +106,7 @@
                     Content="Option"
                     FontSize="20">
                     <Button.Style>
-                        <Style TargetType="Button">
+                        <Style TargetType="{x:Type Button}">
                             <Setter Property="Background" Value="Transparent" />
                             <Setter Property="BorderBrush" Value="Transparent" />
                             <Setter Property="Foreground" Value="White" />
@@ -120,6 +121,7 @@
                     </Button.Style>
                 </Button>
 
+
                 <Button
                     x:Name="boutonAide"
                     Width="169"
@@ -128,7 +130,7 @@
                     Content="Aide"
                     FontSize="20">
                     <Button.Style>
-                        <Style TargetType="Button">
+                        <Style TargetType="{x:Type Button}">
                             <Setter Property="Background" Value="Transparent" />
                             <Setter Property="BorderBrush" Value="Transparent" />
                             <Setter Property="Foreground" Value="White" />
@@ -145,12 +147,12 @@
                 <Button
                     x:Name="boutonAnnuler"
                     Width="169"
-                    Height="43"
+                    Height="46"
                     Click="boutonAnnuler_Click"
                     Content="Quitter"
                     FontSize="20">
                     <Button.Style>
-                        <Style TargetType="Button">
+                        <Style TargetType="{x:Type Button}">
                             <Setter Property="Background" Value="Transparent" />
                             <Setter Property="BorderBrush" Value="Transparent" />
                             <Setter Property="Foreground" Value="White" />
