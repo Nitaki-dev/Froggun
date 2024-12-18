@@ -65,6 +65,7 @@
                 Height="28"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
+                Panel.ZIndex="999"
                 Content="Score : "
                 FontFamily="72 Black"
                 FontSize="18"
@@ -73,6 +74,7 @@
                 x:Name="labelWave"
                 Canvas.Left="10"
                 Canvas.Top="10"
+                Panel.ZIndex="999"
                 Content="Vagues"
                 FontFamily="72 Black"
                 FontSize="16"
@@ -85,6 +87,7 @@
                 Height="90"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
+                Panel.ZIndex="1000"
                 Content="Prochaine vague dans 5 secondes!"
                 FontFamily="72 Black"
                 FontSize="22"
@@ -105,12 +108,12 @@
                 Height="300"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
-                Panel.ZIndex="999"
+                Panel.ZIndex="1000"
                 Content="PAUSE"
                 FontFamily="72 Monospace"
                 FontSize="300"
                 FontWeight="Bold"
-                Foreground="Black">
+                Foreground="White">
                 <Label.Background>
                     <ImageBrush />
                 </Label.Background>
@@ -123,6 +126,7 @@
                 Height="28"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Center"
+                Panel.ZIndex="1000"
                 Content="Combo :"
                 FontFamily="72 Black"
                 FontSize="18"
@@ -149,7 +153,7 @@
                 FontFamily="72 Monospace"
                 FontSize="280"
                 FontWeight="Bold"
-                Foreground="Black" />
+                Foreground="White" />
 
             <Image
                 x:Name="regenVie"

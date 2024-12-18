@@ -187,7 +187,7 @@ namespace Froggun
             foreach (KeyValuePair<Guid, Rect> r in zoneDegats) {
                 //Rectangle re = DebugRect(r.Value); // debug des zones de dégats
                 //canvas.Children.Add(re);
-                if (Joueur.hitbox.IntersectsWith(r.Value) && !Joueur.estInvinsible) Joueur.hit(1);
+                if (Joueur.hitbox.IntersectsWith(r.Value)) Joueur.hit(1);
             }
         }
 

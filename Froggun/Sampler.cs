@@ -14,7 +14,8 @@ namespace Froggun
         private readonly double distanceMin;
         private readonly Random random;
 
-        // Poisson Disk Sampling https://bost.ocks.org/mike/algorithms/
+        // Poisson Disk Sampling
+        // expliquation du code: https://bost.ocks.org/mike/algorithms/
         public Sampler(double width, double height, double minDistance, int? seed = null)
         {
             this.width = width;

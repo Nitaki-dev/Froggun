@@ -376,8 +376,8 @@ namespace Froggun
 
         public void hit(int degats) // degat au joueur
         {
-            if (estInvinsible) return;
-         
+            if (!estInvinsible)
+        
             nombreDeVie-=degats;
             blinkFrame += 7;
         }

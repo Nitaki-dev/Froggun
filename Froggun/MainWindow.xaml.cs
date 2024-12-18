@@ -20,31 +20,24 @@ namespace Froggun
     /// </summary>
     public partial class MainWindow : Window
     {
-        public static int fenetreGauche = 100;
         public const int WINDOW_WIDTH = 1280, WINDOW_HEIGHT = 720;
+        public static int fenetreGauche = 100;
         public static int fenetreHaut = 100;
-
-        private static Random alea = new Random();
 
         private bool pause = false;
         private static DispatcherTimer minuterie = new DispatcherTimer();
-        private static DispatcherTimer pauseVagues = new DispatcherTimer();
+        private static DispatcherTimer pauseEntreVaguesTimer = new DispatcherTimer();
 
         private float angleActuelle;
         private static bool tirLangue, expensionLangue;
-        private static readonly int expensionLangueVitesse = 60, retractionLangueVitesse = 80;
+        private static readonly int expensionLangueVitesse = 60;
+        private static readonly int retractionLangueVitesse = 80;
         private static Vector2 positionArme = new Vector2();
         private static int distancePisolet = 50;
 
         private static BitmapImage imageBalle;
-        private static double vitesseBalle = 30.0f;
 
-        private static BitmapImage imageVie5;
-        private static BitmapImage imageVie4;
-        private static BitmapImage imageVie3;
-        private static BitmapImage imageVie2;
-        private static BitmapImage imageVie1;
-        private static BitmapImage imageVie0;
+        private static BitmapImage[] imagesVie = new BitmapImage[6];
         private static Rectangle bgRegenVie;
         private static Rectangle fgRegenVie;
 
@@ -63,7 +56,6 @@ namespace Froggun
         private List<Proies> proies = new List<Proies>();
 
         public static string difficulte;
-        public static int bulletOffset = 0;
         
         int pauseEntreVagues = 5; // en secondes
         int pauseCounter = 0;
@@ -73,8 +65,6 @@ namespace Froggun
         public bool estEnCombatAvecBoss = false;
         public bool estBossApparu = false;
 
-        public SoundPlayer musique;
-        public Stream audioStream;
         private MediaPlayer musiqueDeFond;
         private MediaPlayer musiqueDeJeu;
 
@@ -200,17 +190,25 @@ namespace Froggun
 
             InitImage();
 
-            Rect playerRect = new Rect(Canvas.GetLeft(joueurImage), Canvas.GetTop(joueurImage), joueurImage.Width, joueurImage.Height);
-            joueur = new Joueur(joueurImage, playerRect, 640 - (int)joueurImage.Width/2, 360 - (int)joueurImage.Height / 2, grid, imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
+            Rect hitbox = new Rect(Canvas.GetLeft(joueurImage), Canvas.GetTop(joueurImage), joueurImage.Width, joueurImage.Height);
+
+            joueur = new Joueur(joueurImage, hitbox, 
+                /*posX*/ 640 - (int)joueurImage.Width/2, 
+                /*posY*/ 360 - (int)joueurImage.Height / 2, grid, 
+                /*imgs*/ imgFrogFront, imgFrogSide, imgFrogBack, imgFrogFrontHit, imgFrogSideHit, imgFrogBackHit);
 
             InitialiserMinuterie();
+
             RenderOptions.SetBitmapScalingMode(canvas.Background, BitmapScalingMode.NearestNeighbor);
             RenderOptions.SetBitmapScalingMode(joueurImage, BitmapScalingMode.NearestNeighbor);
+            
+            // corrige la taille de la fenetre 
             Measure(new Size(WINDOW_WIDTH, WINDOW_HEIGHT));
             Arrange(new Rect(0, 0, DesiredSize.Width, DesiredSize.Height));
 
             ChangerFond("img/arena/arena_unaltered.png");
         }
+
         private void InitMusique(bool jouer)
         {
             if (jouer)
@@ -263,19 +261,19 @@ namespace Froggun
             if (difficulte == "facile" || difficulte == "moyen") pauseEntreVagues = 5;
             else pauseEntreVagues = 10;
 
-            pauseVagues = new DispatcherTimer();
-            pauseVagues.Interval = TimeSpan.FromSeconds(1);
-            pauseVagues.Tick += Vague;
+            // lancer un timer pour le debut de chaques vagues
+            pauseEntreVaguesTimer = new DispatcherTimer();
+            pauseEntreVaguesTimer.Interval = TimeSpan.FromSeconds(1);
+            pauseEntreVaguesTimer.Tick += Vague;
             pauseCounter = 0;
-            pauseVagues.Start();
+            pauseEntreVaguesTimer.Start();
         }
 
-        
         private void Vague(object? sender, EventArgs e)
         {
             if (pause || estEnCombatAvecBoss)
             {
-                pauseVagues.Stop();
+                pauseEntreVaguesTimer.Stop();
                 return;
             }
 
@@ -367,8 +365,9 @@ namespace Froggun
             Sampler sampler = new Sampler(1260, 680, 50);
             List<Point> listeDePoints = sampler.GeneratePoints();
 
-            // https://stackoverflow.com/questions/273313/randomize-a-listt
-            alea = new Random();
+            // "astuce" pour mêler le contenu d'une list, grace à "user453230"
+            // source: https://stackoverflow.com/questions/273313/randomize-a-listt
+            Random alea = new Random();
             listeDePoints = listeDePoints.OrderBy(_ => alea.Next()).ToList();
 
             // creations de nouvelles listes pour chaques type d'ennemis
@@ -383,7 +382,7 @@ namespace Froggun
             foreach (Point point in grands) ennemis.Add(new Ennemis(TypeEnnemis.Squit, point.X, point.Y, 150, 150, 13, canvas));
             foreach (Point point in proiesList) proies.Add(new Proies(TypeProies.Fly, point.X, point.Y, 50, 50, 3, 500, 200, canvas));
             
-            pauseVagues.Stop();
+            pauseEntreVaguesTimer.Stop();
             timerEstActif = false;
         }
 
@@ -412,12 +411,12 @@ namespace Froggun
 
             imageBalle = new BitmapImage(new Uri("pack://application:,,,/img/balle.png"));
 
-            imageVie5 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health5.png"));
-            imageVie4 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health4.png"));
-            imageVie3 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health3.png"));
-            imageVie2 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health2.png"));
-            imageVie1 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
-            imageVie0 = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
+            imagesVie[0] = new BitmapImage(new Uri("pack://application:,,,/img/vie/health0.png"));
+            imagesVie[1] = new BitmapImage(new Uri("pack://application:,,,/img/vie/health1.png"));
+            imagesVie[2] = new BitmapImage(new Uri("pack://application:,,,/img/vie/health2.png"));
+            imagesVie[3] = new BitmapImage(new Uri("pack://application:,,,/img/vie/health3.png"));
+            imagesVie[4] = new BitmapImage(new Uri("pack://application:,,,/img/vie/health4.png"));
+            imagesVie[5] = new BitmapImage(new Uri("pack://application:,,,/img/vie/health5.png"));
 
             bgRegenVie = new Rectangle { Width = regenVie.Width-15, Height = regenVie.Height-20, Fill= (SolidColorBrush)new BrushConverter().ConvertFrom("#464646") };
             fgRegenVie = new Rectangle { Width = 0, Height = regenVie.Height-20, Fill=Brushes.DarkRed };
@@ -508,7 +507,8 @@ namespace Froggun
 
         public static bool IntersectionLigneLigne(Line line1, Line line2, out Point intersection)
         {
-            // explication: https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
+            // version adapté de l'expliquation de Gareth Rees en C#,
+            // expliquation disponible ici:https://stackoverflow.com/questions/563198/how-do-you-detect-where-two-line-segments-intersect
             Point p = new Point(line1.X1, line1.Y1);
             Point r = new Point(line1.X2 - line1.X1, line1.Y2 - line1.Y1);
             Point q = new Point(line2.X1, line2.Y1);
@@ -552,8 +552,8 @@ namespace Froggun
             return v1.X * v2.Y - v1.Y * v2.X;
         }
 
-        // CREDIT: Nils Pipenbrinck 
-        // SOURCE: https://stackoverflow.com/questions/2259476/rotating-a-point-about-another-point-2d
+        // version adapté et modifier du code de Nils Pipenbrinck en C#
+        // https://stackoverflow.com/questions/2259476/rotating-a-point-about-another-point-2d
         private Point PivotPoint(Point point, Point centre, double a)
         {
             double radians = a * (Math.PI / 180); // Convertire angle en radians
@@ -576,7 +576,7 @@ namespace Froggun
             stopwatch.Start();
 
             // bossfight 
-            if ((nombreDeVagues + 1) % 9 == 0)
+            if ((nombreDeVagues + 1) % 5 == 0)
             {
                 if (!estEnCombatAvecBoss && TousLesEnnemisSontMort()) startBoss();
             }
@@ -688,26 +688,22 @@ namespace Froggun
 
         private void AffichageDeVie(int nombreDeVie)
         {
-            if (nombreDeVie <= -1)
+            if (nombreDeVie <= 0)
             {
                 Console.WriteLine("Mort");
-                ImgvieJoueur.Source = imageVie0;
+                ImgvieJoueur.Source = imagesVie[0];
                 pause = true;
                 lab_Defaite.Visibility = Visibility.Visible;
                 mort(nombreDeVie);
             } else {
-                if (nombreDeVie == 5) ImgvieJoueur.Source = imageVie5;
-                else if (nombreDeVie == 4) ImgvieJoueur.Source = imageVie4;
-                else if (nombreDeVie == 3) ImgvieJoueur.Source = imageVie3;
-                else if (nombreDeVie == 2) ImgvieJoueur.Source = imageVie2;
-                else if (nombreDeVie == 1) ImgvieJoueur.Source = imageVie1;
+                ImgvieJoueur.Source = imagesVie[nombreDeVie];
             }
         }
         
         public void mort(int nombreDeVie)
         {
             minuterie.Stop();
-            pauseVagues.Stop();
+            pauseEntreVaguesTimer.Stop();
             MessageBoxResult result = MessageBox.Show("Souhaitez-vous recommencer ?", "Recommencer", MessageBoxButton.YesNo, MessageBoxImage.Information);
             
             if (result == MessageBoxResult.Yes)
@@ -740,7 +736,7 @@ namespace Froggun
             AfficheScore();
             nombreDeVagues = 0;
             pauseEntreVagues = 5;
-            pauseVagues.Stop();
+            pauseEntreVaguesTimer.Stop();
             pauseCounter = 0;
             pause = false;
             
@@ -755,7 +751,7 @@ namespace Froggun
             
             lab_Defaite.Visibility = Visibility.Collapsed;
             minuterie.Start();
-            pauseVagues.Start();
+            pauseEntreVaguesTimer.Start();
         }
 
         private void CheckBallesSortieEcran()
@@ -970,7 +966,7 @@ namespace Froggun
 
         }
 
-        private void SonGun()
+        private void SonArme()
         {
             // Charger le fichier audio depuis les ressources
             Uri audioUri = new Uri("/son/coupdefeu.wav", UriKind.RelativeOrAbsolute);
@@ -993,15 +989,16 @@ namespace Froggun
             musique.Play();
         }
 
-        private void ShootGun()
+        private void TirerArme()
         {
-            SonGun();
+            SonArme();
+            double vitesseBalle = 30.0;
             int scaleX = (Math.Abs(angleActuelle) > 90) ? -1 : 1;
             Balle balle = new Balle(positionArme.X, positionArme.Y, angleActuelle, vitesseBalle, 10, canvas, imageBalle, scaleX);
             Balles.Add(balle);
         }
         
-        private void tirerLangue()
+        private void TirerLangue()
         {
             SonLangue();
             if (tirLangue) return;
@@ -1032,6 +1029,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.droite;
                 }
             }
+
             if (e.Key == Touche.ToucheDroite && !pause)
             {
                 joueur.keyBufferGauche = true;
@@ -1043,6 +1041,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.gauche;
                 }
             }
+
             if (e.Key == Touche.ToucheBas && !pause)
             {
                 joueur.keyBufferBas = true;
@@ -1054,6 +1053,7 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.bas;
                 }
             }
+
             if (e.Key == Touche.ToucheHaut && !pause)
             {
                 joueur.keyBufferHaut = true;
@@ -1065,14 +1065,10 @@ namespace Froggun
                     joueur.directionJoueur = Joueur.Directions.haut;
                 }
             }
+
             if (e.Key == Touche.ToucheRoulade && !pause)
             {
                 joueur.estEnRoulade = true;
-            }
-
-            if (e.Key == Key.K && !pause)
-            {
-                ennemis.Add(new Ennemis(TypeEnnemis.Spider, joueur.posJoueur.X + 60, joueur.posJoueur.Y + 60, 100, 100, 8, canvas));
             }
 
             if (e.Key == Touche.TouchePause)
@@ -1087,7 +1083,7 @@ namespace Froggun
                 }
                 else
                 {
-                    if (!pauseVagues.IsEnabled) pauseVagues.Start();
+                    if (!pauseEntreVaguesTimer.IsEnabled) pauseEntreVaguesTimer.Start();
                     lab_Pause.Visibility = Visibility.Collapsed;
                 }
             }
@@ -1115,24 +1111,18 @@ namespace Froggun
                 joueur.deplacerHaut = false;
                 joueur.keyBufferHaut = false;
             }
-
-            if (e.Key == Key.R)
-            {
-                Recommencer(5);
-            }
-
         }
 
         private void leftButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (pause) return;
-            ShootGun();
+            TirerArme();
         }
 
         private void rightButtonDown(object sender, MouseButtonEventArgs e)
         {
             if (pause) return;
-            tirerLangue();
+            TirerLangue();
         }
     }
 }

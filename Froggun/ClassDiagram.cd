@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="Froggun.MainWindow" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="0.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AJUMEZIoD6AChwVDgEogICAEQBgBOEAAAHA0ADCA/RI=</HashCode>
+      <FileName>MainWindow.xaml.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" Collapsed="true" />
+  </Class>
+  <Class Name="Froggun.Joueur" Collapsed="true">
+    <Position X="0.5" Y="2" Width="1.5" />
+    <Compartments>
+      <Compartment Name="Nested Types" Collapsed="false" />
+    </Compartments>
+    <NestedTypes>
+      <Enum Name="Froggun.Joueur.Directions" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Joueur.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>jFIgICUAAJYCA0AAgIgIEQYJIQAAAgAIAACBETQgIhA=</HashCode>
+      <FileName>Joueur.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Froggun.Ennemis" Collapsed="true">
+    <Position X="0.5" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ADEIAAQIAAAAgAQARACAAAAANCADABRAQBACCACAYgg=</HashCode>
+      <FileName>Ennemis.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Froggun.Proies" Collapsed="true">
+    <Position X="2.25" Y="3" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAgAAAAAEAAAEAADBAAACJAABABGAQBRCAABAYgA=</HashCode>
+      <FileName>Proies.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Froggun.Sampler" Collapsed="true">
+    <Position X="4" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAQASAIAAAAAAAAAAAAAAAYAAAAAAAA=</HashCode>
+      <FileName>Sampler.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Froggun.Touche" Collapsed="true">
+    <Position X="4" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAAAAAACAAAAAgAAAAAAAACAAAgACAAAA=</HashCode>
+      <FileName>Touche.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Froggun.Balle" Collapsed="true">
+    <Position X="2.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>CAAAAAAAAgAAAAAAAAAAEAAAAAAAAAQEAAAAAABAcAA=</HashCode>
+      <FileName>Balle.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Froggun.BossMante" Collapsed="true">
+    <Position X="2.25" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ApAAAAIARAAEACAAAECADUACAAgADDSAoAgUAABACAA=</HashCode>
+      <FileName>BossMante.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="Froggun.TypeEnnemis" Collapsed="true">
+    <Position X="0.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAgAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ennemis.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="Froggun.TypeProies" Collapsed="true">
+    <Position X="2.25" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAA=</HashCode>
+      <FileName>Proies.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
