@@ -1018,7 +1018,7 @@ namespace Froggun
 
         private void keydown(object sender, KeyEventArgs e)
         {
-            if (e.Key == Touche.ToucheGauche && !pause)
+            if (e.Key == Touche.ToucheDroite && !pause)
             {
                 joueur.keyBufferDroite = true;
                 joueur.keyBufferGauche = false;
@@ -1030,7 +1030,7 @@ namespace Froggun
                 }
             }
 
-            if (e.Key == Touche.ToucheDroite && !pause)
+            if (e.Key == Touche.ToucheGauche && !pause)
             {
                 joueur.keyBufferGauche = true;
                 joueur.keyBufferDroite = false;
@@ -1091,12 +1091,12 @@ namespace Froggun
 
         private void keyup(object sender, KeyEventArgs e)
         {
-            if (e.Key == Touche.ToucheGauche)
+            if (e.Key == Touche.ToucheDroite)
             {
                 joueur.deplacerDroite = false;
                 joueur.keyBufferDroite = false;
             }
-            if (e.Key == Touche.ToucheDroite)
+            if (e.Key == Touche.ToucheGauche)
             {
                 joueur.keyBufferGauche = false;
                 joueur.deplacerGauche = false;
